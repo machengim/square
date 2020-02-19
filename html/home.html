@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Square</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <div class="nav_logo">Square</div>
+                <div class="nav_items">
+                    <ul>
+                        <li>Home</li>
+                        <li>Message</li>
+                        <li>Setting</li>
+                        <li>Quit</li>
+                    </ul>
+                </div>
+                <div class="nav_search">
+                    <form>
+                        <input id="top_search" placeholder="Search">
+                    </form>
+                </div>
+            </nav> 
+        </header>
+
+        <content>
+            <div id="wrapper">
+                <article>
+                    <div id="write_box">
+                        <div class="text">Write a post:</div>
+                        <textarea ref="draft" id="draft" placeholder="Share your thought" v-on:focus="show_area"></textarea>
+                        <div v-show="show">
+                            <input type="submit" id="hide" value="Hide" v-on:click="hide_area"></a>
+                            <input id="submit" type="submit" value="Send">
+                        </div>
+                    </div>
+                    <div id="post_list">
+                        <div class="post" v-for="item in items">
+                            <div class="author">{{ item.author }} said:</div>
+                            <div class="text">{{ item.content }}</div>
+                            <div class="foot">
+                                <span class="time">{{ item.time }}</span>
+                                <span class="tool">Comments(0) Mark</span>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                </article>
+
+                <aside>
+                    <div class="user_info">
+                        <p>Nickname</p>
+                        <p>Posts: 58</p>
+                        <p>Marked: 31</p>
+                        <p>New comments: 2</p>
+                    </div>
+                </aside>
+            </div>            
+
+            <footer>
+                Copyright 2020 Square
+            </footer>
+
+            
+        </content>
+    </body>
+
+    <script>
+        new Vue({
+            el:"#write_box",
+            data: {
+                show: 0
+            },
+            methods: {
+                show_area () {
+                    this.show = 1;
+                    this.$refs.draft.style.height = "120px";
+                },
+                hide_area() {
+                    this.show = 0;
+                    this.$refs.draft.style.height = "20px";
+                }
+            }
+        });
+
+        new Vue({
+            el:"#post_list",
+            data() {
+                return {
+                    items: null
+                }
+            },
+            mounted() {
+                axios.get('http://localhost:8080/posts')
+                    .then(res => (this.items = res.data));
+            }
+        })
+    </script>
+</html>

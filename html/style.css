@@ -1,0 +1,153 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: lightgray;
+}
+
+header{
+    position: relative;
+    margin-bottom: 50px;
+    overflow: hidden;
+    min-width: 1024px;
+    background-color: rgb(30, 63, 53);
+}
+
+nav{
+    position: relative; 
+    /* Important for serach bar, since absolute layout cannot have a static paretent */
+    width: 1000px;
+    overflow: hidden;
+    padding-top: 12px;
+    margin: auto;   /* make div center */
+}
+
+.nav_logo{
+    width: 150px;
+    height: 60px;
+    float: left;
+    font-size: 28px;
+    color: rgb(225, 226, 212);
+}
+
+.nav_items {
+    float: left;
+    margin-top: 15px;
+    color: lightgray;
+}
+
+.nav_items li {
+    display: inline;
+    margin-right: 20px;
+}
+
+.nav_search {
+    position: absolute;
+    right: 0;
+    margin-top: 15px;
+    overflow: hidden;
+    padding: 10px 100px 15px 0;
+}
+
+#top_search {
+    border: 1px solid rgb(185, 182, 182);
+    padding: 5px;
+    width: 200px;
+    height: 16px;
+    font-size: 14px;
+    background-color: rgb(245, 241, 227);
+}
+
+#top_search:focus {
+    background-color: white;
+}
+
+content {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+#wrapper {
+    position: relative;
+    width: 1000px;
+    margin: 0 auto;
+    min-height: calc(86vh - 40px);
+}
+
+article {
+    width: 650px;
+    margin: 0 20px;
+    float: left;
+}
+
+aside {
+    margin: 0 10px;
+    float: left;
+    width: 270px;
+}
+
+#draft {
+    border: 1px solid rgb(185, 182, 182);
+    padding: 5px;
+    width: 600px;
+    height: 20px;
+    font-size: 14px;
+}
+
+#submit {
+    float: right;
+    margin: 10px 40px 0 0;
+}
+
+#hide {
+    margin: 10px 40px 0 0;
+}
+
+#write_box {
+    margin-bottom: 50px;
+}
+
+.post{
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.post .author{
+    color: rgb(88, 87, 87);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.text {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.post .foot {
+    font-size: 14px;
+    color: grey;
+}
+
+.post .tool {
+    position: absolute;
+    right: 10px;
+}
+
+
+footer{
+    position: relative;
+    width: 1000px;
+    margin: auto;
+    height: 30px;
+    font-size: 12px;
+}
