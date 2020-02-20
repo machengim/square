@@ -13,6 +13,7 @@ func main() {
 	r.Use(cors.Default())
 	r.GET("/ping", getPing)
 	r.GET("/posts", getPosts)
+	r.POST("/posts", postDraft)
 	r.Run(":8080")
 }
 
@@ -25,4 +26,11 @@ func getPosts(c *gin.Context) {
 	posts = lib.RetrieveData()
 	lib.CloseDB()
 	c.JSON(200, posts)
+}
+
+// Notice the parameter in PostForm should be the same with the 'name' attribute of form
+func postDraft(c *gin.Context) {
+	draft := lib.Draft{1, "Alice", 0, c.PostForm("draft")}
+	lib.InsertData(draft)
+	lib.CloseDB()
 }

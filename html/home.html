@@ -30,14 +30,16 @@
         <content>
             <div id="wrapper">
                 <article>
-                    <div id="write_box">
-                        <div class="text">Write a post:</div>
-                        <textarea ref="draft" id="draft" placeholder="Share your thought" v-on:focus="show_area"></textarea>
-                        <div v-show="show">
-                            <input type="submit" id="hide" value="Hide" v-on:click="hide_area"></a>
-                            <input id="submit" type="submit" value="Send">
+                    <form id="draft_form" onsubmit="return submit_post();">
+                        <div id="write_box">
+                            <div class="text">Write a post:</div>
+                            <textarea ref="draft" id="draft" name="draft" placeholder="Share your thought" v-on:focus="show_area" required></textarea>
+                            <div v-show="show">
+                                <button id="hide" type="button" v-on:click="hide_area">Hide</button>
+                                <button id="submit" type="submit">Send</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                     <div id="post_list">
                         <div class="post" v-for="item in items">
                             <div class="author">{{ item.nickname }} said:</div>
@@ -60,13 +62,12 @@
                     </div>
                 </aside>
             </div>            
-
-            <footer>
-                Copyright 2020 Square
-            </footer>
-
-            
         </content>
+
+        <footer>
+            Copyright 2020 Square
+        </footer>
+
     </body>
 
     <script>
@@ -87,7 +88,7 @@
             }
         });
 
-        new Vue({
+        var post_list = new Vue({
             el:"#post_list",
             data() {
                 return {
@@ -99,5 +100,14 @@
                     .then(res => (this.items = res.data));
             }
         })
+
+        function submit_post() {
+            var form = document.querySelector('#draft_form');
+            var data = new FormData(form);
+            console.log(data);
+            axios.post('http://localhost:8080/posts', data);
+            location.reload();
+            return false;
+        }
     </script>
 </html>

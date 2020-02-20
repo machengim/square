@@ -27,13 +27,13 @@ func connect() *sql.DB {
 	return db
 }
 
-func InsertData() {
+func InsertData(d Draft) {
 	db := connect()
 
-	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, content) VALUES($1, $2, $3)")
+	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content) VALUES($1, $2, $3, $4)")
 	ErrLog(err)
 
-	_, err = stmt.Exec(1, "Dog", "Haha, I'm here!")
+	_, err = stmt.Exec(d.Uid, d.Nickname, d.Status, d.Content)
 	ErrLog(err)
 
 	fmt.Println("Insertion complete!")

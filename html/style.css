@@ -77,11 +77,14 @@ content {
     min-width: 1024px;
 }
 
+/* Use margin auto to put element in center horizontally, 
+   Use flex to make two grid equal height vertically. */
 #wrapper {
     position: relative;
+    display: flex;
     width: 1000px;
     margin: 0 auto;
-    min-height: calc(86vh - 40px);
+    min-height: calc(85vh - 40px);
 }
 
 article {
@@ -146,8 +149,9 @@ aside {
 
 footer{
     position: relative;
-    width: 1000px;
+    width: 900px;
     margin: auto;
+    padding: 0 50px;
     height: 30px;
     font-size: 12px;
 }
