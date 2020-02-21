@@ -92,7 +92,7 @@ func TimeFromNow(ts string) string {
 	if gap/mins[i] > 1 {
 		return fmt.Sprint(gap/mins[i]) + " " + units[i] + "s ago"
 	} else {
-		return fmt.Sprint(gap/mins[i], 10) + " " + units[i] + " ago"
+		return fmt.Sprint(gap/mins[i]) + " " + units[i] + " ago"
 	}
 }
 

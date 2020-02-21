@@ -19,7 +19,7 @@ header{
     margin-bottom: 50px;
     overflow: hidden;
     min-width: 1024px;
-    background-color: rgb(30, 63, 53);
+    background-color: #1e3f35;
 }
 
 nav{
@@ -36,13 +36,13 @@ nav{
     height: 60px;
     float: left;
     font-size: 28px;
-    color: rgb(225, 226, 212);
+    color: #e1e2d4;
 }
 
 .nav_items {
     float: left;
     margin-top: 15px;
-    color: lightgray;
+    color: #e1e2d4;
 }
 
 .nav_items li {
@@ -59,12 +59,12 @@ nav{
 }
 
 #top_search {
-    border: 1px solid rgb(185, 182, 182);
+    border: 1px solid #b9b6b6;
     padding: 5px;
     width: 200px;
     height: 16px;
     font-size: 14px;
-    background-color: rgb(245, 241, 227);
+    background-color: #f5f1e3;
 }
 
 #top_search:focus {
@@ -100,7 +100,7 @@ aside {
 }
 
 #draft {
-    border: 1px solid rgb(185, 182, 182);
+    border: 1px solid #b9b6b6;
     padding: 5px;
     width: 600px;
     height: 20px;
@@ -126,7 +126,7 @@ aside {
 }
 
 .post .author{
-    color: rgb(88, 87, 87);
+    color: #585757;
     font-size: 14px;
     margin-bottom: 10px;
 }
