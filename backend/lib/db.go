@@ -6,17 +6,11 @@ import (
 	"time"
 )
 
-func connect() *sql.DB {
-	var (
-		host     = "localhost"
-		port     = 5432
-		user     = "postgres"
-		password = "qwer1234"
-		dbname   = "test"
-	)
-
+func connect(config Config) *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
-		"dbname=%s sslmode=disable", host, port, user, password, dbname)
+		"dbname=%s sslmode=disable", config.Host, config.Port, config.User,
+		config.Password, config.Dbname)
+
 	db, err := sql.Open("postgres", psqlInfo)
 	ErrLog(err)
 
@@ -27,8 +21,8 @@ func connect() *sql.DB {
 	return db
 }
 
-func InsertData(d Draft) {
-	db := connect()
+func InsertData(d Draft, config Config) {
+	db := connect(config)
 
 	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content) VALUES($1, $2, $3, $4)")
 	ErrLog(err)
@@ -39,8 +33,8 @@ func InsertData(d Draft) {
 	fmt.Println("Insertion complete!")
 }
 
-func RetrieveData() []Post {
-	db := connect()
+func RetrieveData(config Config) []Post {
+	db := connect(config)
 
 	rows, err := db.Query("select * from post order by ts desc")
 	ErrLog(err)
@@ -65,7 +59,7 @@ func RetrieveData() []Post {
 	return posts
 }
 
-func CloseDB() {
-	db := connect()
+func CloseDB(config Config) {
+	db := connect(config)
 	db.Close()
 }

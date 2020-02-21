@@ -1,12 +1,25 @@
 package lib
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"time"
 )
+
+const configFile = "assets/config.json"
+
+type Config struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+}
 
 // Field name should start in uppercase to export
 // Ts is short for Timestamp, UTC is used.
@@ -37,47 +50,60 @@ func ErrLog(err error) {
 // Convert a time string to an array of int.
 // User regex to split the timestamp from postgres.
 // s[] : 0 year, 1 month, 2 day, 3 hour, 4 min, 5 sec, 6 millsec.
-func timeSplit(ts string) [6]int64 {
+func timeSplit(ts string) [6]int16 {
 	s := regexp.MustCompile("[-:T. ]").Split(ts, 7)
-	var splitTime [6]int64
+	var splitTime [6]int16
 	for i := 0; i < 6; i++ {
 		fig, err := strconv.ParseInt(s[i], 10, 16) // this method always return int64
 		ErrLog(err)
 		if fig < 0 || fig > 2020 {
 			panic(fmt.Sprintf("Time %v out of range ", fig))
 		}
-		splitTime[i] = fig
+		splitTime[i] = int16(fig)
 	}
 
 	return splitTime
 }
 
-// It's inconvenient to convert int16 to string, so I change to int64
+// Calculate the time diffence between post time and current time
 func TimeFromNow(ts string) string {
 	current := time.Now().UTC().String()
-	currentTime := timeSplit(current)
-	postTime := timeSplit(ts)
+	ct := timeSplit(current) // Current time
+	pt := timeSplit(ts)      // Post time
 
-	var differ int64 = 0
+	mins := []int32{525600, 43800, 1440, 60, 1}
+	units := []string{"year", "month", "day", "hour", "min"}
+	var gap int32 = 0
 	i := 0
-	for ; i < 6; i++ {
-		if currentTime[i]-postTime[i] > 0 {
-			differ = currentTime[i] - postTime[i]
+	for ; i < 5; i++ {
+		gap += int32(ct[i]-pt[i]) * mins[i]
+	}
+
+	if gap < 1 {
+		return "just now"
+	}
+
+	for i = 0; i < 5; i++ {
+		if gap/mins[i] > 0 {
 			break
 		}
 	}
 
-	if i >= 5 {
-		return "just now"
+	if gap/mins[i] > 1 {
+		return fmt.Sprint(gap/mins[i]) + " " + units[i] + "s ago"
+	} else {
+		return fmt.Sprint(gap/mins[i], 10) + " " + units[i] + " ago"
 	}
+}
 
-	// Use an array to replace switch cases.
-	gap := []string{"year", "month", "day", "hour", "minute"}
-	elapse := strconv.FormatInt(differ, 10) + " " + gap[i]
-	if i > 1 {
-		elapse += "s"
-	}
-	elapse += " ago"
+func ReadJsonConfig() Config {
+	jsonFile, err := os.Open(configFile)
+	ErrLog(err)
+	defer jsonFile.Close()
 
-	return elapse
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var config Config
+	json.Unmarshal(byteValue, &config)
+
+	return config
 }

@@ -8,6 +8,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var config lib.Config = lib.ReadJsonConfig()
+
 func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -23,14 +25,14 @@ func getPing(c *gin.Context) {
 
 func getPosts(c *gin.Context) {
 	var posts []lib.Post
-	posts = lib.RetrieveData()
-	lib.CloseDB()
+	posts = lib.RetrieveData(config)
+	lib.CloseDB(config)
 	c.JSON(200, posts)
 }
 
 // Notice the parameter in PostForm should be the same with the 'name' attribute of form
 func postDraft(c *gin.Context) {
-	draft := lib.Draft{1, "Alice", 0, c.PostForm("draft")}
-	lib.InsertData(draft)
-	lib.CloseDB()
+	draft := lib.Draft{1, "Anonymous", 0, c.PostForm("draft")}
+	lib.InsertData(draft, config)
+	lib.CloseDB(config)
 }
