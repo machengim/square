@@ -21,6 +21,12 @@ type Config struct {
 	Dbname   string `json:"dbname"`
 }
 
+type NewUser struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+}
+
 // Field name should start in uppercase to export
 // Ts is short for Timestamp, UTC is used.
 type Post struct {

@@ -63,3 +63,26 @@ func CloseDB(config Config) {
 	db := connect(config)
 	db.Close()
 }
+
+func InsertUser(u NewUser, config Config) (int, string) {
+	db := connect(config)
+
+	stmt, err := db.Prepare("SELECT email FROM customer WHERE email=$1")
+	ErrLog(err)
+
+	rows, err := stmt.Query(u.Email)
+	ErrLog(err)
+	defer rows.Close()
+	if rows.Next() {
+		fmt.Println("Email already existed in database.")
+		return 400, "Email already existed in database."
+	}
+
+	stmt, err = db.Prepare("INSERT INTO customer(email, password, nickname) VALUES($1, $2, $3)")
+	ErrLog(err)
+
+	_, err = stmt.Exec(u.Email, u.Password, u.Nickname)
+	ErrLog(err)
+
+	return 200, "OK"
+}

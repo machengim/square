@@ -28,7 +28,7 @@ a:hover{
 }
 
 .box h1{
-    font-family: monospace, sans-serif;
+    font-family: monospace, Tahoma, sans-serif;
     color: white;
     font-weight: 550;
     margin-bottom: 30px;
@@ -56,17 +56,15 @@ a:hover{
 
 .btns {
     position: relative;
-    width: 280px;
-    height: 40px;
+    width: 300px;
+    height: 60px;
     margin: auto;
     display: block;
 }
 
 button{
-    float: left;
     background: none;
-    display: block;
-    margin: 10px 30px 30px 30px;
+    margin: 10px 30px 10px 30px;
     text-align: center;
     border: 2px solid #2ecc71;
     padding: 10px 20px;
@@ -77,13 +75,22 @@ button{
     cursor:pointer;
 }
 
+.btn1{
+    float: left;
+}
+
+.btn2{
+    position: absolute;
+    right: 10px;
+}
+
 button:hover{
     background: #2ecc71;
 }
 
 .other{
-    display: block;
-    margin-top: 20px;
+    position: relative;
+    margin: 20px auto;
 }
 
 footer{
