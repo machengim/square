@@ -27,6 +27,11 @@ type NewUser struct {
 	Nickname string `json:"nickname"`
 }
 
+type LoginInfo struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 // Field name should start in uppercase to export
 // Ts is short for Timestamp, UTC is used.
 type Post struct {

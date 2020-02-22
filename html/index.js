@@ -24,3 +24,22 @@ function register() {
 
     return false;
 }
+
+function login() {
+    var form = document.querySelector('#login');
+    var email = form[0].value;
+    var pw = form[1].value;
+    console.log(email)
+    var data = {
+        "email": email,
+        "password": pw
+    };
+
+    axios.post('http://localhost:8080/login', data)
+            .then(
+                (response) => { window.open('home.html', '_self');},
+                (error) => { alert('Login error!'); }
+            );
+
+    return false;
+}

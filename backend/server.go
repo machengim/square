@@ -14,14 +14,29 @@ var config lib.Config = lib.ReadJsonConfig()
 
 func main() {
 	r := gin.Default()
+	/*
+		corsConfig := cors.DefaultConfig()
+		corsConfig.AllowOrigins = []string{"http://localhost"}
+		r.Use(cors.New(corsConfig))
+	*/
 	r.Use(cors.Default())
 	r.GET("/posts", getPosts)
 	r.POST("/posts", postDraft)
 	r.POST("/register", register)
+	r.POST("/login", login)
+	/*
+		public := r.Group("/")
+		public.Use(authPub())
+			{
+				public.GET("/posts", getPosts)
+			}
+	*/
 	r.Run(":8080")
 }
 
 func getPosts(c *gin.Context) {
+	tokenString := lib.GetToken()
+	lib.CheckToken(tokenString)
 	var posts []lib.Post
 	posts = lib.RetrieveData(config)
 	lib.CloseDB(config)
@@ -46,4 +61,26 @@ func register(c *gin.Context) {
 	status, detail := lib.InsertUser(user, config)
 	lib.CloseDB(config)
 	c.String(status, detail)
+}
+
+// Should return a token
+func login(c *gin.Context) {
+	fmt.Println("Enter login process...")
+	var info lib.LoginInfo
+	c.BindJSON(&info)
+	id := lib.ValidateUser(info, config)
+	if id > 0 {
+		c.JSON(200, gin.H{
+			"id": id,
+		})
+	} else {
+		c.String(400, "Login failed!")
+	}
+}
+
+// Wait for complete.
+func authPub() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("claims", "TheTokenYouGet")
+	}
 }

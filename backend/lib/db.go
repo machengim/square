@@ -86,3 +86,22 @@ func InsertUser(u NewUser, config Config) (int, string) {
 
 	return 200, "OK"
 }
+
+func ValidateUser(i LoginInfo, config Config) int {
+	db := connect(config)
+
+	stmt, err := db.Prepare("SELECT id FROM customer WHERE email=$1 AND password=$2")
+	ErrLog(err)
+
+	rows, err := stmt.Query(i.Email, i.Password)
+	ErrLog(err)
+	defer rows.Close()
+
+	id := -1
+	for rows.Next() {
+		err := rows.Scan(&id)
+		ErrLog(err)
+	}
+
+	return id
+}
