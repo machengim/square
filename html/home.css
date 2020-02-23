@@ -153,6 +153,11 @@ aside {
     right: 10px;
 }
 
+.loadmore {
+    text-align: center;
+    margin: 10px 50px;
+}
+
 footer{
     padding-right: 200px;
     width: 100%;

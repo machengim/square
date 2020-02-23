@@ -46,12 +46,18 @@ func getPosts(c *gin.Context) {
 	offsetString := c.Query("offset")
 	offset := 0
 	if offsetString != "" {
-		offset, _ = strconv.Atoi(offsetString)
+		var err error
+		offset, err = strconv.Atoi(offsetString)
+		if err != nil {
+			log.Error(err)
+			c.Abort()
+		}
 	}
 	posts, offset = lib.RetrievePublicPosts(offset, config)
 	if posts == nil {
 		c.Abort()
 	}
+	log.Debug(posts)
 	//c.JSON(200, posts)
 	c.JSON(200, gin.H{
 		"posts":  posts,

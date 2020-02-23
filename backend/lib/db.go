@@ -69,7 +69,7 @@ func RetrievePublicPosts(offset int, config Config) ([]Post, int) {
 	if offset <= 0 {
 		rows, err = stmt.Query(5)
 	} else {
-		rows, err = stmt.Query(5, offset)
+		rows, err = stmt.Query(offset, 5)
 	}
 
 	if err != nil {
@@ -91,6 +91,10 @@ func RetrievePublicPosts(offset int, config Config) ([]Post, int) {
 		p.Ts = TimeFromNow(p.Ts)
 		posts = append(posts, p)
 		offset = p.Id
+	}
+
+	if len(posts) < 5 {
+		offset = -1
 	}
 
 	return posts, offset

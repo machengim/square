@@ -43,12 +43,23 @@ new Vue({
     el: "#post_list",
     data: {
         items: null,
-        link: null,
+        offset: 0,
     },
     mounted() {
         axios.get(ApiServer + '/posts')
             .then(res => { this.items = res.data.posts; 
-                        this.link = ApiServer + '/posts?offset=' + res.data.offset; });
+                            this.offset = res.data.offset; })
+    },
+    methods: {
+        loadMore: function() {
+            axios.get(ApiServer + '/posts?offset=' + this.offset)
+                .then(res => {
+                    for (i = 0; i < res.data.posts.length; i++) {
+                        this.items.push(res.data.posts[i]);
+                    }
+                    this.offset = res.data.offset;
+                })
+        }
     }
 });
 
