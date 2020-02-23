@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -22,7 +23,7 @@ func GenerateToken(id int) string {
 	return tokenString
 }
 
-func CheckToken(tokenString string) bool {
+func CheckToken(tokenString string) int {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -32,11 +33,15 @@ func CheckToken(tokenString string) bool {
 		return []byte(secret), nil
 	})
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["exp"], " and id is ", claims["id"])
-	} else {
-		fmt.Println("Error:", err)
+	if err != nil {
+		fmt.Println(err)
+		return -1
 	}
 
-	return true
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		id, _ := strconv.Atoi(fmt.Sprint(claims["id"]))
+		return id
+	} else {
+		return -1
+	}
 }

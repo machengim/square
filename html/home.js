@@ -1,3 +1,11 @@
+axios.defaults.withCredentials = true;
+
+function checkUserOnHome() {
+    if (document.cookie == "") {
+        window.open('login.html', '_self')
+    }
+};
+
 function submit_post() {
     var form = document.querySelector('#draft_form');
     var data = new FormData(form);
@@ -6,6 +14,11 @@ function submit_post() {
     location.reload();
     return false;
 };
+
+function quit() {
+    axios.get('http://localhost:8080/quit')
+        .then(window.open('login.html', '_self'))
+}
 
 new Vue({
     el:"#write_box",
@@ -24,7 +37,7 @@ new Vue({
     }
 });
 
-var post_list = new Vue({
+new Vue({
     el:"#post_list",
     data() {
         return {
@@ -37,8 +50,16 @@ var post_list = new Vue({
     }
 });
 
-function checkUserOnHome() {
-    if (document.cookie == "") {
-        window.open('login.html', '_self')
+
+new Vue({
+    el:"#user_info",
+    data() {
+        return {
+            info: null
+        }
+    },
+    mounted() {
+        axios.get('http://localhost:8080/userSummary')
+            .then(res => (this.info = res.data));
     }
-}
+})

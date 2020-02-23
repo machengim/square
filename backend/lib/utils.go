@@ -53,6 +53,13 @@ type Draft struct {
 	Content  string
 }
 
+type UserSummary struct {
+	Nickname string `json:"nickname"`
+	Posts    int    `json:"posts"`
+	Marked   int    `json:"marked"`
+	Comments int    `json:"comments"`
+}
+
 func ErrLog(err error) {
 	if err != nil {
 		log.Fatal(err)

@@ -5,7 +5,6 @@ body{
 
 a {
     text-decoration: none;
-    color: black;
 }
 
 hr {
@@ -48,6 +47,10 @@ nav{
 .nav_items li {
     display: inline;
     margin-right: 20px;
+}
+
+.nav_items a{
+    color: #e1e2d4;
 }
 
 .nav_search {

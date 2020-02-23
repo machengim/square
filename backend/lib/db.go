@@ -55,7 +55,6 @@ func RetrieveData(config Config) []Post {
 	err = rows.Err()
 	ErrLog(err)
 
-	fmt.Println("Retrieved complete!")
 	return posts
 }
 
@@ -104,4 +103,24 @@ func ValidateUser(i LoginInfo, config Config) int {
 	}
 
 	return id
+}
+
+func GetUserSummary(id int, config Config) UserSummary {
+	db := connect(config)
+
+	stmt, err := db.Prepare("SELECT nickname, posts, marks, comments FROM customer " +
+		"WHERE id=$1")
+	ErrLog(err)
+
+	rows, err := stmt.Query(id)
+	ErrLog(err)
+	defer rows.Close()
+
+	var summary UserSummary
+	for rows.Next() {
+		err := rows.Scan(&summary.Nickname, &summary.Posts, &summary.Marked, &summary.Comments)
+		ErrLog(err)
+	}
+
+	return summary
 }

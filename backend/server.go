@@ -21,19 +21,18 @@ func main() {
 	corsConfig.AllowCredentials = true
 	r.Use(cors.New(corsConfig))
 
-	r.GET("/index", getRoot)
-	r.GET("/posts", getPosts)
-	r.GET("/home", getHome)
+	r.GET("/quit", quit)
 	r.POST("/posts", postDraft)
 	r.POST("/register", register)
 	r.POST("/login", login)
-	/*
-		public := r.Group("/")
-		public.Use(authPub())
-			{
-				public.GET("/posts", getPosts)
-			}
-	*/
+
+	public := r.Group("/")
+	public.Use(authPub())
+	{
+		public.GET("/posts", getPosts)
+		public.GET("/userSummary", getUserSummary)
+	}
+
 	r.Run(":8080")
 }
 
@@ -44,7 +43,6 @@ func getRoot(c *gin.Context) {
 func getPosts(c *gin.Context) {
 	var posts []lib.Post
 	posts = lib.RetrieveData(config)
-	lib.CloseDB(config)
 	c.JSON(200, posts)
 }
 
@@ -79,21 +77,45 @@ func login(c *gin.Context) {
 		tokenString := lib.GenerateToken(id)
 		fmt.Println("setting cookie...")
 		// Two cookie, one for jwt used in backend, one for validation by frontend.
-		c.SetCookie("square", tokenString, 3600, "/", "localhost", false, true)
-		c.SetCookie("login", "1", 3600, "/", "localhost", false, false)
+		c.SetCookie("square", tokenString, 600, "/", "localhost", false, true)
+		c.SetCookie("login", "1", 600, "/", "localhost", false, false)
 	} else {
 		c.String(400, "Login failed!")
 	}
 
 }
 
-// Wait for complete.
+// Authentication for public request, including public posts and single post.
 func authPub() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("claims", "TheTokenYouGet")
+		tokenString, err := c.Cookie("square")
+
+		if err != nil {
+			fmt.Println(err)
+			c.Abort()
+		}
+
+		id := lib.CheckToken(tokenString)
+
+		if id < 0 {
+			c.Abort()
+		}
+
+		c.Set("id", id)
+		c.Next()
 	}
 }
 
-func getHome(c *gin.Context) {
-	c.Redirect(301, config.Site+"/home.html")
+func getUserSummary(c *gin.Context) {
+	id := c.GetInt("id")
+	summary := lib.GetUserSummary(id, config)
+	fmt.Println(summary.Nickname)
+	c.JSON(200, summary)
+}
+
+func quit(c *gin.Context) {
+	// Expire time is 5 secs before current time to force it to expire.
+	c.SetCookie("square", "", -5, "/", "localhost", false, true)
+	c.SetCookie("login", "", -5, "/", "localhost", false, false)
+	c.String(200, "OK")
 }

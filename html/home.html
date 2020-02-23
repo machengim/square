@@ -17,7 +17,7 @@
                         <li>Home</li>
                         <li>Message</li>
                         <li>Setting</li>
-                        <li>Quit</li>
+                        <li><a href="#" onclick="quit()">Quit</a></li>
                     </ul>
                 </div>
                 <div class="nav_search">
@@ -55,11 +55,11 @@
                 </article>
 
                 <aside>
-                    <div class="user_info">
-                        <p>Nickname</p>
-                        <p>Posts: 58</p>
-                        <p>Marked: 31</p>
-                        <p>New comments: 2</p>
+                    <div id="user_info">
+                        <p>{{ info.nickname }}</p>
+                        <p>Posts: {{ info.posts }}</p>
+                        <p>Marked: {{ info.marked }}</p>
+                        <p>New comments: {{ info.comments }}</p>
                     </div>
                 </aside>
             </div>            
@@ -68,7 +68,7 @@
             Copyright 2020 Square
         </footer>
         <script src="home.js"></script>
-        <script type="text/javascript">window.onload=checkUserOnHome;</script>
+        <script type="text/javascript"> </script>
 
     </body>
 </html>
