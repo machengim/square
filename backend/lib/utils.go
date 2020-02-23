@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const configFile = "assets/config.json"
@@ -60,12 +61,6 @@ type UserSummary struct {
 	Comments int    `json:"comments"`
 }
 
-func ErrLog(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 // Convert a time string to an array of int.
 // User regex to split the timestamp from postgres.
 // s[] : 0 year, 1 month, 2 day, 3 hour, 4 min, 5 sec, 6 millsec.
@@ -74,9 +69,11 @@ func timeSplit(ts string) [6]int16 {
 	var splitTime [6]int16
 	for i := 0; i < 6; i++ {
 		fig, err := strconv.ParseInt(s[i], 10, 16) // this method always return int64
-		ErrLog(err)
+		if err != nil {
+			log.Error(err)
+		}
 		if fig < 0 || fig > 2020 {
-			panic(fmt.Sprintf("Time %v out of range ", fig))
+			log.Error("Invalid date input")
 		}
 		splitTime[i] = int16(fig)
 	}
@@ -117,7 +114,9 @@ func TimeFromNow(ts string) string {
 
 func ReadJsonConfig() Config {
 	jsonFile, err := os.Open(configFile)
-	ErrLog(err)
+	if err != nil {
+		log.Fatal("Cannot read config file")
+	}
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)

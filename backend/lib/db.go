@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func connect(config Config) *sql.DB {
@@ -12,7 +14,9 @@ func connect(config Config) *sql.DB {
 		config.Password, config.Dbname)
 
 	db, err := sql.Open("postgres", psqlInfo)
-	ErrLog(err)
+	if err != nil {
+		log.Fatal("Cannot connect to database.")
+	}
 
 	db.SetMaxOpenConns(5)
 	db.SetMaxIdleConns(2)
@@ -21,23 +25,57 @@ func connect(config Config) *sql.DB {
 	return db
 }
 
-func InsertData(d Draft, config Config) {
+func InsertData(d Draft, config Config) bool {
 	db := connect(config)
 
 	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content) VALUES($1, $2, $3, $4)")
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
 
 	_, err = stmt.Exec(d.Uid, d.Nickname, d.Status, d.Content)
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
 
-	fmt.Println("Insertion complete!")
+	return true
 }
 
-func RetrieveData(config Config) []Post {
+// Return the public posts and the last row in the result set.
+func RetrievePublicPosts(offset int, config Config) ([]Post, int) {
 	db := connect(config)
 
-	rows, err := db.Query("select * from post order by ts desc")
-	ErrLog(err)
+	queryString := "SELECT * FROM post WHERE status=0 "
+	if offset <= 0 {
+		queryString += " ORDER BY ID DESC LIMIT $1"
+	} else {
+		queryString += " AND id<$1 ORDER BY ID DESC LIMIT $2"
+	}
+
+	var (
+		rows *sql.Rows
+		err  error
+	)
+
+	stmt, err := db.Prepare(queryString)
+	if err != nil {
+		log.Error(err)
+		return nil, 0
+	}
+	// Retrieve 5 posts everytime.
+	// TODO: this numbers should be written into config file later.
+	if offset <= 0 {
+		rows, err = stmt.Query(5)
+	} else {
+		rows, err = stmt.Query(5, offset)
+	}
+
+	if err != nil {
+		log.Error(err)
+		return nil, 0
+	}
 
 	defer rows.Close()
 
@@ -46,16 +84,16 @@ func RetrieveData(config Config) []Post {
 		var p Post
 		err := rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.Status,
 			&p.Comments, &p.Content)
-		ErrLog(err)
+		if err != nil {
+			log.Error(err)
+			return nil, 0
+		}
 		p.Ts = TimeFromNow(p.Ts)
 		posts = append(posts, p)
+		offset = p.Id
 	}
 
-	fmt.Println(time.Now())
-	err = rows.Err()
-	ErrLog(err)
-
-	return posts
+	return posts, offset
 }
 
 func CloseDB(config Config) {
@@ -67,21 +105,33 @@ func InsertUser(u NewUser, config Config) (int, string) {
 	db := connect(config)
 
 	stmt, err := db.Prepare("SELECT email FROM customer WHERE email=$1")
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1, ""
+	}
 
 	rows, err := stmt.Query(u.Email)
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1, ""
+	}
 	defer rows.Close()
 	if rows.Next() {
-		fmt.Println("Email already existed in database.")
-		return 400, "Email already existed in database."
+		log.Debug("Email existed.")
+		return 400, "Email already registered."
 	}
 
 	stmt, err = db.Prepare("INSERT INTO customer(email, password, nickname) VALUES($1, $2, $3)")
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1, ""
+	}
 
 	_, err = stmt.Exec(u.Email, u.Password, u.Nickname)
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1, ""
+	}
 
 	return 200, "OK"
 }
@@ -90,37 +140,55 @@ func ValidateUser(i LoginInfo, config Config) int {
 	db := connect(config)
 
 	stmt, err := db.Prepare("SELECT id FROM customer WHERE email=$1 AND password=$2")
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
 
 	rows, err := stmt.Query(i.Email, i.Password)
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return -1
+	}
 	defer rows.Close()
 
 	id := -1
 	for rows.Next() {
 		err := rows.Scan(&id)
-		ErrLog(err)
+		if err != nil {
+			log.Error(err)
+			return -1
+		}
 	}
 
 	return id
 }
 
-func GetUserSummary(id int, config Config) UserSummary {
+func GetUserSummary(id int, config Config) (UserSummary, error) {
 	db := connect(config)
 
+	var summary UserSummary
 	stmt, err := db.Prepare("SELECT nickname, posts, marks, comments FROM customer " +
 		"WHERE id=$1")
-	ErrLog(err)
-
-	rows, err := stmt.Query(id)
-	ErrLog(err)
-	defer rows.Close()
-
-	var summary UserSummary
-	for rows.Next() {
-		err := rows.Scan(&summary.Nickname, &summary.Posts, &summary.Marked, &summary.Comments)
-		ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return summary, err
 	}
 
-	return summary
+	rows, err := stmt.Query(id)
+	if err != nil {
+		log.Error(err)
+		return summary, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&summary.Nickname, &summary.Posts, &summary.Marked, &summary.Comments)
+		if err != nil {
+			log.Error(err)
+			return summary, err
+		}
+	}
+
+	return summary, nil
 }

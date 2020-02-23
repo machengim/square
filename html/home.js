@@ -1,4 +1,5 @@
 axios.defaults.withCredentials = true;
+const ApiServer = "http://localhost:8080"
 
 function checkUserOnHome() {
     if (document.cookie == "") {
@@ -9,16 +10,17 @@ function checkUserOnHome() {
 function submit_post() {
     var form = document.querySelector('#draft_form');
     var data = new FormData(form);
-    console.log(data);
-    axios.post('http://localhost:8080/posts', data);
+    console.log(data); 
+    axios.post(ApiServer + '/posts', data); // Need to handle user input before submit.
     location.reload();
     return false;
 };
 
 function quit() {
-    axios.get('http://localhost:8080/quit')
-        .then(window.open('login.html', '_self'))
-}
+    axios.get(ApiServer + '/quit');
+    document.cookie = "login= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+    window.open('login.html', '_self');
+};
 
 new Vue({
     el:"#write_box",
@@ -38,28 +40,26 @@ new Vue({
 });
 
 new Vue({
-    el:"#post_list",
-    data() {
-        return {
-            items: null
-        }
+    el: "#post_list",
+    data: {
+        items: null,
+        link: null,
     },
     mounted() {
-        axios.get('http://localhost:8080/posts')
-            .then(res => (this.items = res.data));
+        axios.get(ApiServer + '/posts')
+            .then(res => { this.items = res.data.posts; 
+                        this.link = ApiServer + '/posts?offset=' + res.data.offset; });
     }
 });
 
 
 new Vue({
-    el:"#user_info",
-    data() {
-        return {
-            info: null
-        }
+    el: "#user_info",
+    data: {
+        info: null,
     },
     mounted() {
-        axios.get('http://localhost:8080/userSummary')
+        axios.get(ApiServer + '/userSummary')
             .then(res => (this.info = res.data));
     }
-})
+});

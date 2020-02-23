@@ -6,6 +6,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	log "github.com/sirupsen/logrus"
 )
 
 var secret = "unicorn"
@@ -19,7 +20,10 @@ func GenerateToken(id int) string {
 	}
 
 	tokenString, err := token.SignedString([]byte(secret))
-	ErrLog(err)
+	if err != nil {
+		log.Error(err)
+		return ""
+	}
 	return tokenString
 }
 
@@ -34,7 +38,7 @@ func CheckToken(tokenString string) int {
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return -1
 	}
 
@@ -42,6 +46,7 @@ func CheckToken(tokenString string) int {
 		id, _ := strconv.Atoi(fmt.Sprint(claims["id"]))
 		return id
 	} else {
+		log.Error("token invalid")
 		return -1
 	}
 }
