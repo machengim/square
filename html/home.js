@@ -5,7 +5,7 @@ function submit_post() {
     axios.post('http://localhost:8080/posts', data);
     location.reload();
     return false;
-}
+};
 
 new Vue({
     el:"#write_box",
@@ -35,4 +35,10 @@ var post_list = new Vue({
         axios.get('http://localhost:8080/posts')
             .then(res => (this.items = res.data));
     }
-})
+});
+
+function checkUserOnHome() {
+    if (document.cookie == "") {
+        window.open('login.html', '_self')
+    }
+}

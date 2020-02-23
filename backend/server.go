@@ -23,6 +23,7 @@ func main() {
 
 	r.GET("/index", getRoot)
 	r.GET("/posts", getPosts)
+	r.GET("/home", getHome)
 	r.POST("/posts", postDraft)
 	r.POST("/register", register)
 	r.POST("/login", login)
@@ -77,7 +78,9 @@ func login(c *gin.Context) {
 	if id > 0 {
 		tokenString := lib.GenerateToken(id)
 		fmt.Println("setting cookie...")
+		// Two cookie, one for jwt used in backend, one for validation by frontend.
 		c.SetCookie("square", tokenString, 3600, "/", "localhost", false, true)
+		c.SetCookie("login", "1", 3600, "/", "localhost", false, false)
 	} else {
 		c.String(400, "Login failed!")
 	}
@@ -89,4 +92,8 @@ func authPub() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("claims", "TheTokenYouGet")
 	}
+}
+
+func getHome(c *gin.Context) {
+	c.Redirect(301, config.Site+"/home.html")
 }

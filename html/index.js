@@ -45,3 +45,17 @@ function login() {
 
     return false;
 }
+
+function checkUserOnIndex() {
+    if (document.cookie == "") {
+        window.open('login.html', '_self');
+    } else {
+        window.open('home.html', '_self');
+    }
+}
+
+function checkUserOnLogin() {
+    if (document.cookie != "") {
+        window.open('home.html', '_self');
+    } 
+}
