@@ -9,16 +9,16 @@ import (
 
 var secret = "unicorn"
 
-func GetToken() string {
+func GenerateToken(id int) string {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims = jwt.MapClaims{
-		"id":  1,
+		"id":  id,
+		"iss": "square",
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	}
 
 	tokenString, err := token.SignedString([]byte(secret))
 	ErrLog(err)
-	fmt.Println(tokenString)
 	return tokenString
 }
 

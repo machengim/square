@@ -1,3 +1,5 @@
+axios.defaults.withCredentials = true;
+
 function register() {
     var form = document.querySelector('#register');
     var email = form[0].value;

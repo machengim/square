@@ -14,12 +14,14 @@ var config lib.Config = lib.ReadJsonConfig()
 
 func main() {
 	r := gin.Default()
-	/*
-		corsConfig := cors.DefaultConfig()
-		corsConfig.AllowOrigins = []string{"http://localhost"}
-		r.Use(cors.New(corsConfig))
-	*/
-	r.Use(cors.Default())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{config.Site}
+	// Cooperate with axios withCredentials to transfer cookie in cors mode.
+	corsConfig.AllowCredentials = true
+	r.Use(cors.New(corsConfig))
+
+	r.GET("/index", getRoot)
 	r.GET("/posts", getPosts)
 	r.POST("/posts", postDraft)
 	r.POST("/register", register)
@@ -34,9 +36,11 @@ func main() {
 	r.Run(":8080")
 }
 
+func getRoot(c *gin.Context) {
+	c.HTML(200, config.Site+"/index.html", "index")
+}
+
 func getPosts(c *gin.Context) {
-	tokenString := lib.GetToken()
-	lib.CheckToken(tokenString)
 	var posts []lib.Post
 	posts = lib.RetrieveData(config)
 	lib.CloseDB(config)
@@ -66,16 +70,18 @@ func register(c *gin.Context) {
 // Should return a token
 func login(c *gin.Context) {
 	fmt.Println("Enter login process...")
+
 	var info lib.LoginInfo
 	c.BindJSON(&info)
 	id := lib.ValidateUser(info, config)
 	if id > 0 {
-		c.JSON(200, gin.H{
-			"id": id,
-		})
+		tokenString := lib.GenerateToken(id)
+		fmt.Println("setting cookie...")
+		c.SetCookie("square", tokenString, 3600, "/", "localhost", false, true)
 	} else {
 		c.String(400, "Login failed!")
 	}
+
 }
 
 // Wait for complete.

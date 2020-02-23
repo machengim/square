@@ -14,6 +14,7 @@ import (
 const configFile = "assets/config.json"
 
 type Config struct {
+	Site     string `json:"site"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	User     string `json:"user"`
