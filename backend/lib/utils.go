@@ -15,12 +15,13 @@ import (
 const configFile = "assets/config.json"
 
 type Config struct {
-	Site     string `json:"site"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Dbname   string `json:"dbname"`
+	Site         string `json:"site"`
+	Host         string `json:"host"`
+	Port         int    `json:"port"`
+	User         string `json:"user"`
+	Password     string `json:"password"`
+	Dbname       string `json:"dbname"`
+	PostsPerPage int    `json:"postsPerPage"`
 }
 
 type NewUser struct {
@@ -44,6 +45,21 @@ type Post struct {
 	Status   int    `json:"status"`
 	Comments int    `json:"comments"`
 	Content  string `json:"content"`
+}
+
+type PostBrief struct {
+	Id       int    `json:"id"`
+	Nickname string `json:"nickname"`
+	Content  string `json:"content"`
+	Ts       string `json:"ts"`
+	Comments int    `json:"comments"`
+}
+
+type PostBriefResult struct {
+	Posts  []PostBrief `json:"posts"`
+	HasOld bool        `json:"hasOld"`
+	Min    int         `json:"min"`
+	Max    int         `json:"max"`
 }
 
 // Used when user tries to send a new post.

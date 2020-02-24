@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"server/lib"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	ws "github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 )
@@ -36,6 +39,7 @@ func main() {
 	{
 		public.GET("/posts", getPosts)
 		public.GET("/userSummary", getUserSummary)
+		public.GET("/newPosts", webSocket)
 		public.POST("/posts", postDraft)
 		public.POST("/userInfo", postUserInfo)
 	}
@@ -44,27 +48,22 @@ func main() {
 }
 
 func getPosts(c *gin.Context) {
-	var posts []lib.Post
-	offsetString := c.Query("offset")
-	offset := 0
-	if offsetString != "" {
-		var err error
-		offset, err = strconv.Atoi(offsetString)
-		if err != nil {
-			log.Error(err)
-			c.Abort()
-		}
+	// op == 0 means no arguments, -1 means get old posts, 1 means get new
+	// current is used to store the current row number
+	op, current := 0, 0
+	if c.Query("min") != "" {
+		op = -1
+		current, _ = strconv.Atoi(c.Query("min"))
+	} else if c.Query("max") != "" {
+		op = 1
+		current, _ = strconv.Atoi(c.Query("max"))
 	}
-	posts, offset = lib.RetrievePublicPosts(offset, config)
-	if posts == nil {
+
+	results, err := lib.RetrievePublicPosts(op, current, config)
+	if err != nil {
 		c.Abort()
 	}
-	log.Debug(posts)
-	//c.JSON(200, posts)
-	c.JSON(200, gin.H{
-		"posts":  posts,
-		"offset": offset,
-	})
+	c.JSON(200, results)
 }
 
 // Notice the parameter in PostForm should be the same with the 'name' attribute of form
@@ -188,4 +187,31 @@ func quit(c *gin.Context) {
 	c.SetCookie("square", "", -5, "/", "localhost", false, true)
 	c.SetCookie("login", "", -5, "/", "localhost", false, false)
 	c.String(200, "OK")
+}
+
+func webSocket(c *gin.Context) {
+	var upgrader = ws.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	upgrader.CheckOrigin = func(*http.Request) bool {
+		return true
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	p := []byte("Hello websocket")
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		err = conn.WriteMessage(ws.TextMessage, p)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+		ticker.Stop()
+	}
 }

@@ -39,7 +39,7 @@ function submit_post() {
 
 function quit() {
     axios.get(ApiServer + '/quit');
-    document.cookie = "login= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "local= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
     window.open('login.html', '_self');
 };
 
@@ -64,22 +64,47 @@ new Vue({
     el: "#post_list",
     data: {
         items: null,
-        offset: -1,
+        hasNew: false,
+        hasOld: false,
+        min: -1,    // Record the min ID (Oldest post on page)
+        max: -1,    // Record the max ID (newest post on page)
+        greeting: "",   // Temporary used for websocket
     },
     mounted() {
         axios.get(ApiServer + '/posts')
-            .then(res => { this.items = res.data.posts; 
-                            this.offset = res.data.offset; })
+            .then(res => { 
+                this.items = res.data.posts; 
+                this.min = res.data.min;
+                this.max = res.data.max;
+                this.hasOld = res.data.hasOld;
+                this.checkNew();
+            })
     },
     methods: {
         loadMore: function() {
-            axios.get(ApiServer + '/posts?offset=' + this.offset)
+            axios.get(ApiServer + '/posts?min=' + this.min)
                 .then(res => {
                     for (i = 0; i < res.data.posts.length; i++) {
                         this.items.push(res.data.posts[i]);
                     }
-                    this.offset = res.data.offset;
-                })
+                    this.min = res.data.min;
+                    this.hasOld = res.data.hasOld;
+                });
+        },
+        checkNew: function() {
+            var ws = new WebSocket("ws://localhost:8080/newPosts");
+
+            ws.onopen = function() {
+                console.log("Websocket open...");
+            }
+            ws.onmessage = function(e) {
+                console.log("Get data: " + e.data);
+                this.greeting = e.data;
+                this.hasNew = true;
+            }
+            ws.onclose = function() {
+                console.log("Websocket closed.")
+            }
         }
     }
 });

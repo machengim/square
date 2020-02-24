@@ -49,7 +49,7 @@
                         </div>
                     </form>
                     <div id="post_list">
-                        <div class="loadmore"><button class="btnnew">Load 5 New Posts</button></div>
+                        <div v-if="hasNew" class="loadmore"><button class="btnnew">{{ greeting }}</button></div>
                         <div class="post" v-for="item in items">
                             <div class="author">{{ item.nickname }} said:</div>
                             <div class="text">{{ item.content }}</div>
@@ -59,7 +59,7 @@
                             </div>
                             <hr>
                         </div>
-                        <div class="loadmore" v-if="offset>=0"><div class="btnmore_out"><button class="btnmore" @click="loadMore">Load More</button></div></div>
+                        <div class="loadmore" v-if="hasOld"><div class="btnmore_out"><button class="btnmore" @click="loadMore">Load More</button></div></div>
                     </div>
                 </article>
 

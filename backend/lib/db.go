@@ -3,6 +3,7 @@ package lib
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -48,60 +49,82 @@ func InsertDraft(d Draft, config Config) bool {
 }
 
 // Return the public posts and the last row in the result set.
-func RetrievePublicPosts(offset int, config Config) ([]Post, int) {
+func RetrievePublicPosts(op int, current int, config Config) (PostBriefResult, error) {
 	db := connect(config)
 
-	queryString := "SELECT * FROM post WHERE status=0 "
-	if offset <= 0 {
-		queryString += " ORDER BY ID DESC LIMIT $1"
-	} else {
-		queryString += " AND id<$1 ORDER BY ID DESC LIMIT $2"
-	}
-
 	var (
-		rows *sql.Rows
-		err  error
+		result PostBriefResult
+		stmt   *sql.Stmt
+		rows   *sql.Rows
+		err    error
 	)
 
-	stmt, err := db.Prepare(queryString)
+	sqlString := "SELECT id, nickname, content, ts, comments FROM post "
+	switch op {
+	case 0:
+		sqlString += "ORDER BY ts DESC LIMIT $1"
+	case 1:
+		sqlString += "WHERE id > $1 ORDER BY ts DESC"
+		break
+	case -1:
+		sqlString += "WHERE id < $1 ORDER BY ts DESC LIMIT $2"
+		break
+	default:
+		break
+	}
+	log.Debug("Construct sql: ", sqlString)
+
+	stmt, err = db.Prepare(sqlString)
 	if err != nil {
 		log.Error(err)
-		return nil, 0
+		return result, err
 	}
-	// Retrieve 5 posts everytime.
-	// TODO: this numbers should be written into config file later.
-	if offset <= 0 {
-		rows, err = stmt.Query(5)
-	} else {
-		rows, err = stmt.Query(offset, 5)
+
+	switch op {
+	case 0:
+		rows, err = stmt.Query(config.PostsPerPage)
+		break
+	case 1:
+		rows, err = stmt.Query(current)
+		break
+	case -1:
+		rows, err = stmt.Query(current, config.PostsPerPage)
+		break
+	default:
+		break
 	}
 
 	if err != nil {
 		log.Error(err)
-		return nil, 0
+		return result, err
 	}
 
-	defer rows.Close()
-
-	var posts []Post
+	result.HasOld = true
+	result.Max = -1
+	result.Min = math.MaxInt64
 	for rows.Next() {
-		var p Post
-		err := rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.Status,
-			&p.Comments, &p.Content)
+		var p PostBrief
+		err = rows.Scan(&p.Id, &p.Nickname, &p.Content, &p.Ts, &p.Comments)
 		if err != nil {
 			log.Error(err)
-			return nil, 0
+			return result, err
 		}
 		p.Ts = TimeFromNow(p.Ts)
-		posts = append(posts, p)
-		offset = p.Id
+		result.Posts = append(result.Posts, p)
+		if p.Id > result.Max {
+			result.Max = p.Id
+		}
+		if p.Id < result.Min {
+			result.Min = p.Id
+		}
 	}
 
-	if len(posts) < 5 {
-		offset = -1
+	log.Debug("post per page: ", config.PostsPerPage)
+	log.Debug("Posts result: ", result)
+	if len(result.Posts) < config.PostsPerPage {
+		result.HasOld = false
 	}
-
-	return posts, offset
+	return result, nil
 }
 
 func CloseDB(config Config) {
@@ -125,7 +148,6 @@ func InsertUser(u NewUser, config Config) (int, string) {
 	}
 	defer rows.Close()
 	if rows.Next() {
-		log.Debug("Email existed.")
 		return 400, "Email already registered."
 	}
 
