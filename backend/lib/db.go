@@ -286,3 +286,24 @@ func UpdateNickname(id int, name string, config Config) bool {
 
 	return true
 }
+
+func CheckNewPost(max int, config Config) (int, error) {
+	db := connect(config)
+
+	// TODO: Notice the ">=" should be changed to ">" later.
+	stmt, err := db.Prepare("SELECT COUNT(*) FROM post WHERE id>$1 AND status=0")
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	var count int
+	row := stmt.QueryRow(max)
+	err = row.Scan(&count)
+	if err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	return count, nil
+}

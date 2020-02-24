@@ -64,11 +64,10 @@ new Vue({
     el: "#post_list",
     data: {
         items: null,
-        hasNew: false,
+        hasNew: 0,
         hasOld: false,
         min: -1,    // Record the min ID (Oldest post on page)
         max: -1,    // Record the max ID (newest post on page)
-        greeting: "",   // Temporary used for websocket
     },
     mounted() {
         axios.get(ApiServer + '/posts')
@@ -92,15 +91,15 @@ new Vue({
                 });
         },
         checkNew: function() {
+            var self = this;    // Notice the content of "this" changes here.
             var ws = new WebSocket("ws://localhost:8080/newPosts");
 
             ws.onopen = function() {
                 console.log("Websocket open...");
+                ws.send(self.max);
             }
             ws.onmessage = function(e) {
-                console.log("Get data: " + e.data);
-                this.greeting = e.data;
-                this.hasNew = true;
+                self.hasNew = parseInt(e.data);
             }
             ws.onclose = function() {
                 console.log("Websocket closed.")

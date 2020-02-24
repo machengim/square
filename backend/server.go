@@ -204,14 +204,36 @@ func webSocket(c *gin.Context) {
 		log.Error(err)
 		return
 	}
-	p := []byte("Hello websocket")
-	ticker := time.NewTicker(5 * time.Second)
+
+	// Should be an iteration inside another iteration.
+	// So whenever get a message, try multiple times to check new posts in db.
 	for {
-		err = conn.WriteMessage(ws.TextMessage, p)
+		_, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Error(err)
-			return
+			break
 		}
-		ticker.Stop()
+
+		if message != nil {
+			max, _ := strconv.Atoi(string(message))
+			log.Debug("message is ", max)
+
+			for {
+				count, err := lib.CheckNewPost(max, config)
+				if err != nil {
+					log.Error(err)
+					break
+				}
+
+				if count > 0 {
+					err = conn.WriteMessage(ws.TextMessage, []byte(strconv.Itoa(count)))
+					if err != nil {
+						log.Error(err)
+						break
+					}
+				}
+				time.Sleep(5 * time.Second)
+			}
+		}
+		time.Sleep(5 * time.Second)
 	}
 }
