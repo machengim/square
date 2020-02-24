@@ -67,7 +67,7 @@
                     <div id="user_info">
                         <p> </p>
                         <div class="nickname" v-if="changing">
-                            <input ref="newNameInput" v-model="newName" class="nickname changing" @click.escape="cancleChange()">
+                            <input ref="newNameInput" v-model="newName" class="nickname changing">
                         </div>
                         <div class="nickname" v-else>{{info.nickname}}</div>
                         <div class="nickname_right">

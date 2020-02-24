@@ -107,8 +107,12 @@ new Vue({
         this.$nextTick(function () {
             document.addEventListener('keyup', function (e) {
               //此处填写你的业务逻辑即可
-              if (e.keyCode == 27) {
-                self.cancleChange();
+              if (self.$refs.newNameInput == document.activeElement) {
+                if (e.keyCode == 27) {
+                    self.cancleChange();
+                } else if (e.keyCode == 13) {
+                    self.submitChangeName();
+                }
               }
             })
           })
