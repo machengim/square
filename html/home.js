@@ -43,7 +43,7 @@ new Vue({
     el: "#post_list",
     data: {
         items: null,
-        offset: 0,
+        offset: -1,
     },
     mounted() {
         axios.get(ApiServer + '/posts')
@@ -62,7 +62,6 @@ new Vue({
         }
     }
 });
-
 
 new Vue({
     el: "#user_info",

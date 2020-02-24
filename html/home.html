@@ -17,6 +17,7 @@
                         <li><a href='home.html' target="_self">Home</a></li>
                         <li>Message</li>
                         <li>Setting</li>
+                        <li>Help</li>
                         <li><a href="#" onclick="quit()">Quit</a></li>
                     </ul>
                 </div>
@@ -36,8 +37,14 @@
                             <div class="text">Write a post:</div>
                             <textarea ref="draft" id="draft" name="draft" placeholder="Share your thought" v-on:focus="show_area" required></textarea>
                             <div v-show="show">
-                                <button id="hide" type="button" v-on:click="hide_area">Hide</button>
-                                <button id="submit" type="submit">Send</button>
+                                <button id="hide" class="input_btn" type="button" v-on:click="hide_area">Collapse</button>
+                                <div class="post_options">
+                                    <input type="checkbox" id="is_anonymous">
+                                    <label>Anonymous</label>
+                                    <input type="checkbox" id="is_private">
+                                    <label>Private only</label>
+                                    <button id="submit" class="input_btn" type="submit">Send</button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -57,10 +64,20 @@
 
                 <aside>
                     <div id="user_info">
-                        <p>{{ info.nickname }}</p>
-                        <p>Posts: {{ info.posts }}</p>
-                        <p>Marked: {{ info.marked }}</p>
-                        <p>New comments: {{ info.comments }}</p>
+                        <p> </p>
+                        <div class="nickname">{{info.nickname}}</div><div class="nickname_right"><button class="btn_change">Change</button></div><hr>
+                        <div class="info_list">
+                            <div class="info_title">Posts:</div>
+                            <div class="info_detail"><a href="#">{{info.posts}}</a></div>
+                        </div>
+                        <div class="info_list">
+                            <div class="info_title">Marked:</div>
+                            <div class="info_detail"><a href="#">{{info.marked}}</a></div>
+                        </div>
+                        <div class="info_list">
+                            <div class="info_title">New comments:</div>
+                            <div class="info_detail"><a href="#">{{info.comments}}</a></div>
+                        </div>
                     </div>
                 </aside>
             </div>            

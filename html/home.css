@@ -13,6 +13,11 @@ hr {
     background-color: lightgray;
 }
 
+label {
+    padding: 40px 20px 0 0;
+    font-size: 14px;
+}
+
 header{
     position: relative;
     margin-bottom: 50px;
@@ -54,7 +59,7 @@ nav{
 }
 
 .nav_items a:hover{
-    color: azure;
+    color: rgb(160, 250, 183);
 }
 
 .nav_search {
@@ -116,15 +121,31 @@ aside {
 
 #submit {
     float: right;
-    margin: 10px 40px 0 0;
+    margin: 0 40px 0 0;
 }
 
 #hide {
-    margin: 10px 40px 0 0;
+    margin: 0 40px 0 0;
 }
 
 #write_box {
     margin-bottom: 50px;
+}
+
+.input_btn{
+    height: 25px;
+    padding: 0 10px;
+    background-color: dimgray;
+    color: white;
+    border-radius: 5px;
+}
+
+.input_btn:hover {
+    background-color: black;
+}
+
+.post_options {
+    float: right;
 }
 
 .post{
@@ -141,6 +162,7 @@ aside {
 .text {
     font-size: 16px;
     margin-bottom: 10px;
+    font-family: sans-serif;
 }
 
 .post .foot {
@@ -166,6 +188,65 @@ aside {
     color: rgb(122, 89, 4);
     font-size: 16px;
     cursor: pointer;
+}
+
+.nickname {
+    display: inline-block;
+    font-family: sans-serif;
+    font-size: 18px;
+    color: darkslategray;
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.nickname_right {
+    position: relative;
+    display: inline-block;
+    margin-left: 25px;
+}
+
+.btn_change {
+    position:  absolute;
+    bottom: 0;
+    height: 20px;
+    background-color: rgb(235, 229, 229);
+    border-radius: 5px;
+}
+
+.btn_change:hover {
+    background-color: white;
+}
+
+#user_info {
+    background-color: whitesmoke;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.info_list {
+    margin: 8px auto;
+}
+.info_title {
+    display: inline;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+.info_detail {
+    display: inline;
+    margin-left: 15px;
+    color: rgb(38, 77, 1);
+    font-size: 16px;
+}
+
+.info_detail a {
+    color: rgb(38, 77, 1);
+}
+
+.info_detail a:hover {
+    color: rgb(104, 33, 60);
+    font-weight: 600;
 }
 
 footer{
