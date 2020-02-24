@@ -101,7 +101,7 @@ func RetrievePublicPosts(op int, current int, config Config) (PostBriefResult, e
 
 	result.HasOld = true
 	result.Max = -1
-	result.Min = math.MaxInt64
+	result.Min = math.MaxInt32
 	for rows.Next() {
 		var p PostBrief
 		err = rows.Scan(&p.Id, &p.Nickname, &p.Content, &p.Ts, &p.Comments)

@@ -29,11 +29,16 @@ function submit_post() {
         alert("Empty input!");
         return false;
     }
+    post_lists.closeWs();
     var data = new FormData(form);
     console.log(data); 
     axios.post(ApiServer + '/posts', data)
-            .then(res => { location.reload(); },
-                    err => { alert(err); });
+            .then(res => {
+                post_lists.loadNew(); 
+                document.getElementById('draft').value = '';
+                write_box.hide_area();
+            },
+                err => { alert(err); });
     return false;
 };
 
@@ -43,7 +48,7 @@ function quit() {
     window.open('login.html', '_self');
 };
 
-new Vue({
+var write_box = new Vue({
     el:"#write_box",
     data: {
         show: 0
@@ -60,12 +65,13 @@ new Vue({
     }
 });
 
-new Vue({
+var post_lists = new Vue({
     el: "#post_list",
     data: {
         items: null,
         hasNew: 0,
         hasOld: false,
+        ws: null,   // Record the curret websocket connection.
         min: -1,    // Record the min ID (Oldest post on page)
         max: -1,    // Record the max ID (newest post on page)
     },
@@ -80,7 +86,7 @@ new Vue({
             })
     },
     methods: {
-        loadMore: function() {
+        loadOld: function() {
             axios.get(ApiServer + '/posts?min=' + this.min)
                 .then(res => {
                     for (i = 0; i < res.data.posts.length; i++) {
@@ -90,13 +96,26 @@ new Vue({
                     this.hasOld = res.data.hasOld;
                 });
         },
+        loadNew: function() {
+            axios.get(ApiServer + '/posts?max=' + this.max)
+                .then(res => {
+                    for (i = res.data.posts.length - 1; i >= 0; i--) {
+                        this.items.unshift(res.data.posts[i]);
+                    }
+                    this.max = res.data.max;
+                    this.hasNew = 0;
+                    this.checkNew();
+                })
+        },
         checkNew: function() {
             var self = this;    // Notice the content of "this" changes here.
             var ws = new WebSocket("ws://localhost:8080/newPosts");
 
             ws.onopen = function() {
                 console.log("Websocket open...");
+                self.ws = ws;
                 ws.send(self.max);
+                console.log(self.max);
             }
             ws.onmessage = function(e) {
                 self.hasNew = parseInt(e.data);
@@ -104,6 +123,10 @@ new Vue({
             ws.onclose = function() {
                 console.log("Websocket closed.")
             }
+        },
+        closeWs: function() {
+            this.ws.close();
+            console.log("Socket closed.")
         }
     }
 });
@@ -130,7 +153,6 @@ new Vue({
         let self = this;
         this.$nextTick(function () {
             document.addEventListener('keyup', function (e) {
-              //此处填写你的业务逻辑即可
               if (self.$refs.newNameInput == document.activeElement) {
                 if (e.keyCode == 27) {
                     self.cancleChange();
