@@ -39,9 +39,9 @@
                             <div v-show="show">
                                 <button id="hide" class="input_btn" type="button" v-on:click="hide_area">Collapse</button>
                                 <div class="post_options">
-                                    <input type="checkbox" id="is_anonymous">
+                                    <input type="checkbox" name="is_anonymous">
                                     <label>Anonymous</label>
-                                    <input type="checkbox" id="is_private">
+                                    <input type="checkbox" name="is_private">
                                     <label>Private only</label>
                                     <button id="submit" class="input_btn" type="submit">Send</button>
                                 </div>
@@ -49,6 +49,7 @@
                         </div>
                     </form>
                     <div id="post_list">
+                        <div class="loadmore"><button class="btnnew">Load 5 New Posts</button></div>
                         <div class="post" v-for="item in items">
                             <div class="author">{{ item.nickname }} said:</div>
                             <div class="text">{{ item.content }}</div>
@@ -58,14 +59,22 @@
                             </div>
                             <hr>
                         </div>
-                        <div class="loadmore" v-if="offset>=0"><button class="btnmore" @click="loadMore">Load More</button></div>
+                        <div class="loadmore" v-if="offset>=0"><div class="btnmore_out"><button class="btnmore" @click="loadMore">Load More</button></div></div>
                     </div>
                 </article>
 
                 <aside>
                     <div id="user_info">
                         <p> </p>
-                        <div class="nickname">{{info.nickname}}</div><div class="nickname_right"><button class="btn_change">Change</button></div><hr>
+                        <div class="nickname" v-if="changing">
+                            <input ref="newNameInput" v-model="newName" class="nickname changing" @click.escape="cancleChange()">
+                        </div>
+                        <div class="nickname" v-else>{{info.nickname}}</div>
+                        <div class="nickname_right">
+                            <button v-if="changing" class="btn_change" @click="submitChangeName()">Submit</button>
+                            <button v-else class="btn_change" @click="changeName()">Change</button>
+                        </div>
+                        <hr>
                         <div class="info_list">
                             <div class="info_title">Posts:</div>
                             <div class="info_detail"><a href="#">{{info.posts}}</a></div>

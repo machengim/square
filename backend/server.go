@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"server/lib"
 	"strconv"
 	"strings"
@@ -27,7 +28,6 @@ func main() {
 	r.Use(cors.New(corsConfig))
 
 	r.GET("/quit", quit)
-	r.POST("/posts", postDraft)
 	r.POST("/register", register)
 	r.POST("/login", login)
 
@@ -36,6 +36,8 @@ func main() {
 	{
 		public.GET("/posts", getPosts)
 		public.GET("/userSummary", getUserSummary)
+		public.POST("/posts", postDraft)
+		public.POST("/userInfo", postUserInfo)
 	}
 
 	r.Run(":8080")
@@ -68,9 +70,34 @@ func getPosts(c *gin.Context) {
 // Notice the parameter in PostForm should be the same with the 'name' attribute of form
 func postDraft(c *gin.Context) {
 	// Switch PostForm method to BindJson later.
-	draft := lib.Draft{1, "Anonymous", 0, c.PostForm("draft")}
-	lib.InsertData(draft, config)
-	lib.CloseDB(config)
+	content := strings.TrimSpace(c.PostForm("draft"))
+	if content == "" {
+		c.String(400, "Empty input.")
+	}
+
+	id, _ := c.Get("id")
+	uid, _ := strconv.Atoi(fmt.Sprint(id))
+
+	nickname := "Anonymous"
+	if c.PostForm("is_anonymous") == "" {
+		var err error
+		nickname, err = lib.RetrieveNicknameById(uid, config)
+		if err != nil {
+			c.Abort()
+		}
+	}
+
+	status := 0
+	if c.PostForm("is_private") != "" {
+		status = 1
+	}
+
+	draft := lib.Draft{uid, nickname, status, content}
+	if lib.InsertDraft(draft, config) {
+		c.String(200, "OK")
+	} else {
+		c.String(400, "Post failed.")
+	}
 }
 
 func register(c *gin.Context) {
@@ -102,7 +129,7 @@ func login(c *gin.Context) {
 		log.Debug("Setting cookie...")
 		// Two cookie, one for jwt used in backend, one for validation by frontend.
 		c.SetCookie("square", tokenString, 3600, "/", "localhost", false, true)
-		c.SetCookie("login", "1", 3600, "/", "localhost", false, false)
+		c.SetCookie("local", strconv.Itoa(id), 3600, "/", "localhost", false, false)
 	} else {
 		c.String(400, "Login failed!")
 	}
@@ -138,6 +165,20 @@ func getUserSummary(c *gin.Context) {
 	}
 	log.Debug(summary.Nickname)
 	c.JSON(200, summary)
+}
+
+func postUserInfo(c *gin.Context) {
+	id := c.GetInt("id")
+	name := c.Query("name")
+	if name == "" {
+		c.Abort()
+	}
+
+	if !lib.UpdateNickname(id, name, config) {
+		c.String(400, "Update error")
+	} else {
+		c.String(200, "OK")
+	}
 }
 
 // This function may have security problem.

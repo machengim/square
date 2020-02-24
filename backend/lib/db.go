@@ -25,7 +25,7 @@ func connect(config Config) *sql.DB {
 	return db
 }
 
-func InsertData(d Draft, config Config) bool {
+func InsertDraft(d Draft, config Config) bool {
 	db := connect(config)
 
 	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content) VALUES($1, $2, $3, $4)")
@@ -37,6 +37,10 @@ func InsertData(d Draft, config Config) bool {
 	_, err = stmt.Exec(d.Uid, d.Nickname, d.Status, d.Content)
 	if err != nil {
 		log.Error(err)
+		return false
+	}
+
+	if !updatePostsByOne(d.Uid, config) {
 		return false
 	}
 
@@ -195,4 +199,68 @@ func GetUserSummary(id int, config Config) (UserSummary, error) {
 	}
 
 	return summary, nil
+}
+
+func RetrieveNicknameById(id int, config Config) (string, error) {
+	db := connect(config)
+
+	stmt, err := db.Prepare("SELECT nickname FROM customer WHERE id=$1")
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+
+	rows, err := stmt.Query(id)
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+	defer rows.Close()
+
+	var nickname string
+	for rows.Next() {
+		err := rows.Scan(&nickname)
+		if err != nil {
+			log.Error(err)
+			return "", err
+		}
+	}
+
+	return nickname, nil
+}
+
+func updatePostsByOne(id int, config Config) bool {
+	db := connect(config)
+
+	stmt, err := db.Prepare("UPDATE customer SET posts=posts+1 WHERE ID=$1")
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	return true
+}
+
+func UpdateNickname(id int, name string, config Config) bool {
+	db := connect(config)
+
+	stmt, err := db.Prepare("UPDATE customer SET nickname=$1 WHERE id=$2")
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	_, err = stmt.Exec(name, id)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	return true
 }

@@ -129,7 +129,7 @@ aside {
 }
 
 #write_box {
-    margin-bottom: 50px;
+    margin-bottom: 30px;
 }
 
 .input_btn{
@@ -176,17 +176,37 @@ aside {
 }
 
 .loadmore {
-    width: 600px;
-    margin: 0 30px 20px 30px;
+    width: 650px;
+    margin: 0 0 30px 0;
 }
 
 .btnmore {
-    margin: 0 auto;
     height: 30px;
     width: 100%;
-    background-color: #e0d8d8;
-    color: rgb(122, 89, 4);
+    background-color: #1e3f35;
+    color: #e1e2d4;
     font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #e1e2d4;
+}
+
+.btnmore:hover{
+    background-color: #1b6b53;
+}
+
+.btnmore_out {
+    margin: 0 100px;
+}
+
+.btnnew {
+    margin: 0 auto;
+    border: 0;
+    height: 25px;
+    width: 100%;
+    background-color: #fcfae6;
+    color: rgb(27, 22, 8);
+    letter-spacing: 2px;
+    font-size: 14px;
     cursor: pointer;
 }
 
@@ -198,6 +218,13 @@ aside {
     max-width: 150px;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.changing {
+    border: none;
+    border-width: 0;
+    max-width: 140px;
+    background-color: rgb(168, 154, 154);
 }
 
 .nickname_right {
@@ -230,7 +257,7 @@ aside {
 .info_title {
     display: inline;
     font-family: sans-serif;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .info_detail {
@@ -246,7 +273,6 @@ aside {
 
 .info_detail a:hover {
     color: rgb(104, 33, 60);
-    font-weight: 600;
 }
 
 footer{
