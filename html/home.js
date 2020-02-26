@@ -119,6 +119,7 @@ var post_lists = new Vue({
             }
             ws.onmessage = function(e) {
                 self.hasNew = parseInt(e.data);
+                console.log(e.data);
             }
             ws.onclose = function() {
                 console.log("Websocket closed.")

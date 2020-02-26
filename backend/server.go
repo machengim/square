@@ -195,6 +195,7 @@ func webSocket(c *gin.Context) {
 		WriteBufferSize: 1024,
 	}
 
+	// Notice the security problem
 	upgrader.CheckOrigin = func(*http.Request) bool {
 		return true
 	}
@@ -202,38 +203,56 @@ func webSocket(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Error(err)
-		return
+		c.String(400, "Cannot establish websocket.")
 	}
 
-	// Should be an iteration inside another iteration.
-	// So whenever get a message, try multiple times to check new posts in db.
+	ch := make(chan string)
+	// Use anther goroutine to read so it doesn't block other functions.
+	go readWs(conn, ch)
+	writeWs(conn, ch, config)
+}
+
+func readWs(conn *ws.Conn, ch chan string) {
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			break
+			log.Error(err)
+			return
+		}
+		ch <- string(message)
+	}
+}
+
+func writeWs(conn *ws.Conn, ch chan string, config lib.Config) {
+	msg := ""
+
+	// Use this part of code to check whether channel is empty
+	// Without the 'select' it will block the process.
+	for {
+		select {
+		case msg = <-ch:
+			log.Debug("Get new message: ", msg)
+		default:
+			log.Debug("Channel is empty")
 		}
 
-		if message != nil {
-			max, _ := strconv.Atoi(string(message))
-			log.Debug("message is ", max)
+		if msg == "" {
+			time.Sleep(5 * time.Second)
+			continue
+		}
 
-			for {
-				count, err := lib.CheckNewPost(max, config)
-				if err != nil {
-					log.Error(err)
-					break
-				}
+		max, _ := strconv.Atoi(msg)
+		count, err := lib.CheckNewPost(max, config)
 
-				if count > 0 {
-					err = conn.WriteMessage(ws.TextMessage, []byte(strconv.Itoa(count)))
-					if err != nil {
-						log.Error(err)
-						break
-					}
-				}
-				time.Sleep(5 * time.Second)
+		if count >= 0 {
+			log.Debug("Writing count ", count)
+			err = conn.WriteMessage(ws.TextMessage, []byte(strconv.Itoa(count)))
+			if err != nil {
+				log.Error(err)
+				return
 			}
 		}
+
 		time.Sleep(5 * time.Second)
 	}
 }

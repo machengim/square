@@ -35,7 +35,7 @@
                     <form id="draft_form" onsubmit="return submit_post();">
                         <div id="write_box">
                             <div class="text">Write a post:</div>
-                            <textarea ref="draft" id="draft" name="draft" placeholder="Share your thought" v-on:focus="show_area" required></textarea>
+                            <textarea ref="draft" id="draft" name="draft" placeholder="Share your thought" v-on:focus="show_area"></textarea>
                             <div v-show="show">
                                 <button id="hide" class="input_btn" type="button" v-on:click="hide_area">Collapse</button>
                                 <div class="post_options">
