@@ -29,13 +29,13 @@ func connect(config Config) *sql.DB {
 func InsertDraft(d Draft, config Config) bool {
 	db := connect(config)
 
-	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content) VALUES($1, $2, $3, $4)")
+	stmt, err := db.Prepare("INSERT INTO post(uid, nickname, status, content, rid) VALUES($1, $2, $3, $4, $5)")
 	if err != nil {
 		log.Error(err)
 		return false
 	}
 
-	_, err = stmt.Exec(d.Uid, d.Nickname, d.Status, d.Content)
+	_, err = stmt.Exec(d.Uid, d.Nickname, d.Status, d.Content, d.Rid)
 	if err != nil {
 		log.Error(err)
 		return false
@@ -306,4 +306,36 @@ func CheckNewPost(max int, config Config) (int, error) {
 	}
 
 	return count, nil
+}
+
+func GetCommentsByPid(pid int, config Config) ([]Post, error) {
+	db := connect(config)
+
+	var comments []Post
+	stmt, err := db.Prepare("SELECT id, ts, uid, nickname, status, comments, content " +
+		"FROM post WHERE status=2 AND rid=$1")
+	if err != nil {
+		log.Error(err)
+		return comments, err
+	}
+
+	rows, err := stmt.Query(pid)
+	if err != nil {
+		log.Error(err)
+		return comments, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p Post
+		err = rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.Status, &p.Comments, &p.Content)
+		if err != nil {
+			log.Error(err)
+			return comments, err
+		}
+		p.Ts = TimeFromNow(p.Ts)
+		comments = append(comments, p)
+	}
+
+	return comments, nil
 }

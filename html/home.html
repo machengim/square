@@ -55,7 +55,16 @@
                             <div class="text">{{ item.content }}</div>
                             <div class="foot">
                                 <span class="time">{{ item.ts }}</span>
-                                <span class="tool">Comments({{ item.comments }}) Mark</span>
+                                <span class="tool"><a @click="readComments(item.id)">Comments({{ item.comments }})</a> Mark</span>
+                            </div>
+                            <div v-show="item.showComments">
+                                <div v-for="comment in item.comments">
+                                    <div>{{ comment.content }}</div>
+                                </div>
+                                <div>
+                                    <textarea v-model="item.newComment" placeholder="comments" class="comment_input"></textarea>
+                                    <button class="input_btn" @click="sendComment(item.id)">Send</button>
+                                </div>
                             </div>
                             <hr>
                         </div>

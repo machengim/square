@@ -42,6 +42,7 @@ function submit_post() {
     return false;
 };
 
+// This function could be replaced by server side operation after deployment.
 function quit() {
     axios.get(ApiServer + '/quit');
     document.cookie = "local= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
@@ -128,6 +129,39 @@ var post_lists = new Vue({
         closeWs: function() {
             this.ws.close();
             console.log("Socket closed.")
+        },
+        readComments: function(id) {
+            item = this.getItemById(id);
+            if (item == null) {
+                console.log("Found nothing");
+                return;
+            }
+
+            if (item.showComments) {
+                item.showComments = false;
+                this.$forceUpdate();
+            } else {
+                axios.get(ApiServer + '/comments?pid=' + item.id)
+                    .then(res => {
+                        item.comments = res.data;
+                        item.newComment = "";
+                        item.showComments = true;
+                        this.$forceUpdate();
+                    });
+            }
+        },
+        sendComment: function(id) {
+            item = this.getItemById(id);
+            data = { "pid": id, "content": item.newComment };
+            axios.post(ApiServer + '/comments', data);
+        },
+        getItemById: function(pid) {
+            for (i = 0; i < this.items.length; i++) {
+                if (this.items[i].id == pid) {
+                    return this.items[i];
+                }
+            }
+            return null;
         }
     }
 });

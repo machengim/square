@@ -42,6 +42,8 @@ func main() {
 		public.GET("/newPosts", webSocket)
 		public.POST("/posts", postDraft)
 		public.POST("/userInfo", postUserInfo)
+		public.GET("/comments", readComments)
+		public.POST("/comments", postComment)
 	}
 
 	r.Run(":8080")
@@ -91,7 +93,7 @@ func postDraft(c *gin.Context) {
 		status = 1
 	}
 
-	draft := lib.Draft{uid, nickname, status, content}
+	draft := lib.Draft{uid, nickname, status, content, 0}
 	if lib.InsertDraft(draft, config) {
 		c.String(200, "OK")
 	} else {
@@ -244,7 +246,7 @@ func writeWs(conn *ws.Conn, ch chan string, config lib.Config) {
 		max, _ := strconv.Atoi(msg)
 		count, err := lib.CheckNewPost(max, config)
 
-		if count >= 0 {
+		if count > 0 { // Notice it should be count > 0 after debug.
 			log.Debug("Writing count ", count)
 			err = conn.WriteMessage(ws.TextMessage, []byte(strconv.Itoa(count)))
 			if err != nil {
@@ -255,4 +257,30 @@ func writeWs(conn *ws.Conn, ch chan string, config lib.Config) {
 
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func readComments(c *gin.Context) {
+	pidString := c.Query("pid")
+	if pidString == "" {
+		c.String(400, "No post id refered.")
+	}
+
+	pid, _ := strconv.Atoi(pidString)
+	comments, err := lib.GetCommentsByPid(pid, config)
+	if err != nil {
+		log.Error(err)
+		c.Abort()
+	} else if len(comments) == 0 {
+		c.Abort()
+	}
+
+	c.JSON(200, comments)
+}
+
+// TODO: unfinished
+func postComment(c *gin.Context) {
+	var comment lib.NewComment
+	c.BindJSON(&comment)
+	id := c.GetInt("id")
+	log.Debug("id is ", id, " and comment is: ", comment.Content)
 }

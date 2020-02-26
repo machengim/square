@@ -30,6 +30,11 @@ type NewUser struct {
 	Nickname string `json:"nickname"`
 }
 
+type NewComment struct {
+	Pid     int    `json:"pid"`
+	Content string `json:"content"`
+}
+
 type LoginInfo struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -68,6 +73,7 @@ type Draft struct {
 	Nickname string
 	Status   int
 	Content  string
+	Rid      int
 }
 
 type UserSummary struct {
