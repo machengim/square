@@ -1,4 +1,5 @@
-<center><h2>Database Design</h2></center>
+Database Design
+===
 
 Table customer
 ---
@@ -11,7 +12,7 @@ Table customer
 | nickname | varchar(16) | not null | Default 'Anonymous'. |
 | ip | varchar(15) | None | Last login IP. |
 | posts | integer | not null | Total number of posts, default 0. |
-| marked | integer | not null | Total number of marked posts, default 0. |
+| marks | integer | not null | Total number of marked posts, default 0. |
 | comments | integer | not null | Total number of unread comments, default 0. |
 
 
@@ -40,7 +41,7 @@ Table post
 | isPrivate | boolean | not null | Default FALSE. |
 | comments | integer | not null | Number of commens of this post. Default 0. |
 | content | text | not null | Content of the post. |
-| hasNewComments | boolean | If it has unread commens for the author. |
+| hasNewComments | boolean | not null | If it has unread commens for the author. |
 
 
 **SQL schema:**
@@ -81,7 +82,7 @@ Note that the timestamp value of a comment is not used in current system.
         content text not null
     );
 
-Table marked
+Table mark
 ---
 
 |Column | Type | Constraints|  Description |
@@ -92,7 +93,7 @@ Table marked
 
 **SQL schema:**
 
-    CREATE TABLE marked (
+    CREATE TABLE marks (
         id serial primary key,
         uid integer not null,
         pid integer not null,

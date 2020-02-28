@@ -1,6 +1,9 @@
-<center><h2>API Rules</h2></center>
+API Rules
+===
 
-Use `withCredential` with requests, so jwt token can be sent with all methods for authentication. This case is described as "token" in the form below. Admin, message and search functions are waiting in the roadmap.
+Use `withCredential` with requests, so jwt token can be sent with all methods for authentication. 
+
+ Admin, message and search functionalities are waiting in the roadmap.
 
 GET method
 ---
