@@ -1,0 +1,1 @@
+Config.json and docker-compose.yml files are ignored due to the password stored in them.

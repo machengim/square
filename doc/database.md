@@ -10,7 +10,6 @@ Table customer
 | email | varchar(24) | not null | Email must be unique. |
 | password | varchar(16) | not null | Password needs to be hashed. Other Constraints may apply.|
 | nickname | varchar(16) | not null | Default 'Anonymous'. |
-| ip | varchar(15) | None | Last login IP. |
 | posts | integer | not null | Total number of posts, default 0. |
 | marks | integer | not null | Total number of marked posts, default 0. |
 | comments | integer | not null | Total number of unread comments, default 0. |
@@ -23,7 +22,6 @@ Table customer
         email varchar(24) not null,
         password varchar(16) not null,
         nickname varchar(16) default 'Anonymous',
-        ip varchar(15),
         posts integer not null default 0,
         marks integer not null default 0,
         messages integer not null default 0,
@@ -51,10 +49,10 @@ Table post
         ts timestamp without time zone default(timezone('utc', now())) not null,
         uid integer not null,
         nickname varchar(16) not null,
-        isPrivate default false not null,
+        isPrivate boolean default false not null,
         comments integer default 0 not null,
         content text not null,
-        hasNewComments default false not null
+        hasNewComments boolean default false not null
     );
 
 Table comment
@@ -93,8 +91,8 @@ Table mark
 
 **SQL schema:**
 
-    CREATE TABLE marks (
+    CREATE TABLE mark (
         id serial primary key,
         uid integer not null,
-        pid integer not null,
+        pid integer not null
     );
