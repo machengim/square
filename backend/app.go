@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"os/signal"
 	"square/db"
 	"square/lib"
+	"square/models"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +21,7 @@ var (
 )
 
 func init() {
+	log.SetLevel(log.DebugLevel)
 	var err error
 	config, err = lib.ReadConfig("assets/config.json")
 	if err != nil {
@@ -33,16 +36,18 @@ func init() {
 }
 
 func main() {
-	shutdown()
+	shutdownHandler()
 
+	user, _ := models.ReadUserById(conn, 1)
+	fmt.Println(user)
 	app := gin.Default()
 	app.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello world!")
 	})
-	app.Run(":8080")
+	//app.Run(":8080")
 }
 
-func shutdown() {
+func shutdownHandler() {
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
