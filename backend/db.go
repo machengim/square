@@ -1,17 +1,39 @@
-package db
+package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"square/lib"
+	"io/ioutil"
 	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenDb(config lib.Config) (*sql.DB, error) {
+
+func ReadConfig(path string) (Config, error) {
+	var config Config
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Cannot read config file. ", err)
+		return config, err
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println(err)
+		return config, err
+	}
+
+	return config, nil
+}
+
+
+
+func OpenDb(config Config) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
 		"dbname=%s sslmode=disable", config.Host, config.Port, config.User,
 		config.Password, config.Dbname)
@@ -97,11 +119,28 @@ func QuerySingle(conn *sql.DB, table string, columns []string, values []interfac
 	var row *sql.Row
 	stmt, err := conn.Prepare(sqlString)
 	if err != nil {
-		log.Error("Error when reading entry: ", err)
+		log.Error("Error when querying entry: ", err)
 		return row, err
 	}
 	row = stmt.QueryRow(values...)
 	return row, nil
+}
+
+func QueryMultiple(conn *sql.DB, table string, condition string, values []interface{}) (*sql.Rows, error) {
+	sqlString := "SELECT * FROM " + table + " " + condition
+	var rows *sql.Rows
+	stmt, err := conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return rows, err
+	}
+
+	rows, err = stmt.Query(values...)
+	if err != nil {
+		log.Error("Error when querying entries: ", err)
+	}
+
+	return rows, err
 }
 
 func UpdateEntryById(conn *sql.DB, table string, id int, columns []string, values []interface{}) (bool, error) {

@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"os"
 	"os/signal"
-	"square/db"
-	"square/lib"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -13,23 +11,36 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Config struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+	Limit    int    `json:"limit"`
+}
+
+const configPath = "assets/config.json"
+
 var (
-	config lib.Config
-	conn   *sql.DB
+	conf Config
+	conn *sql.DB
 )
 
 func init() {
 	log.SetLevel(log.DebugLevel)
+
 	var err error
-	config, err = lib.ReadConfig("assets/config.json")
+	conf, err = ReadConfig(configPath)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	conn, err = db.OpenDb(config)
+	conn, err = OpenDb(conf)
 	if err != nil {
 		os.Exit(1)
 	}
+
 	log.Info("Database connection opened.")
 }
 
@@ -37,10 +48,8 @@ func main() {
 	shutdownHandler()
 
 	app := gin.Default()
-	app.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello world!")
-	})
-	//app.Run(":8080")
+	app.GET("/posts", GetPosts)
+	app.Run(":8080")
 }
 
 func shutdownHandler() {
@@ -48,7 +57,7 @@ func shutdownHandler() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		db.CloseDb(conn)
+		CloseDb(conn)
 		log.Info("Database connection closed.")
 		os.Exit(0)
 	}()

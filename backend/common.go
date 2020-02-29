@@ -1,9 +1,9 @@
-package models
+package main
 
 import (
-	"reflect"
-
+	"database/sql"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 )
 
 type Model interface {
@@ -31,4 +31,13 @@ func Reflect(model interface{}, op int) []interface{} {
 	}
 
 	return results
+}
+
+func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
+	_, err := DeleteEntryById(conn, id, table)
+	if err != nil {
+		log.Error("Error when deleting user.")
+		return false, err
+	}
+	return true, nil
 }

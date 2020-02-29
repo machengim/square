@@ -1,9 +1,7 @@
-package models
+package main
 
 import (
 	"database/sql"
-	"square/db"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,7 +21,7 @@ type User struct {
 func (user User) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"email", "password", "nickname"}
 	values := []interface{}{&user.Email, &user.Password, &user.Nickname}
-	_, err := db.CreateEntry(conn, "customer", columns, values)
+	_, err := CreateEntry(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new user.")
 		return false, err
@@ -58,7 +56,7 @@ func RetrieveUserByLogin(conn *sql.DB, email string, password string) (User, err
 func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
 	var u User
 
-	row, err := db.QuerySingle(conn, "customer", columns, values)
+	row, err := QuerySingle(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when reading user.")
 		return u, err
@@ -72,21 +70,12 @@ func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User,
 	return u, nil
 }
 
-func DeleteUserById(conn *sql.DB, id int) (bool, error) {
-	_, err := db.DeleteEntryById(conn, id, "customer")
-	if err != nil {
-		log.Error("Error when deleting user.")
-		return false, err
-	}
-	return true, nil
-}
-
 // Notice this method cannot change id, email and password.
 func (user User) UpdateById(conn *sql.DB) (bool, error) {
 	columns := []string{"nickname", "posts", "marks", "messages", "comments"}
 	values := Reflect(user, 0)
 
-	_, err := db.UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
+	_, err := UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
 	if err != nil {
 		log.Error("Cannot update user.")
 	}
@@ -98,7 +87,7 @@ func (user User) UpdatePassword(conn *sql.DB) (bool, error) {
 	columns := []string{"password"}
 	values := []interface{}{user.Password}
 
-	_, err := db.UpdateEntryById(conn, "customer", user.Id, columns, values)
+	_, err := UpdateEntryById(conn, "customer", user.Id, columns, values)
 	if err != nil {
 		log.Error("Cannot update user.")
 	}
