@@ -2,12 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"os/signal"
 	"square/db"
 	"square/lib"
-	"square/models"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -38,8 +36,6 @@ func init() {
 func main() {
 	shutdownHandler()
 
-	user, _ := models.ReadUserById(conn, 1)
-	fmt.Println(user)
 	app := gin.Default()
 	app.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello world!")

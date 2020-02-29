@@ -7,16 +7,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Only use when a new user is registering
-type NewUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Nickname string `json:"nickname"`
-}
-
+// Notice the field Password should never be transfered back.
 type User struct {
 	Id       int
 	Email    string
+	Password string
 	Nickname string
 	Posts    int
 	Marks    int
@@ -24,9 +19,10 @@ type User struct {
 	Comments int
 }
 
-func (user NewUser) Create(conn *sql.DB) (bool, error) {
+// Create function is used for registeration.
+func (user User) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"email", "password", "nickname"}
-	values := Reflect(user, 0)
+	values := []interface{}{&user.Email, &user.Password, &user.Nickname}
 	_, err := db.CreateEntry(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new user.")
@@ -35,29 +31,77 @@ func (user NewUser) Create(conn *sql.DB) (bool, error) {
 	return true, nil
 }
 
-func ReadUserById(conn *sql.DB, id int) (User, error) {
-	// Password field has been excluded.
-	//columns := []string{"id", "email", "nickname", "posts", "marks", "messages", "comments"}
-	var (
-		u       User
-		columns []string
-	)
-
-	fields := Reflect(u, 1)
-	for i := 0; i < len(fields); i++ {
-		columns = append(columns, fields[i].(string))
+// Retrieve a user by id.
+func RetrieveUserById(conn *sql.DB, id int) (User, error) {
+	columns := []string{"id"}
+	values := []interface{}{id}
+	user, err := readSingleUser(conn, columns, values)
+	if err != nil {
+		log.Error(err)
 	}
-	log.Debug("columns is: ", columns)
-	row, err := db.ReadEntryById(conn, id, "customer", columns)
+
+	return user, err
+}
+
+// Retrieve a user by email and password. Used in login section.
+func RetrieveUserByLogin(conn *sql.DB, email string, password string) (User, error) {
+	columns := []string{"email", "password"}
+	values := []interface{}{email, password}
+	user, err := readSingleUser(conn, columns, values)
+	if err != nil {
+		log.Error(err)
+	}
+
+	return user, err
+}
+
+func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
+	var u User
+
+	row, err := db.QuerySingle(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when reading user.")
 		return u, err
 	}
 
-	err = row.Scan(&u.Id, &u.Email, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
+	err = row.Scan(&u.Id, &u.Password, &u.Email, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
 	if err != nil {
 		log.Error("Error when scanning row to user: ", err)
 		return u, err
 	}
 	return u, nil
+}
+
+func DeleteUserById(conn *sql.DB, id int) (bool, error) {
+	_, err := db.DeleteEntryById(conn, id, "customer")
+	if err != nil {
+		log.Error("Error when deleting user.")
+		return false, err
+	}
+	return true, nil
+}
+
+// Notice this method cannot change id, email and password.
+func (user User) UpdateById(conn *sql.DB) (bool, error) {
+	columns := []string{"nickname", "posts", "marks", "messages", "comments"}
+	values := Reflect(user, 0)
+
+	_, err := db.UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
+	if err != nil {
+		log.Error("Cannot update user.")
+	}
+
+	return true, err
+}
+
+func (user User) UpdatePassword(conn *sql.DB) (bool, error) {
+	columns := []string{"password"}
+	values := []interface{}{user.Password}
+
+	_, err := db.UpdateEntryById(conn, "customer", user.Id, columns, values)
+	if err != nil {
+		log.Error("Cannot update user.")
+	}
+
+	return true, err
 }
