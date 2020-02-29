@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"reflect"
+	"strconv"
 )
 
 type Model interface {
@@ -40,4 +42,19 @@ func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func GetUidFromParam(c *gin.Context) (int) {
+	uidVal := c.Param("uid")
+	if uidVal == "" {
+		log.Error("User id not found")
+		c.Abort()
+	}
+	uid, err := strconv.Atoi(uidVal)
+	if err != nil {
+		log.Error("Cannot retrieve user id")
+		c.Abort()
+	}
+
+	return uid
 }

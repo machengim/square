@@ -7,14 +7,14 @@ import (
 
 // Notice the field Password should never be transfered back.
 type User struct {
-	Id       int
-	Email    string
-	Password string
-	Nickname string
-	Posts    int
-	Marks    int
-	Messages int
-	Comments int
+	Id       int 	`json:"id"`
+	Email    string	`json:"email"`
+	Password string	`json:"password"`
+	Nickname string	`json:"nickname"`
+	Posts    int	`json:"posts"`
+	Marks    int	`json:"marks"`
+	Messages int	`json:"messages"`
+	Comments int	`json:"comments"`
 }
 
 // Create function is used for registeration.
