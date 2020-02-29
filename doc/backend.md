@@ -60,7 +60,7 @@ models/user.go
 
 >Struct: `User`
 >
->Fields: Id, Email, Nickname, Posts, Marks, Messages, Comments.
+>Fields: Id, Password, Email, Nickname, Posts, Marks, Messages, Comments.
 >
 >Description: common use.
 
@@ -71,4 +71,4 @@ models/user.go
 | RetrieveUserByLogin(*sql.DB, int) | (User, error) | Read a user from db by email and password. Revoke QuerySingle() function of db/db.go.|
 | DeleteById(*sql.DB, int) | (bool, error) | Delete a user by id. Revoke DeleteEntryById() function of db/db.go.| 
 | User UpdateById(*sql.DB) | (bool, error) | Update a user by id. Columns id, email and password will not be changed by it. Revoke UpdateEntryById() function in db/db.go.|
-| User ModifyPassword(*sql.DB) | (bool, error) | Update user's password. Nickname may be changed together. Revoke UpdateEntryById() function in db/db.go.|
+| User UpdatePassword(*sql.DB) | (bool, error) | Update user's password. Nickname may be changed together. Revoke UpdateEntryById() function in db/db.go.|
