@@ -1,14 +1,64 @@
-package main
+package lib
 
 import (
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"strconv"
 )
 
-type Model interface {
+type Config struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+	Limit    int    `json:"limit"`
+}
+
+var (
+	Conf Config
+	Conn *sql.DB
+)
+
+const configPath = "assets/config.json"
+
+func InitSystem() {
+	var err error
+	Conf, err = readConfig(configPath)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	Conn, err = OpenDb(Conf)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	log.Info("Database connection opened.")
+}
+
+func readConfig(path string) (Config, error) {
+	var config Config
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Cannot read config file. ", err)
+		return config, err
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println(err)
+		return config, err
+	}
+
+	return config, nil
 }
 
 // op == 0 means getting values, op==1 means getting fields name, op==2 means getting fields address
@@ -35,6 +85,7 @@ func Reflect(model interface{}, op int) []interface{} {
 	return results
 }
 
+// TODO: the functions below need for further considerations.
 func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
 	_, err := DeleteEntryById(conn, id, table)
 	if err != nil {

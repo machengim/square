@@ -1,36 +1,14 @@
-package main
+package lib
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
-
-
-func ReadConfig(path string) (Config, error) {
-	var config Config
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal("Cannot read config file. ", err)
-		return config, err
-	}
-
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		fmt.Println(err)
-		return config, err
-	}
-
-	return config, nil
-}
-
 
 
 func OpenDb(config Config) (*sql.DB, error) {

@@ -17,7 +17,7 @@ GET method
 | /comments | ?pid={post_id} | Retrieve all comments of the post | Yes | multiple comments |
 | /posts/user| /{user_id} | Retrive all posts of the user | Yes | multiple posts|
 | /posts/user| /{user_id}?newcomment=1 | Retrieve posts of the user with unread comments | Yes | multiple posts |
-| /marked/user | /{user_id} | Retrieve posts marked by the user | Yes | multiple posts |
+| /marks/user | /{user_id} | Retrieve posts marked by the user | Yes | multiple posts |
  
 
 POST method

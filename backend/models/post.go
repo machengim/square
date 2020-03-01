@@ -1,8 +1,9 @@
-package main
+package models
 
 import (
 	"database/sql"
 	log "github.com/sirupsen/logrus"
+	"square/lib"
 )
 
 type Post struct {
@@ -19,7 +20,7 @@ type Post struct {
 func (post Post) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"uid", "nickname", "isPrivate", "content"}
 	values := []interface{}{post.Uid, post.Nickname, post.IsPrivate, post.Content}
-	_, err := CreateEntry(conn, "post", columns, values)
+	_, err := lib.CreateEntry(conn, "post", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new post.")
 		return false, err
@@ -51,11 +52,11 @@ func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
 	}
 
 	// All errors has been caught by sub function.
-	posts, err := readPosts(conn, condition, values)
+	posts, err := readPosts(lib.Conn, condition, values)
 	return posts, err
 }
 
-func RetrievePrivatePosts(conn *sql.DB, op int, offset int, limit int, uid int) ([]Post, error) {
+func RetrievePrivatePosts( op int, offset int, limit int, uid int) ([]Post, error) {
 	var (
 		condition string
 		values    []interface{}
@@ -77,13 +78,13 @@ func RetrievePrivatePosts(conn *sql.DB, op int, offset int, limit int, uid int) 
 	}
 
 	// All errors has been caught by sub function.
-	posts, err := readPosts(conn, condition, values)
+	posts, err := readPosts(lib.Conn, condition, values)
 	return posts, err
 }
 
 func readPosts(conn *sql.DB, condition string, values []interface{}) ([]Post, error) {
 	var posts []Post
-	rows, err := QueryMultiple(conn, "post", condition, values)
+	rows, err := lib.QueryMultiple(conn, "post", condition, values)
 	if err != nil {
 		log.Error("Cannot retrieve posts.")
 		return posts, err
@@ -106,11 +107,11 @@ func readPosts(conn *sql.DB, condition string, values []interface{}) ([]Post, er
 }
 
 // Used to increment comments number by 1 when user sends a comment to this post.
-func (post Post) IncrementCommentsById(conn *sql.DB) (bool, error) {
+func (post Post) IncrementCommentsById() (bool, error) {
 	columns := []string{"comments"}
 	values := []interface{}{post.Comments + 1}
 
-	_, err := UpdateEntryById(conn, "post", post.Id, columns, values)
+	_, err := lib.UpdateEntryById(lib.Conn, "post", post.Id, columns, values)
 	if err != nil {
 		log.Error("Cannot update post.")
 	}

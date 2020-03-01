@@ -1,8 +1,9 @@
-package main
+package models
 
 import (
 	"database/sql"
 	log "github.com/sirupsen/logrus"
+	"square/lib"
 )
 
 // Notice the field Password should never be transfered back.
@@ -21,7 +22,7 @@ type User struct {
 func (user User) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"email", "password", "nickname"}
 	values := []interface{}{&user.Email, &user.Password, &user.Nickname}
-	_, err := CreateEntry(conn, "customer", columns, values)
+	_, err := lib.CreateEntry(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new user.")
 		return false, err
@@ -56,7 +57,7 @@ func RetrieveUserByLogin(conn *sql.DB, email string, password string) (User, err
 func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
 	var u User
 
-	row, err := QuerySingle(conn, "customer", columns, values)
+	row, err := lib.QuerySingle(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when reading user.")
 		return u, err
@@ -73,9 +74,9 @@ func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User,
 // Notice this method cannot change id, email and password.
 func (user User) UpdateById(conn *sql.DB) (bool, error) {
 	columns := []string{"nickname", "posts", "marks", "messages", "comments"}
-	values := Reflect(user, 0)
+	values := lib.Reflect(user, 0)
 
-	_, err := UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
+	_, err := lib.UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
 	if err != nil {
 		log.Error("Cannot update user.")
 	}
@@ -87,7 +88,7 @@ func (user User) UpdatePassword(conn *sql.DB) (bool, error) {
 	columns := []string{"password"}
 	values := []interface{}{user.Password}
 
-	_, err := UpdateEntryById(conn, "customer", user.Id, columns, values)
+	_, err := lib.UpdateEntryById(conn, "customer", user.Id, columns, values)
 	if err != nil {
 		log.Error("Cannot update user.")
 	}

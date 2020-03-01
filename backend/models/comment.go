@@ -1,8 +1,9 @@
-package main
+package models
 
 import (
 	"database/sql"
 	log "github.com/sirupsen/logrus"
+	"square/lib"
 )
 
 type Comment struct {
@@ -17,7 +18,7 @@ type Comment struct {
 func (c Comment) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"uid", "pid", "ts", "nickname", "content"}
 	values := []interface{} {c.Uid, c.Pid, c.Ts, c.Nickname, c.Content}
-	_, err := CreateEntry(conn, "comment", columns, values)
+	_, err := lib.CreateEntry(conn, "comment", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new comment.")
 		return false, err
@@ -31,13 +32,13 @@ func RetrieveCommentsByPid(pid int) ([]Comment, error) {
 
 	values := []interface{} {pid}
 
-	comments, err := readComments(conn, condition, values)
+	comments, err := readComments(lib.Conn, condition, values)
 	return comments, err
 }
 
 func readComments(conn *sql.DB, condition string, values []interface{}) ([]Comment, error) {
 	var comments []Comment
-	rows, err := QueryMultiple(conn, "comment", condition, values)
+	rows, err := lib.QueryMultiple(conn, "comment", condition, values)
 	if err != nil {
 		log.Error("Cannot retrieve comment.")
 		return comments, err

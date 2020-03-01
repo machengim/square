@@ -1,27 +1,32 @@
-package main
+package apis
 
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"square/lib"
+	"square/models"
 	"strconv"
 )
 
 type PostList struct {
-	Min		int 	`json:"min"`
-	Max		int 	`json:"max"`
-	HasMore	bool	`json:"hasMore"`
-	HasNew	bool	`json:"hasNew"`
-	Posts	[]Post	`json:"posts"`
+	Min		int         `json:"min"`
+	Max		int         `json:"max"`
+	HasMore	bool        `json:"hasMore"`
+	HasNew	bool         `json:"hasNew"`
+	Posts	[]models.Post `json:"posts"`
 }
 
 // Handle /posts, /posts?min={pid}, /posts?max={pid}
 func GetPublicPosts(c *gin.Context) {
 	op, offset := getOpAndOffset(c)
-	posts, _ := RetrievePublicPosts(op, offset, conf.Limit)
-	list := PostList {posts[len(posts) - 1].Id, posts[0].Id,
-		true, false, posts}
+	posts, _ := models.RetrievePublicPosts(op, offset, lib.Conf.Limit)
+	list := PostList {0, 0, true, false, posts}
+	if len(list.Posts) > 0 {
+		list.Min = posts[len(posts) - 1].Id
+		list.Max = posts[0].Id
+	}
 	// This method to check hasMore is really primitive. Need refinement later.
-	if len(posts) < conf.Limit {
+	if len(posts) < lib.Conf.Limit {
 		list.HasMore = false
 	}
 
@@ -30,9 +35,9 @@ func GetPublicPosts(c *gin.Context) {
 
 // Handle /posts/user/:uid, or with ?min/max option.
 func GetPrivatePosts(c *gin.Context)  {
-	uid := GetUidFromParam(c)
+	uid := lib.GetUidFromParam(c)
 	op, offset := getOpAndOffset(c)
-	posts, err := RetrievePrivatePosts(conn, op, offset, conf.Limit, uid)
+	posts, err := models.RetrievePrivatePosts(op, offset, lib.Conf.Limit, uid)
 	if err != nil {
 		c.Abort()
 	}
@@ -53,7 +58,7 @@ func GetPrivatePosts(c *gin.Context)  {
 }
 
 func PostPosts(c *gin.Context) {
-	var p Post
+	var p models.Post
 	c.BindJSON(&p)
 	if p.Uid <= 0 {
 		log.Error("Cannot get user id of post.")
@@ -68,7 +73,7 @@ func PostPosts(c *gin.Context) {
 	if p.Nickname == "" {
 		p.Nickname = "Anonymous"
 	}
-	p.Create(conn)
+	p.Create(lib.Conn)
 }
 
 func getOpAndOffset(c *gin.Context) (op int, offset int) {

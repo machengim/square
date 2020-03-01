@@ -1,8 +1,10 @@
-package main
+package apis
 
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"square/lib"
+	"square/models"
 	"strconv"
 )
 
@@ -20,10 +22,29 @@ func GetComments(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	comments, err := RetrieveCommentsByPid(pid)
+	comments, err := models.RetrieveCommentsByPid(pid)
 	if err != nil {
 		c.Abort()
 		return
 	}
 	c.JSON(200, comments)
+}
+
+func PostComments(c *gin.Context) {
+	var cmt models.Comment
+	c.BindJSON(&c)
+	if cmt.Uid <= 0 {
+		log.Error("Cannot get user id of comment.")
+		c.Abort()
+		return
+	}
+	if cmt.Content == "" {
+		log.Error("No content in the post.")
+		c.Abort()
+		return
+	}
+	if cmt.Nickname == "" {
+		cmt.Nickname = "Anonymous"
+	}
+	cmt.Create(lib.Conn)
 }
