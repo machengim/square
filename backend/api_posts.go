@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type PostList struct {
@@ -36,11 +37,16 @@ func GetPrivatePosts(c *gin.Context)  {
 		c.Abort()
 	}
 	list := PostList{
-		Min:     posts[len(posts) - 1].Id,
-		Max:     posts[0].Id,
+		Min:     0,
+		Max:     0,
 		HasMore: true,
 		HasNew:  false,
 		Posts:   posts,
+	}
+
+	if len(posts) > 0 {
+		list.Min = posts[len(posts) - 1].Id
+		list.Max = posts[0].Id
 	}
 
 	c.JSON(200, list)
@@ -52,10 +58,12 @@ func PostPosts(c *gin.Context) {
 	if p.Uid <= 0 {
 		log.Error("Cannot get user id of post.")
 		c.Abort()
+		return
 	}
 	if p.Content == "" {
 		log.Error("No content in the post.")
 		c.Abort()
+		return
 	}
 	if p.Nickname == "" {
 		p.Nickname = "Anonymous"
@@ -63,18 +71,22 @@ func PostPosts(c *gin.Context) {
 	p.Create(conn)
 }
 
-func getOpAndOffset(c *gin.Context) (int, int) {
-	op, offset := 0, 0
-	result, exist := c.Get("min")
-	if exist {
+func getOpAndOffset(c *gin.Context) (op int, offset int) {
+	op, offset = 0, 0
+	result := c.Query("min")
+	if result != "" {
 		op = -1
-		offset = result.(int)
-	} else if result, exist = c.Get("max"); exist {
+		offset, _ = strconv.Atoi(result)
+	} else if result = c.Query("max"); result != "" {
 		op = 1
-		offset = result.(int)
+		offset, _ = strconv.Atoi(result)
+	}
+	if offset < 0 {
+		offset = 0
 	}
 
-	return op, offset
+	log.Debug("option is ", op, " and offset is ", offset)
+	return
 }
 
 // TODO: need another function to retrieve unread comments in here and post.go

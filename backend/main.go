@@ -51,6 +51,7 @@ func main() {
 	app.GET("/posts", GetPublicPosts)
 	app.GET("/posts/user/:uid", GetPrivatePosts)
 	app.GET("/user/:uid", GetUserSummary)
+	app.GET("/comments", GetComments)
 	app.POST("/posts", PostPosts)
 	app.Run(":8080")
 }
