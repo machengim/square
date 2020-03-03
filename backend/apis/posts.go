@@ -9,20 +9,20 @@ import (
 )
 
 type PostList struct {
-	Min		int         `json:"min"`
-	Max		int         `json:"max"`
-	HasMore	bool        `json:"hasMore"`
-	HasNew	bool         `json:"hasNew"`
-	Posts	[]models.Post `json:"posts"`
+	Min     int           `json:"min"`
+	Max     int           `json:"max"`
+	HasMore bool          `json:"hasMore"`
+	HasNew  bool          `json:"hasNew"`
+	Posts   []models.Post `json:"posts"`
 }
 
 // Handle /posts, /posts?min={pid}, /posts?max={pid}
 func GetPublicPosts(c *gin.Context) {
 	op, offset := getOpAndOffset(c)
 	posts, _ := models.RetrievePublicPosts(op, offset, lib.Conf.Limit)
-	list := PostList {0, 0, true, false, posts}
+	list := PostList{0, 0, true, false, posts}
 	if len(list.Posts) > 0 {
-		list.Min = posts[len(posts) - 1].Id
+		list.Min = posts[len(posts)-1].Id
 		list.Max = posts[0].Id
 	}
 	// This method to check hasMore is really primitive. Need refinement later.
@@ -34,7 +34,7 @@ func GetPublicPosts(c *gin.Context) {
 }
 
 // Handle /posts/user/:uid, or with ?min/max option.
-func GetPrivatePosts(c *gin.Context)  {
+func GetPrivatePosts(c *gin.Context) {
 	uid := lib.GetUidFromParam(c)
 	op, offset := getOpAndOffset(c)
 	posts, err := models.RetrievePrivatePosts(op, offset, lib.Conf.Limit, uid)
@@ -50,7 +50,7 @@ func GetPrivatePosts(c *gin.Context)  {
 	}
 
 	if len(posts) > 0 {
-		list.Min = posts[len(posts) - 1].Id
+		list.Min = posts[len(posts)-1].Id
 		list.Max = posts[0].Id
 	}
 
@@ -58,22 +58,24 @@ func GetPrivatePosts(c *gin.Context)  {
 }
 
 func PostPosts(c *gin.Context) {
-	var p models.Post
-	c.BindJSON(&p)
-	if p.Uid <= 0 {
+	var d models.Draft
+	c.BindJSON(&d)
+	if d.Uid <= 0 {
 		log.Error("Cannot get user id of post.")
 		c.Abort()
 		return
 	}
-	if p.Content == "" {
+	if d.Content == "" {
 		log.Error("No content in the post.")
 		c.Abort()
 		return
 	}
-	if p.Nickname == "" {
-		p.Nickname = "Anonymous"
+	if d.Nickname == "" {
+		d.Nickname = "Anonymous"
 	}
-	p.Create(lib.Conn)
+
+	post := d.GeneratePost()
+	post.Create(lib.Conn)
 }
 
 func getOpAndOffset(c *gin.Context) (op int, offset int) {

@@ -1,0 +1,13 @@
+content {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+#wrapper {
+    position: relative;
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    min-height: calc(88vh - 40px);
+}

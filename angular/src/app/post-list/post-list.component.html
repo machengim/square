@@ -1,0 +1,21 @@
+<div id="post_list">
+    <button *ngIf="hasNew" id="btn_loadnew">Load 3 new posts</button>
+
+    <div class="post" *ngFor="let post of posts">
+        <div class="author">{{post.nickname}} said:</div>
+        <div class="content">{{post.content}}</div>
+        <div class="foot">
+            <span>{{post.ts}}</span>
+            <span class="toolbar"><a>Comments({{post.comments}})</a>&nbsp;<a>Mark</a></span>
+        </div>
+        <div class="comment">
+            <p>Nice to meet you too! --by Charlie</p>
+            <p>Thanks, Charlie. --by Bob</p>
+            <textarea name="comment"></textarea>
+            <button>Send</button>
+        </div>
+        <hr>
+    </div>
+
+    <button *ngIf="hasMore" id="btn_loadmore" (click)="loadMore()" >Load More</button>
+</div>

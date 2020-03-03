@@ -28,6 +28,8 @@ header{
     background-color: #1e3f35;
 }
 
+/* ========================================================================= */
+
 nav{
     position: relative; 
     /* Important for serach bar, since absolute layout cannot have a static paretent */
@@ -82,6 +84,7 @@ nav{
     background-color: #f5f1e3;
 }
 
+/* ========================================================================= */
 content {
     position: relative;
     overflow: hidden;
@@ -95,6 +98,8 @@ content {
     margin: 0 auto;
     min-height: calc(88vh - 40px);
 }
+
+/* ========================================================================= */
 
 article {
     width: 650px;
@@ -126,7 +131,7 @@ aside {
 
 #draft_area button {
     height: 25px;
-    padding: 0 10px;
+    padding: 0 20px;
     background-color: dimgray;
     color: white;
     border-radius: 5px;

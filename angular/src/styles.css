@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+body{
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: rgb(24, 105, 59);
+}
+
+a:hover {
+    color: rgb(26, 221, 26);
+    text-decoration: underline;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: lightgray;
+}

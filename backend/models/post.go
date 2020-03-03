@@ -6,6 +6,14 @@ import (
 	"square/lib"
 )
 
+type Draft struct {
+	Uid         int    `json:"uid"`
+	Nickname    string `json:"nickname"`
+	Content     string `json:"content"`
+	IsAnonymous bool   `json:"isAnonymous"`
+	IsPrivate   bool   `json:"isPrivate"`
+}
+
 type Post struct {
 	Id             int    `json:"id"`
 	Ts             string `json:"ts"`
@@ -15,6 +23,15 @@ type Post struct {
 	Comments       int    `json:"comments"`
 	Content        string `json:"content"`
 	HasNewComments bool   `json:"hasNewComments"`
+}
+
+func (draft Draft) GeneratePost() Post {
+	var post Post
+	post.Uid = draft.Uid
+	post.Nickname = draft.Nickname
+	post.Content = draft.Content
+	post.IsPrivate = draft.IsPrivate
+	return post
 }
 
 func (post Post) Create(conn *sql.DB) (bool, error) {
@@ -56,7 +73,7 @@ func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
 	return posts, err
 }
 
-func RetrievePrivatePosts( op int, offset int, limit int, uid int) ([]Post, error) {
+func RetrievePrivatePosts(op int, offset int, limit int, uid int) ([]Post, error) {
 	var (
 		condition string
 		values    []interface{}

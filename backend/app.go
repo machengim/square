@@ -7,6 +7,7 @@ import (
 	"square/lib"
 	"syscall"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -21,6 +22,12 @@ func main() {
 	shutdownHandler()
 
 	app := gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:4200"}
+	// Cooperate with axios withCredentials to transfer cookie in cors mode.
+	corsConfig.AllowCredentials = true
+	app.Use(cors.New(corsConfig))
+
 	app.GET("/posts", apis.GetPublicPosts)
 	app.GET("/posts/user/:uid", apis.GetPrivatePosts)
 	app.GET("/user/:uid", apis.GetUserSummary)

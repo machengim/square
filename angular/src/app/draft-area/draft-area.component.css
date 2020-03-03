@@ -1,0 +1,43 @@
+#draft_area {
+    position: relative;
+    margin-bottom: 30px;
+    font-size: 16px;
+    font-family: sans-serif;
+}
+
+#draft_area textarea {
+    border: 1px solid #b9b6b6;
+    margin: 5px auto;
+    padding: 5px;
+    width: 95%;
+    height: 20px;
+    font-size: 14px;
+}
+
+#draft_area textarea.selected {
+    height: 80px;
+}
+
+#draft_area button {
+    height: 25px;
+    padding: 0 10px;
+    background-color: dimgray;
+    color: white;
+    border-radius: 5px;
+}
+
+#draft_area button:hover{
+    background-color: black;
+}
+
+#draft_toolbar {
+    position: absolute;
+    right: 5%;
+    display: inline;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+#draft_toolbar input, label {
+    margin-right: 10px;
+}
