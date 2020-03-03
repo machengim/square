@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Draft } from '../models'; 
+import { Component, OnInit, Output } from '@angular/core';
+import { Draft, Post } from '../models'; 
 import { SquareService } from '../square.service';
 
 @Component({
@@ -10,8 +10,8 @@ import { SquareService } from '../square.service';
 export class DraftAreaComponent implements OnInit {
 
   selected = false;
-
   draft: Draft;
+  post: Post;   // Used to generate a temporaral post from the draft.
 
   constructor(private squareService: SquareService) { }
 
@@ -21,11 +21,24 @@ export class DraftAreaComponent implements OnInit {
 
   initDraft(): void {
     this.draft = {
-      uid: -1,
-      nickname: "",
+      uid: 1,   // This field should be set to the user's id later.
+      nickname: "", // Should be set to user's nickname later.
       content: "",
       isAnonymous: false,
       isPrivate: false,
+    }
+  }
+
+  generatePost(): void {
+    this.post = {
+      id: -1,
+      ts: "",
+      uid: this.draft.uid,
+      nickname: this.draft.nickname,
+      isPrivate: this.draft.isPrivate,
+      comments: 0,
+      content: this.draft.content,
+      hasNewComments: false
     }
   }
 
@@ -34,9 +47,9 @@ export class DraftAreaComponent implements OnInit {
   }
 
   submitDraft(): void {
-    console.log(this.draft);
-    this.squareService.postDraft(this.draft);
-    this.initDraft();
-    this.selected = false;
+    this.generatePost();
+    this.squareService.postDraft(this.post)
+        .subscribe(data => { this.selected = false; this.initDraft(); });
   }
+
 }

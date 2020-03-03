@@ -49,4 +49,9 @@ export class PostListComponent implements OnInit {
     this.squareService.getPostsWithOffset("min", this.min)
         .subscribe(data => this.handlePostsResponse(data));
   }
+
+  loadNew(): void {
+    this.squareService.getPostsWithOffset("max", this.max)
+        .subscribe(data => this.handlePostsResponse(data));
+  }
 }

@@ -1,0 +1,7 @@
+<div class="author">{{post.nickname}} said:</div>
+<div class="content">{{post.content}}</div>
+<div class="foot">
+    <span>{{post.ts}}</span>
+    <span class="toolbar"><a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;<a>Mark</a></span>
+</div>
+<app-comment #child [post]="post"></app-comment>

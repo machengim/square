@@ -1,0 +1,32 @@
+.comment p{
+    text-indent: 20px;
+    color: rgb(53, 52, 52);
+    font-size: 14px;
+    margin: 5px auto;
+}
+
+/* Used for the comment textarea beneath every post */
+.comment textarea {
+    border: 1px solid #b9b6b6;
+    margin-left: 20px;  /* Should be comply with the text-indent of .comment style */
+    padding: 5px;
+    width: 80%;
+    height: 15px;
+    font-size: 13px;
+}
+
+/* Used to send the comment for the post */
+.comment button {
+    position:  absolute;
+    right: 10px;
+    bottom: 10px;
+    height: 25px;
+    padding: 0 10px;
+    background-color: dimgray;
+    color: white;
+    border-radius: 5px;
+}
+
+.comment button:hover{
+    background-color: black;
+}

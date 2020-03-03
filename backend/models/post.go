@@ -2,17 +2,10 @@ package models
 
 import (
 	"database/sql"
-	log "github.com/sirupsen/logrus"
 	"square/lib"
-)
 
-type Draft struct {
-	Uid         int    `json:"uid"`
-	Nickname    string `json:"nickname"`
-	Content     string `json:"content"`
-	IsAnonymous bool   `json:"isAnonymous"`
-	IsPrivate   bool   `json:"isPrivate"`
-}
+	log "github.com/sirupsen/logrus"
+)
 
 type Post struct {
 	Id             int    `json:"id"`
@@ -23,15 +16,6 @@ type Post struct {
 	Comments       int    `json:"comments"`
 	Content        string `json:"content"`
 	HasNewComments bool   `json:"hasNewComments"`
-}
-
-func (draft Draft) GeneratePost() Post {
-	var post Post
-	post.Uid = draft.Uid
-	post.Nickname = draft.Nickname
-	post.Content = draft.Content
-	post.IsPrivate = draft.IsPrivate
-	return post
 }
 
 func (post Post) Create(conn *sql.DB) (bool, error) {
@@ -116,7 +100,7 @@ func readPosts(conn *sql.DB, condition string, values []interface{}) ([]Post, er
 			log.Error("Error when reading post results: ", err)
 			return posts, err
 		}
-		// TODO: process the timestamp of the post.
+		p.Ts = lib.TimeFromNow(p.Ts)
 		posts = append(posts, p)
 	}
 
@@ -133,4 +117,17 @@ func (post Post) IncrementCommentsById() (bool, error) {
 		log.Error("Cannot update post.")
 	}
 	return true, err
+}
+
+func GetPostById(pid int) (Post, error) {
+	columns := []string{"id"}
+	values := []interface{}{pid}
+	row, err := lib.QuerySingle(lib.Conn, "post", columns, values)
+	var p Post
+	if err != nil {
+		return p, err
+	}
+	err = row.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
+		&p.Content, &p.HasNewComments)
+	return p, err
 }

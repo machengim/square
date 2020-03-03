@@ -4,12 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"reflect"
+	"regexp"
 	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -95,7 +98,7 @@ func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
 	return true, nil
 }
 
-func GetUidFromParam(c *gin.Context) (int) {
+func GetUidFromParam(c *gin.Context) int {
 	uidVal := c.Param("uid")
 	if uidVal == "" {
 		log.Error("User id not found")
@@ -108,4 +111,55 @@ func GetUidFromParam(c *gin.Context) (int) {
 	}
 
 	return uid
+}
+
+// Convert a time string to an array of int.
+// User regex to split the timestamp from postgres.
+// s[] : 0 year, 1 month, 2 day, 3 hour, 4 min, 5 sec, 6 millsec.
+func timeSplit(ts string) [6]int16 {
+	s := regexp.MustCompile("[-:T. ]").Split(ts, 7)
+	var splitTime [6]int16
+	for i := 0; i < 6; i++ {
+		fig, err := strconv.ParseInt(s[i], 10, 16) // this method always return int64
+		if err != nil {
+			log.Error(err)
+		}
+		if fig < 0 || fig > 2020 {
+			log.Error("Invalid date input")
+		}
+		splitTime[i] = int16(fig)
+	}
+
+	return splitTime
+}
+
+// Calculate the time diffence between post time and current time
+func TimeFromNow(ts string) string {
+	current := time.Now().UTC().String()
+	ct := timeSplit(current) // Current time
+	pt := timeSplit(ts)      // Post time
+
+	mins := []int32{525600, 43800, 1440, 60, 1}
+	units := []string{"year", "month", "day", "hour", "min"}
+	var gap int32 = 0
+	i := 0
+	for ; i < 5; i++ {
+		gap += int32(ct[i]-pt[i]) * mins[i]
+	}
+
+	if gap < 1 {
+		return "just now"
+	}
+
+	for i = 0; i < 5; i++ {
+		if gap/mins[i] > 0 {
+			break
+		}
+	}
+
+	if gap/mins[i] > 1 {
+		return fmt.Sprint(gap/mins[i]) + " " + units[i] + "s ago"
+	} else {
+		return fmt.Sprint(gap/mins[i]) + " " + units[i] + " ago"
+	}
 }

@@ -9,6 +9,15 @@ export interface Post {
     hasNewComments: boolean
 }
 
+export interface Comment {
+    id: number,
+	ts: string,
+	uid: number,
+	nickname: string,
+	pid: number,
+	content: string,
+}
+
 export interface Draft {
     uid: number,
     nickname: string,

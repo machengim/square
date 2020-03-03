@@ -1,11 +1,12 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"square/lib"
 	"square/models"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type PostList struct {
@@ -58,24 +59,25 @@ func GetPrivatePosts(c *gin.Context) {
 }
 
 func PostPosts(c *gin.Context) {
-	var d models.Draft
-	c.BindJSON(&d)
-	if d.Uid <= 0 {
+	log.Debug("Start reading draft")
+	var p models.Post
+	c.BindJSON(&p)
+	log.Debug(p)
+	if p.Uid <= 0 {
 		log.Error("Cannot get user id of post.")
 		c.Abort()
 		return
 	}
-	if d.Content == "" {
+	if p.Content == "" {
 		log.Error("No content in the post.")
 		c.Abort()
 		return
 	}
-	if d.Nickname == "" {
-		d.Nickname = "Anonymous"
+	if p.Nickname == "" {
+		p.Nickname = "Anonymous"
 	}
 
-	post := d.GeneratePost()
-	post.Create(lib.Conn)
+	p.Create(lib.Conn)
 }
 
 func getOpAndOffset(c *gin.Context) (op int, offset int) {

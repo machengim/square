@@ -10,6 +10,8 @@ import { FooterComponent } from './footer/footer.component';
 import { DraftAreaComponent } from './draft-area/draft-area.component';
 import { PostListComponent } from './post-list/post-list.component';
 import { FormsModule } from '@angular/forms';
+import { CommentComponent } from './comment/comment.component';
+import { PostComponent } from './post/post.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +23,8 @@ import { FormsModule } from '@angular/forms';
     FooterComponent,
     DraftAreaComponent,
     PostListComponent,
+    CommentComponent,
+    PostComponent,
   ],
   imports: [
     BrowserModule,

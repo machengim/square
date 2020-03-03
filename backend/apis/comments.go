@@ -1,11 +1,12 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"square/lib"
 	"square/models"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func GetComments(c *gin.Context) {
@@ -32,7 +33,7 @@ func GetComments(c *gin.Context) {
 
 func PostComments(c *gin.Context) {
 	var cmt models.Comment
-	c.BindJSON(&c)
+	c.BindJSON(&cmt)
 	if cmt.Uid <= 0 {
 		log.Error("Cannot get user id of comment.")
 		c.Abort()
@@ -47,4 +48,12 @@ func PostComments(c *gin.Context) {
 		cmt.Nickname = "Anonymous"
 	}
 	cmt.Create(lib.Conn)
+	post, err := models.GetPostById(cmt.Pid)
+	if err != nil {
+		log.Debug(err)
+		c.Abort()
+		return
+	}
+	post.IncrementCommentsById()
+	c.JSON(200, "Comment successfully")
 }
