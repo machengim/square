@@ -23,7 +23,7 @@ func main() {
 
 	app := gin.Default()
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:4200"}
+	corsConfig.AllowOrigins = []string{"http://localhost:4200", "http://localhost"}
 	// Cooperate with axios withCredentials to transfer cookie in cors mode.
 	corsConfig.AllowCredentials = true
 	app.Use(cors.New(corsConfig))
@@ -32,8 +32,10 @@ func main() {
 	app.GET("/posts/user/:uid", apis.GetPrivatePosts)
 	app.GET("/user/:uid", apis.GetUserSummary)
 	app.GET("/comments", apis.GetComments)
+	app.POST("/login", apis.Login)
 	app.POST("/posts", apis.PostPosts)
 	app.POST("/comments", apis.PostComments)
+	app.POST("/register", apis.Register)
 	app.Run(":8080")
 }
 

@@ -15,10 +15,14 @@ export class PostListComponent implements OnInit {
   hasNew = false;
   hasMore = false;
 
+
   constructor(private squareService: SquareService) { }
 
+  // Cookie setting is temporarily put here. 
+  // It should be removed after the implementation of user authentication.
   ngOnInit(): void {
     this.getPostList();
+    this.squareService.setCookie(1, "Walt White");
   }
 
   getPostList(): void {

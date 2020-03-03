@@ -4,6 +4,8 @@
         <meta charset="utf-8">
         <title>Square</title>
         <link rel="stylesheet" href="index.css">
+        <script src="./axios.min.js"></script>
+        <script src="./index.js"></script>
     </head>
     <body>
         <form id="login" class="box" method="POST" onsubmit="return login()">
@@ -11,7 +13,7 @@
             <input type="email" name="email" placeholder="Email" autocomplete="off" required>
             <input type="password" name="passwd" placeholder="Password" required>
             <div class="btns">
-                    <button class="btn1">Login</button>
+                    <button type="submit" class="btn1">Login</button>
                     <button class="btn2" onclick="window.open('register.html', '_self')">Register</button>
             </div>
             <div class="other"><a href="#">Anonymous login</a></div>

@@ -23,17 +23,23 @@ export class AsideComponent implements OnInit {
   constructor(private squareService: SquareService) { }
 
   ngOnInit(): void {
+    this.readInfoFromCookie();
     this.getUserInfo();
   }
 
   getUserInfo(): void {
-    this.squareService.getUserInfo(1)
+    if (this.user.id <= 0) return;
+    this.squareService.getUserInfo(this.user.id)
         .subscribe(data => this.handleUserInfo(data));
   }
 
   handleUserInfo(data: User): void {
     this.user = data;
     console.log(data);
+  }
+
+  readInfoFromCookie(): void {
+    [this.user.id, this.user.nickname] = this.squareService.getUserInfoFromCookie();
   }
 
 }

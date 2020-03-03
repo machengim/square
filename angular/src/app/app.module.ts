@@ -12,6 +12,7 @@ import { PostListComponent } from './post-list/post-list.component';
 import { FormsModule } from '@angular/forms';
 import { CommentComponent } from './comment/comment.component';
 import { PostComponent } from './post/post.component';
+import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
   declarations: [
@@ -29,9 +30,9 @@ import { PostComponent } from './post/post.component';
   imports: [
     BrowserModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
   ],
-  providers: [],
+  providers: [CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

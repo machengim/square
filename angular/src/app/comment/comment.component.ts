@@ -24,7 +24,7 @@ export class CommentComponent implements OnInit {
     this.comment = {
       id: -1,
       ts: "",
-      uid: 1,
+      uid: -1,
       nickname: "",
       pid: this.post.id,
       content: "",
@@ -37,7 +37,11 @@ export class CommentComponent implements OnInit {
   }
 
   submitComment(): void {
-    console.log(this.comment)
+    let [uid, nickname] = this.squareService.getUserInfoFromCookie();
+    if (nickname == "") nickname = "Anonymous";
+    this.comment.uid = uid;
+    this.comment.nickname = nickname;
+    
     this.squareService.postComment(this.comment)
         .subscribe(data => this.initComment());
   }

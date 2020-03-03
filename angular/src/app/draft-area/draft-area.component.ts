@@ -1,4 +1,4 @@
-import { Component, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Draft, Post } from '../models'; 
 import { SquareService } from '../square.service';
 
@@ -21,7 +21,7 @@ export class DraftAreaComponent implements OnInit {
 
   initDraft(): void {
     this.draft = {
-      uid: 1,   // This field should be set to the user's id later.
+      uid: -1,   // This field should be set to the user's id later.
       nickname: "", // Should be set to user's nickname later.
       content: "",
       isAnonymous: false,
@@ -30,11 +30,14 @@ export class DraftAreaComponent implements OnInit {
   }
 
   generatePost(): void {
+    let [uid, nickname] = this.squareService.getUserInfoFromCookie();
+    if (this.draft.isAnonymous || nickname == "") nickname = "Anonymous";
+
     this.post = {
       id: -1,
       ts: "",
-      uid: this.draft.uid,
-      nickname: this.draft.nickname,
+      uid: uid,
+      nickname: nickname,
       isPrivate: this.draft.isPrivate,
       comments: 0,
       content: this.draft.content,

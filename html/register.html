@@ -4,16 +4,17 @@
         <meta charset="utf-8">
         <title>Square</title>
         <link rel="stylesheet" href="index.css">
+        <script src="./axios.min.js"></script>
     </head>
     <body>
-        <form id="register" class="box" method="POST">
+        <form id="register" class="box" method="POST" onsubmit="return register()">
             <h1>Register</h1>
             <input type="email" name="email" placeholder="Email" autocomplete="off" required>
             <input type="password" name="password" placeholder="Password" required>
             <input type="password" name="repeat_passwd" placeholder="Repeat password" required>
             <input type="text" name="nickname" autocomplete="off" placeholder="Nickname (optional)">
             <div class="btns">
-                    <button>Submit</button>
+                    <button type="submit">Submit</button>
                     <button onclick="window.open('login.html', '_self')">Back</button>
             </div>
         </form>
