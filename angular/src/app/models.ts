@@ -34,6 +34,11 @@ export interface PostList {
     posts: Post[]
 }
 
+export interface PagedList {
+    total: number,
+    posts: Post[]
+}
+
 export interface User {
     id: number;
     email: string;

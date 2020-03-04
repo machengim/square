@@ -13,6 +13,9 @@ import { FormsModule } from '@angular/forms';
 import { CommentComponent } from './comment/comment.component';
 import { PostComponent } from './post/post.component';
 import { CookieService } from 'ngx-cookie-service';
+import { AppRoutingModule } from './app-routing.module';
+import { SettingPageComponent } from './setting-page/setting-page.component';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
   declarations: [
@@ -26,11 +29,14 @@ import { CookieService } from 'ngx-cookie-service';
     PostListComponent,
     CommentComponent,
     PostComponent,
+    SettingPageComponent,
+    UserComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FormsModule,
+    AppRoutingModule,
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]

@@ -1,0 +1,52 @@
+content {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+/* Use margin auto to put element in center horizontally, 
+   Use flex to make two grid equal height vertically. */
+article {
+    position: relative;
+    display: flex;
+    width: 700px;
+    margin: 0 auto;
+    min-height: calc(85vh - 40px);
+}
+
+article #title {
+    text-align: center;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 30px;
+}
+
+#setting {
+    width: 400px;
+    margin-left: 100px;
+}
+
+#setting label {
+    margin: 5px auto;
+}
+
+#setting input {
+    width: 100%;
+    margin: 5px auto 15px auto;
+    height: 25px;
+    color: sienna;
+}
+
+#setting button {
+    height: 30px;
+    background-color: rgb(235, 229, 229);
+    border-radius: 6px;
+}
+
+#setting button:hover{
+    background-color: white;
+}
+
+#setting #btn_reset {
+    float: right;
+}

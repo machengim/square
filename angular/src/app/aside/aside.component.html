@@ -7,7 +7,7 @@
         <button *ngIf="changing"(click)="clickSubmit()">Submit</button>
         <hr>
         <ul>
-            <li>Posts: <a>{{user.posts}}</a></li>
+            <li>Posts: <a [routerLink]="['/user', 'posts']">{{user.posts}}</a></li>
             <li>Marked: <a>{{user.marks}}</a></li>
             <li>Comments: <a>{{user.comments}}</a></li>
         </ul>

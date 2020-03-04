@@ -29,8 +29,9 @@ export class PostListComponent implements OnInit {
   }
 
   handlePostsResponse(data: PostList, op: number) : void {
-    if (data.posts == null) return;
-
+    if (data.posts == null) {
+      this.hasMore = false; return;
+    }
     if (this.posts == null) {
       this.posts = data.posts;
     } else if (op == -1) {
@@ -46,8 +47,12 @@ export class PostListComponent implements OnInit {
     if (this.max < 0 || this.max < data.max) {
       this.max = data.max;
     }
-    this.hasNew = data.hasNew;
-    this.hasMore = data.hasMore;
+
+    if (op == 1) {
+      this.hasNew = false;
+    } else {
+      this.hasMore = data.hasMore;
+    }
   }
 
   loadMore(): void {

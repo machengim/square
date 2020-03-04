@@ -1,0 +1,51 @@
+content {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+#wrapper {
+    position: relative;
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    min-height: calc(85vh - 40px);
+}
+
+article {
+    width: 650px;
+    margin: 0 20px;
+    float: left;
+}
+
+article #title {
+    text-align: center;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 30px;
+}
+
+.post{
+    position: relative;
+    margin-bottom: 20px;
+}
+
+
+#pagination {
+    margin: 0 auto;
+    width: 800;
+    padding-right: 100px;
+    height: 20px;
+    font-size: 16px;
+    text-align: center;
+}
+
+#pagination .item {
+    margin-left: 20px;
+    display: inline;
+}
+
+#pagination .nonlink {
+    color: rgb(185, 116, 67);
+    display: inline;
+}

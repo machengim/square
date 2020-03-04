@@ -53,39 +53,36 @@ func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
 	}
 
 	// All errors has been caught by sub function.
-	posts, err := readPosts(lib.Conn, condition, values)
+	posts, err := readPosts(condition, values)
 	return posts, err
 }
 
-func RetrievePrivatePosts(op int, offset int, limit int, uid int) ([]Post, error) {
+func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
 	var (
 		condition string
 		values    []interface{}
 	)
 
+	limit := lib.Conf.Limit
+	offset := (page - 1) * lib.Conf.Limit
+	//op: 1 marks, 0 posts, -1 comments; wait further action
 	switch op {
-	case 1:
-		condition = "WHERE id>$1 AND uid=$2 ORDER BY id DESC LIMIT $3"
-		values = append(values, offset, uid, limit)
-		break
-	case -1:
-		condition = "WHERE id<$1 AND uid=$2 ORDER BY id DESC LIMIT $3"
-		values = append(values, offset, uid, limit)
-		break
 	default:
-		condition = "WHERE uid=$1 ORDER BY id DESC LIMIT $2"
-		values = append(values, uid, limit)
+		condition = "WHERE uid=$1 ORDER BY id OFFSET $2 LIMIT $3"
+		values = append(values, uid, offset, limit)
 		break
 	}
 
 	// All errors has been caught by sub function.
-	posts, err := readPosts(lib.Conn, condition, values)
+	posts, err := readPosts(condition, values)
+	log.Debug(values...)
+	log.Debug(posts)
 	return posts, err
 }
 
-func readPosts(conn *sql.DB, condition string, values []interface{}) ([]Post, error) {
+func readPosts(condition string, values []interface{}) ([]Post, error) {
 	var posts []Post
-	rows, err := lib.QueryMultiple(conn, "post", condition, values)
+	rows, err := lib.QueryMultiple(lib.Conn, "post", condition, values)
 	if err != nil {
 		log.Error("Cannot retrieve posts.")
 		return posts, err

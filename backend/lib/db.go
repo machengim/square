@@ -120,6 +120,25 @@ func QueryMultiple(conn *sql.DB, table string, condition string, values []interf
 	return rows, err
 }
 
+func QueryCount(table string, condition string, values []interface{}) (int, error) {
+	sqlString := "SELECT count(id) FROM " + table + " " + condition
+
+	stmt, err := Conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return -1, err
+	}
+
+	count := -1
+	row := stmt.QueryRow(values...)
+	err = row.Scan(&count)
+	if err != nil {
+		log.Error("Error when scanning count: ", err)
+	}
+
+	return count, err
+}
+
 func UpdateEntryById(table string, id int, columns []string, values []interface{}) (bool, error) {
 	if len(columns) != len(values) {
 		log.Error("Columns and values lengthes not match.")

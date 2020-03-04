@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Post, PostList, User, Comment } from './models';
+import { Post, PostList, PagedList, User, Comment } from './models';
 import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
@@ -35,6 +35,12 @@ export class SquareService {
     return this.http.get<PostList>(this.postListUrl + "?" + op + "=" + offset);
   }
 
+  getPrivatePost(op: number, page: number): Observable<PagedList> {
+    let [uid, nickname] = this.getUserInfoFromCookie();
+    let url = this.postListUrl + '/user/' + uid + '?op=' + op + '&page=' + page;
+    return this.http.get<PagedList>(url);
+  }
+
   getUserInfo(id: number): Observable<User> {
     return this.http.get<User>(this.userUrl + '/' + id);
   }
@@ -58,9 +64,7 @@ export class SquareService {
   // Set cookie should be done by server.
   setCookie(id: number, nickname: string): void {
     let info = '{"id":' + id + ',"nickname":"' + nickname + '"}';
-    console.log(info);
     this.cookie.set("square", info, 3, "/", "localhost", false, "None");
-    console.log("Now cookie is " + this.cookie.get("square"));
   }
 
   getUserInfoFromCookie(): [number, string] {

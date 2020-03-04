@@ -64,7 +64,7 @@ func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User,
 		return u, err
 	}
 
-	err = row.Scan(&u.Id, &u.Password, &u.Email, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
+	err = row.Scan(&u.Id, &u.Email, &u.Password, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
 	if err != nil {
 		log.Error("Error when scanning row to user: ", err)
 		return u, err

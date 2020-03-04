@@ -38,6 +38,9 @@ export class CommentComponent implements OnInit {
   }
 
   submitComment(): void {
+    if (this.comment.content.trim() == "") {
+      alert("Content is empty!"); return;
+    }
     let [uid, nickname] = this.squareService.getUserInfoFromCookie();
     if (nickname == "") nickname = "Anonymous";
     this.comment.uid = uid;
