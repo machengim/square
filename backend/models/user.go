@@ -2,20 +2,21 @@ package models
 
 import (
 	"database/sql"
-	log "github.com/sirupsen/logrus"
 	"square/lib"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Notice the field Password should never be transfered back.
 type User struct {
-	Id       int 	`json:"id"`
-	Email    string	`json:"email"`
-	Password string	`json:"password"`
-	Nickname string	`json:"nickname"`
-	Posts    int	`json:"posts"`
-	Marks    int	`json:"marks"`
-	Messages int	`json:"messages"`
-	Comments int	`json:"comments"`
+	Id       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+	Posts    int    `json:"posts"`
+	Marks    int    `json:"marks"`
+	Messages int    `json:"messages"`
+	Comments int    `json:"comments"`
 }
 
 // Create function is used for registeration.
@@ -76,7 +77,7 @@ func (user User) UpdateById(conn *sql.DB) (bool, error) {
 	columns := []string{"nickname", "posts", "marks", "messages", "comments"}
 	values := lib.Reflect(user, 0)
 
-	_, err := lib.UpdateEntryById(conn, "customer", user.Id, columns, values[3:])
+	_, err := lib.UpdateEntryById("customer", user.Id, columns, values[3:])
 	if err != nil {
 		log.Error("Cannot update user.")
 	}
@@ -88,7 +89,7 @@ func (user User) UpdatePassword(conn *sql.DB) (bool, error) {
 	columns := []string{"password"}
 	values := []interface{}{user.Password}
 
-	_, err := lib.UpdateEntryById(conn, "customer", user.Id, columns, values)
+	_, err := lib.UpdateEntryById("customer", user.Id, columns, values)
 	if err != nil {
 		log.Error("Cannot update user.")
 	}

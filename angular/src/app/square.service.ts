@@ -39,8 +39,11 @@ export class SquareService {
     return this.http.get<User>(this.userUrl + '/' + id);
   }
 
+  putUserInfo(user: User): Observable<User> {
+    return this.http.put<User>(this.userUrl, user, this.httpOptions);
+  }
+
   postDraft(post: Post): Observable<Post> {
-    console.log(post);
     return this.http.post<Post>(this.postListUrl, post, this.httpOptions);
   }
 
@@ -54,10 +57,10 @@ export class SquareService {
 
   // Set cookie should be done by server.
   setCookie(id: number, nickname: string): void {
-    if (this.cookie.get("square") != "") return;
     let info = '{"id":' + id + ',"nickname":"' + nickname + '"}';
     console.log(info);
     this.cookie.set("square", info, 3, "/", "localhost", false, "None");
+    console.log("Now cookie is " + this.cookie.get("square"));
   }
 
   getUserInfoFromCookie(): [number, string] {

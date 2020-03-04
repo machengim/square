@@ -1,13 +1,15 @@
 <aside>
     <div class="panel">
         <p> </p>
-        <div id="nickname">{{user.nickname}}</div>
-        <button id="btn_change_name">Change</button>
+        <div id="nickname" *ngIf="!changing">{{user.nickname}}</div>
+        <button id="btn_change_name" *ngIf="!changing" (click)="clickChang()">Change</button>
+        <input  [(ngModel)]="newNickname"  *ngIf="changing" maxlength="16">
+        <button *ngIf="changing"(click)="clickSubmit()">Submit</button>
         <hr>
         <ul>
-            <li>Posts: <a>0</a></li>
-            <li>Marked: <a>0</a></li>
-            <li>Comments: <a>0</a></li>
+            <li>Posts: <a>{{user.posts}}</a></li>
+            <li>Marked: <a>{{user.marks}}</a></li>
+            <li>Comments: <a>{{user.comments}}</a></li>
         </ul>
     </div>
 </aside>

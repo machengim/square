@@ -2,7 +2,7 @@
     <button *ngIf="hasNew" id="btn_loadnew">Load 3 new posts</button>
 
     <div class="post" *ngFor="let post of posts">
-        <app-post [post]="post"></app-post>
+        <app-post [post]="post" (newComment)="onNewComment($event)"></app-post>
         <hr>
     </div>
 

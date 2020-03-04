@@ -112,7 +112,7 @@ func (post Post) IncrementCommentsById() (bool, error) {
 	columns := []string{"comments"}
 	values := []interface{}{post.Comments + 1}
 
-	_, err := lib.UpdateEntryById(lib.Conn, "post", post.Id, columns, values)
+	_, err := lib.UpdateEntryById("post", post.Id, columns, values)
 	if err != nil {
 		log.Error("Cannot update post.")
 	}

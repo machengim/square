@@ -21,6 +21,31 @@ func GetUserSummary(c *gin.Context) {
 	c.JSON(200, user)
 }
 
+func UpdataUserInfo(c *gin.Context) {
+	var u models.User
+	c.BindJSON(&u)
+	if u.Id <= 0 {
+		log.Error("Invalid user id.")
+		c.Abort()
+		return
+	}
+	columns := []string{"nickname"}
+	values := []interface{}{u.Nickname}
+	if u.Password == "" {
+		columns = append(columns, "password")
+		values = append(values, u.Password)
+	}
+
+	_, err := lib.UpdateEntryById("customer", u.Id, columns, values)
+	if err != nil {
+		log.Error("Cannot update user info: ", err)
+		c.Abort()
+		return
+	}
+
+	c.JSON(200, "OK")
+}
+
 func Register(c *gin.Context) {
 	log.Info("Enter register process")
 	var u models.User

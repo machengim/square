@@ -27,7 +27,7 @@ func GetPublicPosts(c *gin.Context) {
 		list.Max = posts[0].Id
 	}
 	// This method to check hasMore is really primitive. Need refinement later.
-	if len(posts) < lib.Conf.Limit {
+	if op == -1 && len(posts) < lib.Conf.Limit {
 		list.HasMore = false
 	}
 

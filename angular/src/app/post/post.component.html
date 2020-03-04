@@ -4,4 +4,4 @@
     <span>{{post.ts}}</span>
     <span class="toolbar"><a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;<a>Mark</a></span>
 </div>
-<app-comment #child [post]="post"></app-comment>
+<app-comment #child [post]="post" (submitted)="onSubmitComment($event)"></app-comment>

@@ -15,26 +15,28 @@ export class PostListComponent implements OnInit {
   hasNew = false;
   hasMore = false;
 
-
   constructor(private squareService: SquareService) { }
 
   // Cookie setting is temporarily put here. 
   // It should be removed after the implementation of user authentication.
   ngOnInit(): void {
     this.getPostList();
-    this.squareService.setCookie(1, "Walt White");
   }
 
   getPostList(): void {
     this.squareService.getPosts()
-      .subscribe(data => this.handlePostsResponse(data));
+      .subscribe(data => this.handlePostsResponse(data, 0));
   }
 
-  handlePostsResponse(data: PostList) : void {
+  handlePostsResponse(data: PostList, op: number) : void {
+    if (data.posts == null) return;
+
     if (this.posts == null) {
       this.posts = data.posts;
-    } else {
-      this.posts.concat(data.posts);
+    } else if (op == -1) {
+      this.posts = this.posts.concat(data.posts);
+    } else if (op == 1) {
+      this.posts = data.posts.concat(this.posts);
     }
     
     if (this.min < 0 || this.min > data.min) {
@@ -46,16 +48,25 @@ export class PostListComponent implements OnInit {
     }
     this.hasNew = data.hasNew;
     this.hasMore = data.hasMore;
-    console.log(data);
   }
 
   loadMore(): void {
     this.squareService.getPostsWithOffset("min", this.min)
-        .subscribe(data => this.handlePostsResponse(data));
+        .subscribe(data => this.handlePostsResponse(data, -1));
   }
 
   loadNew(): void {
     this.squareService.getPostsWithOffset("max", this.max)
-        .subscribe(data => this.handlePostsResponse(data));
+        .subscribe(data => this.handlePostsResponse(data, 1));
+  }
+
+  // This implementation is not ideal.
+  // The real comments number should be retrieved from database later.
+  onNewComment(pid: number): void{
+    for (let post of this.posts){
+      if (post.id == pid) {
+        post.comments += 1;
+      }
+    }
   }
 }

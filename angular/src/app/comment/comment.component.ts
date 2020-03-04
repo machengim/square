@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Post, Comment } from '../models';
 import { SquareService } from '../square.service';
 
@@ -10,6 +10,7 @@ import { SquareService } from '../square.service';
 export class CommentComponent implements OnInit {
 
   @Input() post: Post;
+  @Output() submitted = new EventEmitter<boolean>();
   comments: Comment[];
   comment: Comment;
   show = false;
@@ -43,11 +44,17 @@ export class CommentComponent implements OnInit {
     this.comment.nickname = nickname;
     
     this.squareService.postComment(this.comment)
-        .subscribe(data => this.initComment());
+        .subscribe(data => this.handleSubmit());
+  }
+
+  handleSubmit(): void{
+    this.submitted.emit(true);
+    this.initComment();
+    this.getComments();
   }
 
   switchShow(): void {
     this.show = !this.show;
-    if (this.show) { this.getComments(); }
+    if (this.show && this.comments == null) { this.getComments(); }
   }
 }

@@ -36,6 +36,7 @@ func main() {
 	app.POST("/posts", apis.PostPosts)
 	app.POST("/comments", apis.PostComments)
 	app.POST("/register", apis.Register)
+	app.PUT("/user", apis.UpdataUserInfo)
 	app.Run(":8080")
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { Draft, Post } from '../models'; 
 import { SquareService } from '../square.service';
 
@@ -9,6 +9,7 @@ import { SquareService } from '../square.service';
 })
 export class DraftAreaComponent implements OnInit {
 
+  @Output() submitted = new EventEmitter<boolean>();
   selected = false;
   draft: Draft;
   post: Post;   // Used to generate a temporaral post from the draft.
@@ -52,7 +53,13 @@ export class DraftAreaComponent implements OnInit {
   submitDraft(): void {
     this.generatePost();
     this.squareService.postDraft(this.post)
-        .subscribe(data => { this.selected = false; this.initDraft(); });
+        .subscribe(data => this.handleSubmitRes());
+  }
+
+  handleSubmitRes(): void {
+    this.selected = false;
+    this.initDraft();
+    this.submitted.emit(true);
   }
 
 }

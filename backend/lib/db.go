@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-
 func OpenDb(config Config) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
 		"dbname=%s sslmode=disable", config.Host, config.Port, config.User,
@@ -121,7 +120,7 @@ func QueryMultiple(conn *sql.DB, table string, condition string, values []interf
 	return rows, err
 }
 
-func UpdateEntryById(conn *sql.DB, table string, id int, columns []string, values []interface{}) (bool, error) {
+func UpdateEntryById(table string, id int, columns []string, values []interface{}) (bool, error) {
 	if len(columns) != len(values) {
 		log.Error("Columns and values lengthes not match.")
 		return false, errors.New("Invalid input")
@@ -136,7 +135,7 @@ func UpdateEntryById(conn *sql.DB, table string, id int, columns []string, value
 		}
 	}
 
-	stmt, err := conn.Prepare(sqlString)
+	stmt, err := Conn.Prepare(sqlString)
 	if err != nil {
 		log.Error("Error when preparing statement: ", err)
 		return false, err
