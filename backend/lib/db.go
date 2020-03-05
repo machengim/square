@@ -120,6 +120,23 @@ func QueryMultiple(conn *sql.DB, table string, condition string, values []interf
 	return rows, err
 }
 
+func ComplexQueryMultiple(sqlString string, values []interface{}) (*sql.Rows, error) {
+	var rows *sql.Rows
+	stmt, err := Conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return rows, err
+	}
+
+	rows, err = stmt.Query(values...)
+	if err != nil {
+		log.Error("Error when querying entries: ", err)
+	}
+
+	return rows, err
+}
+
+
 func QueryCount(table string, condition string, values []interface{}) (int, error) {
 	sqlString := "SELECT count(id) FROM " + table + " " + condition
 

@@ -15,6 +15,7 @@ export class UserComponent implements OnInit {
   current = -1;
   total = -1;
   pages: number[];
+  changing = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -23,12 +24,20 @@ export class UserComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    let opString = this.route.snapshot.paramMap.get('op');
-    this.getPrivatePosts(opString);
+    this.posts = [];
+    let url = this.route.snapshot.paramMap.get('op');
+    this.getPrivatePosts(url);
+    this.squareService.refreshUser
+        .subscribe(url => this.refresh(url));
   }
 
-  getPrivatePosts(opString: string): void {
-    switch (opString) {
+  refresh(url: string): void {
+    this.posts = [];
+    this.getPrivatePosts(url);
+  }
+
+  getPrivatePosts(url: string): void {
+    switch (url) {
       case "comments":
         this.op = -1;
         break;

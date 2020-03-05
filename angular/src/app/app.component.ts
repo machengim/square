@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SquareService } from './square.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,13 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'angular';
+
+  constructor(private squareService: SquareService){
+    let [id, _] = this.squareService.getUserInfoFromCookie();
+    if (id <= 0) {
+      //window.location.href="./login.html";
+    }
+  }
+
+
 }

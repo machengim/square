@@ -2,6 +2,10 @@
 <div class="content">{{post.content}}</div>
 <div class="foot">
     <span>{{post.ts}}</span>
-    <span class="toolbar"><a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;<a>Mark</a></span>
+    <span class="toolbar">
+        <a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;
+        <a *ngIf="markid < 0" (click)="markPost()">Mark</a>
+        <a *ngIf="markid > 0">Marked</a>
+    </span>
 </div>
 <app-comment #child [post]="post" (submitted)="onSubmitComment($event)"></app-comment>

@@ -57,7 +57,6 @@ func RetrieveUserByLogin(conn *sql.DB, email string, password string) (User, err
 
 func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
 	var u User
-
 	row, err := lib.QuerySingle(conn, "customer", columns, values)
 	if err != nil {
 		log.Error("Error when reading user.")

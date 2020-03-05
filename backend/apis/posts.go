@@ -47,12 +47,15 @@ func GetPrivatePosts(c *gin.Context) {
 	if page <= 0 {
 		page = 1
 	}
+	log.Debug("In GET, op is ", op, " and page is ", page)
 	posts, err := models.RetrievePrivatePosts(op, page, uid)
+	log.Debug("posts is ", posts)
 	if err != nil {
 		c.Abort()
 		return
 	}
 
+	// The list.Total cannot cover other cases.
 	list := PagedList{0, posts}
 	if page == 1 {
 		count, err := getTotalPostByUid(uid)
@@ -139,4 +142,47 @@ func getTotalPostByUid(uid int) (int, error) {
 	return count, err
 }
 
-// TODO: need another function to retrieve unread comments in here and post.go
+func MarkPost(c *gin.Context) {
+	var mark models.Mark
+	c.BindJSON(&mark)
+	if mark.Pid <= 0 || mark.Uid <= 0 {
+		log.Error("Invalid mark request")
+		c.Abort()
+		return
+	}
+	id, _ := mark.Create()
+	c.JSON(200, id)
+}
+
+func DeleteMark(c *gin.Context) {
+	var mark models.Mark
+	c.BindJSON(&mark)
+	if mark.Pid <= 0 || mark.Uid <= 0 {
+		log.Error("Invalid mark request")
+		c.Abort()
+		return
+	}
+
+	columns := []string{"pid", "uid"}
+	values := []interface{}{mark.Pid, mark.Uid}
+	row, err := lib.QuerySingle(lib.Conn, "mark", columns, values)
+	if err != nil {
+		log.Error("No entry found: ", err)
+		c.Abort()
+		return
+	}
+	err = row.Scan(&mark)
+	if err != nil {
+		log.Error("Cannot scan mark", err)
+		c.Abort()
+		return
+	}
+
+	success, err := lib.DeleteById(lib.Conn, mark.Id, "mark")
+	if err != nil || !success {
+		log.Error("Cannot delete mark")
+		c.Abort()
+		return
+	}
+	c.JSON(200, "OK")
+}

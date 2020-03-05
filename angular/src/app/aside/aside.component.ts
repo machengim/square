@@ -45,7 +45,8 @@ export class AsideComponent implements OnInit {
   handleUserInfo(data: User): void {
     this.user = data;
     this.newNickname = this.user.nickname;
-    this.squareService.setCookie(this.user.id, this.user.nickname);
+    // Comment this line to debug.
+    //this.squareService.setCookie(this.user.id, this.user.nickname);
   }
 
   readInfoFromCookie(): void {
@@ -61,5 +62,9 @@ export class AsideComponent implements OnInit {
     this.squareService.putUserInfo(this.user)
         .subscribe(data => this.getUserInfo());
     this.changing = false;
+  }
+
+  urlChange(url: string): void {
+    this.squareService.userSectionChange(url);
   }
 }

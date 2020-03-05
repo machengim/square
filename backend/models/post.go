@@ -16,6 +16,7 @@ type Post struct {
 	Comments       int    `json:"comments"`
 	Content        string `json:"content"`
 	HasNewComments bool   `json:"hasNewComments"`
+	Mid				int		`json:"mid"`
 }
 
 func (post Post) Create(conn *sql.DB) (bool, error) {
@@ -26,6 +27,10 @@ func (post Post) Create(conn *sql.DB) (bool, error) {
 		log.Error("Error when inserting new post.")
 		return false, err
 	}
+
+	user, _ := RetrieveUserById(lib.Conn, post.Uid)
+	user.Posts += 1
+	user.UpdateById(lib.Conn)
 
 	return true, nil
 }
@@ -58,6 +63,9 @@ func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
 }
 
 func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
+	if op == 1 {
+		return RetrievePrivateMarks(page, uid)
+	}
 	var (
 		condition string
 		values    []interface{}
@@ -72,11 +80,30 @@ func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
 		values = append(values, uid, offset, limit)
 		break
 	}
-
+	log.Debug("IN models, op is ", op, " and offset is ", offset)
 	// All errors has been caught by sub function.
 	posts, err := readPosts(condition, values)
-	log.Debug(values...)
-	log.Debug(posts)
+	log.Debug("posts is ", posts)
+	return posts, err
+}
+
+func RetrievePrivateMarks(page int, uid int) ([]Post, error) {
+	limit := lib.Conf.Limit
+	offset := (page - 1) * lib.Conf.Limit
+	sqlString := "SELECT post.* FROM post, mark WHERE post.id=mark.pid AND mark.uid=$1 OFFSET $2 LIMIT $3"
+	values := []interface{} {uid, offset, limit}
+	rows, err := lib.ComplexQueryMultiple(sqlString, values)
+	var posts []Post
+	if err != nil {
+		return posts, err
+	}
+	defer rows.Close()
+
+	posts, err = readRows(rows)
+	if err != nil {
+		log.Error("Error when scanning posts:", err)
+	}
+
 	return posts, err
 }
 
@@ -89,9 +116,19 @@ func readPosts(condition string, values []interface{}) ([]Post, error) {
 	}
 	defer rows.Close()
 
+	posts, err = readRows(rows)
+	if err != nil {
+		log.Error("Error when scanning posts:", err)
+	}
+
+	return posts, err
+}
+
+func readRows(rows *sql.Rows) ([]Post, error) {
+	var posts []Post
 	for rows.Next() {
 		var p Post
-		err = rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
+		err := rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
 			&p.Content, &p.HasNewComments)
 		if err != nil {
 			log.Error("Error when reading post results: ", err)
@@ -100,14 +137,13 @@ func readPosts(condition string, values []interface{}) ([]Post, error) {
 		p.Ts = lib.TimeFromNow(p.Ts)
 		posts = append(posts, p)
 	}
-
 	return posts, nil
 }
 
 // Used to increment comments number by 1 when user sends a comment to this post.
 func (post Post) IncrementCommentsById() (bool, error) {
-	columns := []string{"comments"}
-	values := []interface{}{post.Comments + 1}
+	columns := []string{"comments", "hasNewComments"}
+	values := []interface{}{post.Comments + 1, true}
 
 	_, err := lib.UpdateEntryById("post", post.Id, columns, values)
 	if err != nil {

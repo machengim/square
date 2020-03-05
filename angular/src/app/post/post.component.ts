@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { SquareService } from '../square.service';
 import { Post } from '../models';
 
 @Component({
@@ -10,8 +11,9 @@ export class PostComponent implements OnInit {
 
   @Input() post: Post;
   @Output() newComment = new EventEmitter<number>();
+  markid = -1;
 
-  constructor() { }
+  constructor(private squareService: SquareService) { }
 
   ngOnInit(): void {
   }
@@ -20,5 +22,10 @@ export class PostComponent implements OnInit {
   // and then report it to parent.
   onSubmitComment(submit: boolean) {
     this.newComment.emit(this.post.id);
+  }
+
+  markPost(): void {
+    this.squareService.postMark(this.post.id)
+        .subscribe(res => { this.markid = res; console.log(res)});
   }
 }

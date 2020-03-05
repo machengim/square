@@ -50,3 +50,8 @@ export interface User {
     comments: number;
 }
 
+export interface Mark {
+    id: number;
+    pid: number;
+    uid: number;
+}

@@ -85,6 +85,9 @@ func Login(c *gin.Context) {
 		c.JSON(400, "User not found")
 		return
 	}
-
-	c.SetCookie("local", strconv.Itoa(user.Id), 3600, "/", "localhost", false, false)
+	//info := '{"id":' + id + ',"nickname":"' + nickname + '"}';
+	id := strconv.Itoa(user.Id)
+	info := "{\"id\":" + id + ",\"nickname\":\"" + user.Nickname + "\"}"
+	log.Debug("Cookie set: ", info)
+	c.SetCookie("square", info, 3600 * 24, "/", "localhost", false, false)
 }
