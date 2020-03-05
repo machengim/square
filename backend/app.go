@@ -41,7 +41,7 @@ func main() {
 		public.POST("/register", apis.Register)
 		public.POST("/marks", apis.MarkPost)
 		public.PUT("/user", apis.UpdataUserInfo)
-		public.DELETE("/marks", apis.DeleteMark)
+		public.DELETE("/marks/:mid", apis.DeleteMark)
 	}
 
 	app.Run(":8080")

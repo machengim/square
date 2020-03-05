@@ -11,7 +11,6 @@ export class PostComponent implements OnInit {
 
   @Input() post: Post;
   @Output() newComment = new EventEmitter<number>();
-  markid = -1;
 
   constructor(private squareService: SquareService) { }
 
@@ -26,6 +25,11 @@ export class PostComponent implements OnInit {
 
   markPost(): void {
     this.squareService.postMark(this.post.id)
-        .subscribe(res => { this.markid = res; console.log(res)});
+        .subscribe(res => { this.post.mid = res; this.squareService.draftSent() });
+  }
+
+  unmarkPost():void {
+    this.squareService.deleteMark(this.post.mid)
+        .subscribe(res => { this.post.mid = -1; this.squareService.draftSent(); })
   }
 }

@@ -4,8 +4,8 @@
     <span>{{post.ts}}</span>
     <span class="toolbar">
         <a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;
-        <a *ngIf="markid < 0" (click)="markPost()">Mark</a>
-        <a *ngIf="markid > 0">Marked</a>
+        <a *ngIf="post.mid < 0" (click)="markPost()">Mark</a>
+        <a *ngIf="post.mid > 0" (click)="unmarkPost()">Marked</a>
     </span>
 </div>
 <app-comment #child [post]="post" (submitted)="onSubmitComment($event)"></app-comment>

@@ -54,6 +54,7 @@ export class CommentComponent implements OnInit {
     this.submitted.emit(true);
     this.initComment();
     this.getComments();
+    this.squareService.draftSent();
   }
 
   switchShow(): void {

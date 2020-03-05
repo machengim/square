@@ -10,6 +10,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class SquareService {
 
   @Output() refreshUser = new EventEmitter<string>();
+  @Output() refreshInfo = new EventEmitter<boolean>();
 
   constructor(private http: HttpClient,
               private cookie: CookieService) { }
@@ -22,7 +23,7 @@ export class SquareService {
   };
 
   private host = 'http://localhost:8080';
-  private postListUrl = this.host + '/posts';
+  private postUrl = this.host + '/posts';
   // TODO: change the user id dynamically.
   private userUrl = this.host + '/user';
   private commentUrl = this.host + '/comments';
@@ -30,17 +31,17 @@ export class SquareService {
 
   // Used for /posts
   getPosts(): Observable<PostList> {
-    return this.http.get<PostList>(this.postListUrl, this.httpOptions);
+    return this.http.get<PostList>(this.postUrl, this.httpOptions);
   }
 
   // Used for /posts?min={post_id} or /posts?max={post_id}
   getPostsWithOffset(op: string, offset: number): Observable<PostList> {
-    return this.http.get<PostList>(this.postListUrl + "?" + op + "=" + offset, this.httpOptions);
+    return this.http.get<PostList>(this.postUrl + "?" + op + "=" + offset, this.httpOptions);
   }
 
   getPrivatePost(op: number, page: number): Observable<PagedList> {
     let [uid, nickname] = this.getUserInfoFromCookie();
-    let url = this.postListUrl + '/user/' + uid + '?op=' + op + '&page=' + page;
+    let url = this.postUrl + '/user/' + uid + '?op=' + op + '&page=' + page;
     return this.http.get<PagedList>(url, this.httpOptions);
   }
 
@@ -53,7 +54,7 @@ export class SquareService {
   }
 
   postDraft(post: Post): Observable<Post> {
-    return this.http.post<Post>(this.postListUrl, post, this.httpOptions);
+    return this.http.post<Post>(this.postUrl, post, this.httpOptions);
   }
 
   getComments(pid: number): Observable<Comment[]> {
@@ -70,10 +71,13 @@ export class SquareService {
     return this.http.post<number>(this.markUrl, mark, this.httpOptions);
   }
 
-  deleteMark(pid: number): Observable<string> {
+  deleteMark(mid: number): Observable<string> {
+    return this.http.delete<string>(this.markUrl + "/" + mid, this.httpOptions);
+  }
+
+  clearUnreadComments(): Observable<string> {
     let [uid, _ ] = this.getUserInfoFromCookie();
-    let mark: Mark = {id: -1, pid: pid, uid: uid};
-    return this.http.delete<string>(this.markUrl, this.httpOptions);
+    return this.http.delete<string>(this.commentUrl + "/user/" + uid, this.httpOptions);
   }
 
   // Set cookie should be done by server.
@@ -92,5 +96,9 @@ export class SquareService {
 
   userSectionChange(url: string): void {
     this.refreshUser.emit(url);
+  }
+
+  draftSent(): void {
+    this.refreshInfo.emit(true);
   }
 }

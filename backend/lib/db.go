@@ -50,7 +50,6 @@ func CreateEntry(conn *sql.DB, table string, columns []string, values []interfac
 			sqlString += ")"
 		}
 	}
-	log.Debug(sqlString)
 
 	stmt, err := conn.Prepare(sqlString)
 	if err != nil {
@@ -91,7 +90,6 @@ func QuerySingle(conn *sql.DB, table string, columns []string, values []interfac
 			sqlString += " AND "
 		}
 	}
-	log.Debug(sqlString)
 
 	var row *sql.Row
 	stmt, err := conn.Prepare(sqlString)
@@ -136,6 +134,20 @@ func ComplexQueryMultiple(sqlString string, values []interface{}) (*sql.Rows, er
 	return rows, err
 }
 
+func ComplexExec(sqlString string, values []interface{}) bool {
+	stmt, err := Conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return false
+	}
+
+	_, err = stmt.Exec(values...)
+	if err != nil  {
+		log.Error("Error when querying entries: ", err)
+	}
+
+	return true
+}
 
 func QueryCount(table string, condition string, values []interface{}) (int, error) {
 	sqlString := "SELECT count(id) FROM " + table + " " + condition

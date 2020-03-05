@@ -32,6 +32,12 @@ export class AsideComponent implements OnInit {
   constructor(private squareService: SquareService) { }
 
   ngOnInit(): void {
+    this.refresh();
+    this.squareService.refreshInfo
+        .subscribe(sig => this.refresh());
+  }
+
+  refresh(): void{
     this.readInfoFromCookie();
     this.getUserInfo();
   }

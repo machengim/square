@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"fmt"
 	"square/lib"
 	"square/models"
 	"strconv"
@@ -26,6 +27,9 @@ type PagedList struct {
 func GetPublicPosts(c *gin.Context) {
 	op, offset := getOpAndOffset(c)
 	posts, _ := models.RetrievePublicPosts(op, offset, lib.Conf.Limit)
+	idString, _ := c.Get("id")
+	id, _ := strconv.Atoi(fmt.Sprint(idString))
+	posts = checkPostMarked(posts, id)
 	list := PostList{0, 0, false, false, posts}
 	if len(list.Posts) > 0 {
 		list.Min = posts[len(posts)-1].Id
@@ -47,9 +51,9 @@ func GetPrivatePosts(c *gin.Context) {
 	if page <= 0 {
 		page = 1
 	}
-	log.Debug("In GET, op is ", op, " and page is ", page)
+
 	posts, err := models.RetrievePrivatePosts(op, page, uid)
-	log.Debug("posts is ", posts)
+	posts = checkPostMarked(posts, uid)
 	if err != nil {
 		c.Abort()
 		return
@@ -66,18 +70,14 @@ func GetPrivatePosts(c *gin.Context) {
 			if count%lib.Conf.Limit > 0 {
 				list.Total += 1
 			}
-			log.Debug("limit is ", lib.Conf.Limit)
 		}
 	}
-
 	c.JSON(200, list)
 }
 
 func PostPosts(c *gin.Context) {
-	log.Debug("Start reading draft")
 	var p models.Post
 	c.BindJSON(&p)
-	log.Debug(p)
 	if p.Uid <= 0 {
 		log.Error("Cannot get user id of post.")
 		c.Abort()
@@ -112,7 +112,6 @@ func getOpAndOffset(c *gin.Context) (op int, offset int) {
 		offset = 0
 	}
 
-	log.Debug("option is ", op, " and offset is ", offset)
 	return
 }
 
@@ -155,34 +154,81 @@ func MarkPost(c *gin.Context) {
 }
 
 func DeleteMark(c *gin.Context) {
-	var mark models.Mark
-	c.BindJSON(&mark)
-	if mark.Pid <= 0 || mark.Uid <= 0 {
+	midVal := c.Param("mid")
+	mid, err := strconv.Atoi(midVal)
+	if err != nil || mid <= 0 {
 		log.Error("Invalid mark request")
 		c.Abort()
 		return
 	}
 
-	columns := []string{"pid", "uid"}
-	values := []interface{}{mark.Pid, mark.Uid}
-	row, err := lib.QuerySingle(lib.Conn, "mark", columns, values)
-	if err != nil {
-		log.Error("No entry found: ", err)
+	success, err := reduceMarkByOne(mid)
+	if err != nil || !success {
+		log.Error("Cannot reduce mark by one")
 		c.Abort()
 		return
 	}
-	err = row.Scan(&mark)
-	if err != nil {
-		log.Error("Cannot scan mark", err)
-		c.Abort()
-		return
-	}
-
-	success, err := lib.DeleteById(lib.Conn, mark.Id, "mark")
+	success, err = lib.DeleteById(lib.Conn, mid, "mark")
 	if err != nil || !success {
 		log.Error("Cannot delete mark")
 		c.Abort()
 		return
 	}
 	c.JSON(200, "OK")
+}
+
+func checkPostMarked(posts []models.Post, uid int) []models.Post {
+	for i := 0; i < len(posts); i++ {
+		mid, err := models.GetMarkIdByInfo(uid, posts[i].Id)
+		if err != nil || mid <= 0{
+			posts[i].Mid = -1
+		} else {
+			posts[i].Mid = mid
+		}
+	}
+
+	return posts
+}
+
+func reduceMarkByOne(mid int) (bool, error) {
+	columns := []string{"id"}
+	values := []interface{} {mid}
+	row, err := lib.QuerySingle(lib.Conn, "mark", columns, values)
+	if err != nil {
+		log.Error("Cannot query mark: ", err)
+		return false, err
+	}
+
+	var mark models.Mark
+	err = row.Scan(&mark.Id, &mark.Uid, &mark.Pid)
+	if err != nil {
+		log.Error("Cannot scan mark: ", err)
+		return false, err
+	}
+
+	user, err := models.RetrieveUserById(lib.Conn, mark.Uid)
+	if err != nil {
+		log.Error("Cannot retrieve user by id: ", err)
+		return false, err
+	}
+	user.Marks -= 1
+	user.UpdateById(lib.Conn)
+	return true, nil
+}
+
+func ClearUnreadPosts(uid int) {
+	sqlString := "UPDATE post SET hasNewComments=$1 WHERE uid=$2"
+	values := []interface{}{false, uid}
+	success := lib.ComplexExec(sqlString, values)
+	if !success {
+		log.Error("Update posts status error: ")
+		return
+	}
+	user, err := models.RetrieveUserById(lib.Conn, uid)
+	if err != nil {
+		log.Error("Cannot read user: ", err)
+		return
+	}
+	user.Comments = 0
+	user.UpdateById(lib.Conn)
 }

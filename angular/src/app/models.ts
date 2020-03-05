@@ -6,7 +6,8 @@ export interface Post {
     isPrivate: boolean,
     comments: number,
     content: string,
-    hasNewComments: boolean
+    hasNewComments: boolean,
+    mid: number
 }
 
 export interface Comment {

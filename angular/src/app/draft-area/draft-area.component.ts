@@ -42,7 +42,8 @@ export class DraftAreaComponent implements OnInit {
       isPrivate: this.draft.isPrivate,
       comments: 0,
       content: this.draft.content,
-      hasNewComments: false
+      hasNewComments: false,
+      mid: -1
     }
   }
 
@@ -60,6 +61,7 @@ export class DraftAreaComponent implements OnInit {
     this.selected = false;
     this.initDraft();
     this.submitted.emit(true);
+    this.squareService.draftSent();
   }
 
 }

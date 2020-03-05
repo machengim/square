@@ -16,7 +16,7 @@ type Post struct {
 	Comments       int    `json:"comments"`
 	Content        string `json:"content"`
 	HasNewComments bool   `json:"hasNewComments"`
-	Mid				int		`json:"mid"`
+	Mid			   int	  `json:"mid"`
 }
 
 func (post Post) Create(conn *sql.DB) (bool, error) {
@@ -75,15 +75,16 @@ func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
 	offset := (page - 1) * lib.Conf.Limit
 	//op: 1 marks, 0 posts, -1 comments; wait further action
 	switch op {
+	case -1:
+		condition = "WHERE uid=$1 AND hasNewComments=$2 ORDER BY id OFFSET $3 LIMIT $4"
+		values = append(values, uid, true, offset, limit)
 	default:
 		condition = "WHERE uid=$1 ORDER BY id OFFSET $2 LIMIT $3"
 		values = append(values, uid, offset, limit)
 		break
 	}
-	log.Debug("IN models, op is ", op, " and offset is ", offset)
 	// All errors has been caught by sub function.
 	posts, err := readPosts(condition, values)
-	log.Debug("posts is ", posts)
 	return posts, err
 }
 
@@ -149,6 +150,14 @@ func (post Post) IncrementCommentsById() (bool, error) {
 	if err != nil {
 		log.Error("Cannot update post.")
 	}
+
+	user, err := RetrieveUserById(lib.Conn, post.Uid)
+	if err != nil {
+		log.Error("Cannot retrieve user by id: ", err)
+		return false, err
+	}
+	user.Comments += 1
+	_, err = user.UpdateById(lib.Conn)
 	return true, err
 }
 

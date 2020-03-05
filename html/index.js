@@ -39,7 +39,7 @@ function login() {
 
     axios.post('http://localhost:8080/login', data)
             .then(
-                (response) => { window.open('home.html', '_self');},
+                (response) => { window.open('index.html', '_self');},
                 (error) => { alert('Login error!'); }
             );
 

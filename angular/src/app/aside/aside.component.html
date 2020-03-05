@@ -9,7 +9,6 @@
         <ul>
             <li>Posts: <a [routerLink]="['/user', 'posts']" (click)="urlChange('posts')">{{user.posts}}</a></li>
             <li>Marked: <a [routerLink]="['/user', 'marks']" (click)="urlChange('marks')">{{user.marks}}</a></li>
-            <li>Comments: <a>{{user.comments}}</a></li>
         </ul>
     </div>
 </aside>
