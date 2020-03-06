@@ -1,12 +1,12 @@
 <header>
     <nav>
-        <div id="nav_logo">Square1</div>
+        <div id="nav_logo">Square</div>
         <div id="nav_items">
             <ul>
-                <li><a routerLink="/home">Home</a></li>
+                <li><a routerLink="/">Home</a></li>
                 <li><a>Message</a></li>
                 <li><a routerLink="/setting">Setting</a></li>
-                <li><a>Quit</a></li>
+                <li><a (click)="logout()">Quit</a></li>
             </ul>
         </div>
         <div id="nav_search">

@@ -87,10 +87,10 @@ export class SquareService {
   }
 
   getUserInfoFromCookie(): [number, string] {
-    let info = this.cookie.get("square");
+    let inf = this.cookie.get("square");
+    let info = inf.replace('\+', ' ');
     if (info == "") return [-1, ""];
     let json = JSON.parse(info);
-    console.log("json from cookie: " + json);
     return [json.id, json.nickname];
   }
 
@@ -100,5 +100,9 @@ export class SquareService {
 
   draftSent(): void {
     this.refreshInfo.emit(true);
+  }
+
+  logout(): Observable<string> {
+    return this.http.get<string>(this.host + "/logout", this.httpOptions);
   }
 }

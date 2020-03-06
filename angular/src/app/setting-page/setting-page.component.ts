@@ -44,7 +44,6 @@ export class SettingPageComponent implements OnInit {
   handleUserInfo(data: User): void {
     this.user = data;
     this.newNickname = this.user.nickname;
-    this.squareService.setCookie(this.user.id, this.user.nickname);
   }
 
   submitChange(): void {

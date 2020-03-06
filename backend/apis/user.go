@@ -31,7 +31,7 @@ func UpdataUserInfo(c *gin.Context) {
 	}
 	columns := []string{"nickname"}
 	values := []interface{}{u.Nickname}
-	if u.Password == "" {
+	if u.Password != "" {
 		columns = append(columns, "password")
 		values = append(values, u.Password)
 	}
@@ -42,7 +42,7 @@ func UpdataUserInfo(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
+	setCookie(u, c)
 	c.JSON(200, "OK")
 }
 
@@ -86,8 +86,20 @@ func Login(c *gin.Context) {
 		return
 	}
 	//info := '{"id":' + id + ',"nickname":"' + nickname + '"}';
+	setCookie(user, c)
+	c.JSON(200, "OK")
+}
+
+func Logout(c *gin.Context)  {
+	c.SetCookie("square", "", -5, "/", "localhost", false, false)
+	c.SetCookie("jwt", "", -5, "/", "localhost", false, true)
+	c.JSON(200, "OK")
+}
+
+func setCookie(user models.User, c *gin.Context) {
 	id := strconv.Itoa(user.Id)
 	info := "{\"id\":" + id + ",\"nickname\":\"" + user.Nickname + "\"}"
-	log.Debug("Cookie set: ", info)
 	c.SetCookie("square", info, 3600 * 24, "/", "localhost", false, false)
+	token := lib.GenerateToken(user.Id)
+	c.SetCookie("jwt", token, 3600 * 24, "/", "localhost", false, true)
 }

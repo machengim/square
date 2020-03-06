@@ -12,7 +12,7 @@ export class AppComponent {
   constructor(private squareService: SquareService){
     let [id, _] = this.squareService.getUserInfoFromCookie();
     if (id <= 0) {
-      //window.location.href="./login.html";
+      window.location.href="../login.html";
     }
   }
 

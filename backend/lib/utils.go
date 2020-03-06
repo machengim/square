@@ -66,7 +66,6 @@ func readConfig(path string) (Config, error) {
 
 // op == 0 means getting values, op==1 means getting fields name, op==2 means getting fields address
 func Reflect(model interface{}, op int) []interface{} {
-	log.Debug("op == ", op)
 	getType := reflect.TypeOf(model)
 	getValue := reflect.ValueOf(model)
 	var results []interface{}
@@ -81,7 +80,6 @@ func Reflect(model interface{}, op int) []interface{} {
 			t := reflect.ValueOf(model).Elem()
 			v = t.Field(i).Addr().Interface()
 		}
-		log.Debug("v == ", v)
 		results = append(results, v)
 	}
 

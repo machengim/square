@@ -28,6 +28,9 @@ func main() {
 	corsConfig.AllowCredentials = true
 	app.Use(cors.New(corsConfig))
 
+	app.POST("/login", apis.Login)
+	app.POST("/register", apis.Register)
+
 	public := app.Group("/")
 	public.Use(lib.AuthPub())
 	{
@@ -35,10 +38,9 @@ func main() {
 		public.GET("/posts/user/:uid", apis.GetPrivatePosts)
 		public.GET("/user/:uid", apis.GetUserSummary)
 		public.GET("/comments", apis.GetComments)
-		public.POST("/login", apis.Login)
+		public.GET("/logout", apis.Logout)
 		public.POST("/posts", apis.PostPosts)
 		public.POST("/comments", apis.PostComments)
-		public.POST("/register", apis.Register)
 		public.POST("/marks", apis.MarkPost)
 		public.PUT("/user", apis.UpdataUserInfo)
 		public.DELETE("/marks/:mid", apis.DeleteMark)
