@@ -60,11 +60,14 @@ func GetPrivatePosts(c *gin.Context) {
 	}
 
 	// The list.Total cannot cover other cases.
-	list := PagedList{0, posts}
+	list := PagedList{-1, posts}
 	if page == 1 {
-		count, err := getTotalPostByUid(uid)
+		count, err := getTotalPostByUid(uid, op)
+		log.Debug("count = ", count)
 		if err != nil {
 			log.Error("Cannot get total page", err)
+		} else if count == 0 {
+			list.Total = 1
 		} else {
 			list.Total = count / lib.Conf.Limit
 			if count%lib.Conf.Limit > 0 {
@@ -134,10 +137,14 @@ func getOpAndPage(c *gin.Context) (op int, page int) {
 	return op, page
 }
 
-func getTotalPostByUid(uid int) (int, error) {
+func getTotalPostByUid(uid int, op int) (int, error) {
 	condition := "WHERE uid=$1"
 	values := []interface{}{uid}
-	count, err := lib.QueryCount("post", condition, values)
+	table := "post"
+	if op == 1 {
+		table = "mark"
+	}
+	count, err := lib.QueryCount(table, condition, values)
 	return count, err
 }
 

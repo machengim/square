@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"square/auth"
 	"square/lib"
 	"square/models"
 	"strconv"
@@ -85,7 +86,6 @@ func Login(c *gin.Context) {
 		c.JSON(400, "User not found")
 		return
 	}
-	//info := '{"id":' + id + ',"nickname":"' + nickname + '"}';
 	setCookie(user, c)
 	c.JSON(200, "OK")
 }
@@ -100,6 +100,6 @@ func setCookie(user models.User, c *gin.Context) {
 	id := strconv.Itoa(user.Id)
 	info := "{\"id\":" + id + ",\"nickname\":\"" + user.Nickname + "\"}"
 	c.SetCookie("square", info, 3600 * 24, "/", "localhost", false, false)
-	token := lib.GenerateToken(user.Id)
+	token := auth.GenerateToken(user.Id)
 	c.SetCookie("jwt", token, 3600 * 24, "/", "localhost", false, true)
 }

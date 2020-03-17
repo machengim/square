@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/signal"
 	"square/apis"
+	"square/auth"
 	"square/lib"
 	"syscall"
 
@@ -32,17 +33,27 @@ func main() {
 	app.POST("/register", apis.Register)
 
 	public := app.Group("/")
-	public.Use(lib.AuthPub())
+	public.Use(auth.AuthPub())
 	{
 		public.GET("/posts", apis.GetPublicPosts)
-		public.GET("/posts/user/:uid", apis.GetPrivatePosts)
-		public.GET("/user/:uid", apis.GetUserSummary)
 		public.GET("/comments", apis.GetComments)
 		public.GET("/logout", apis.Logout)
 		public.POST("/posts", apis.PostPosts)
 		public.POST("/comments", apis.PostComments)
 		public.POST("/marks", apis.MarkPost)
 		public.PUT("/user", apis.UpdataUserInfo)
+	}
+
+	private := app.Group("/")
+	private.Use(auth.AuthPri())
+	{
+		public.GET("/posts/user/:uid", apis.GetPrivatePosts)
+		public.GET("/user/:uid", apis.GetUserSummary)
+	}
+
+	markAuth := app.Group("/")
+	markAuth.Use(auth.AuthDeleteMark())
+	{
 		public.DELETE("/marks/:mid", apis.DeleteMark)
 	}
 

@@ -37,6 +37,27 @@ func (mark Mark) Create() (int, error) {
 func GetMarkIdByInfo(uid int,pid int) (int, error)  {
 	columns := []string{"uid", "pid"}
 	values := []interface{}{uid, pid}
+	mid, err := getSingleInt(columns, values, 0)
+	if err != nil {
+		return -1, err
+	}
+
+	return mid, nil
+}
+
+func GetUidByMid(mid int) (int, error) {
+	columns := []string{"mid"}
+	values := []interface{}{mid}
+
+	uid, err := getSingleInt(columns, values, 1)
+	if err != nil {
+		return -1, err
+	}
+
+	return uid, nil
+}
+
+func getSingleInt(columns []string, values []interface{}, op int) (int, error) {
 	row, err := lib.QuerySingle(lib.Conn, "mark", columns, values)
 	if err != nil {
 		log.Error("Error when quering mark: ", err)
@@ -48,5 +69,10 @@ func GetMarkIdByInfo(uid int,pid int) (int, error)  {
 	if err != nil{
 		return -1, err
 	}
-	return mark.Id, nil
+
+	result := mark.Id
+	if op == 1 {
+		result = mark.Uid
+	}
+	return result, nil
 }

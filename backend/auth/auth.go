@@ -1,10 +1,12 @@
-package lib
+package auth
 
 import (
 	"fmt"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	jwt "github.com/dgrijalva/jwt-go"
+	"square/lib"
+	"square/models"
 	"strconv"
 	"time"
 )
@@ -13,26 +15,68 @@ var secret = "unicorn"
 
 func AuthPub() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token, err := ctx.Cookie("jwt")
+		authHelper(ctx)
+	}
+}
+
+func AuthPri() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHelper(ctx)
+		uid := ctx.GetInt("id")
+		claimId := lib.GetUidFromParam(ctx)
+		if claimId != uid {
+			log.Error("User id not match!")
+			ctx.Abort()
+			return
+		}
+	}
+}
+
+func AuthDeleteMark() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHelper(ctx)
+		uid := ctx.GetInt("id")
+		midStr := ctx.Param("mid")
+		mid, err := strconv.Atoi(midStr)
 		if err != nil {
-			log.Error("Cannot read token: ", err)
-			ctx.Abort()
-			return
-		} else if token == "" {
-			log.Error("Empty token.")
+			log.Error("Cannot retrieve user id")
 			ctx.Abort()
 			return
 		}
 
-		id := checkToken(token)
-		if id <= 0 {
-			log.Error("Invalid token")
+		uidInDb, err := models.GetUidByMid(mid)
+		if err != nil {
+			log.Error("Cannot get user id by mark id")
 			ctx.Abort()
 			return
-		} else {
-			ctx.Set("id", id)
+		} else if uid != uidInDb {
+			log.Error("User id not match mark record")
+			ctx.Abort()
+			return
 		}
 
+	}
+}
+
+func authHelper(ctx *gin.Context) {
+	token, err := ctx.Cookie("jwt")
+	if err != nil {
+		log.Error("Cannot read token: ", err)
+		ctx.Abort()
+		return
+	} else if token == "" {
+		log.Error("Empty token.")
+		ctx.Abort()
+		return
+	}
+
+	id := checkToken(token)
+	if id <= 0 {
+		log.Error("Invalid token")
+		ctx.Abort()
+		return
+	} else {
+		ctx.Set("id", id)
 	}
 }
 

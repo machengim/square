@@ -53,7 +53,7 @@ export class UserComponent implements OnInit {
   }
 
   handlePostsResponse(data: PagedList): void {
-    if (this.total <=0 && data.total > 0) {
+    if (data.total > 0) {
       this.total = data.total;
     }
     this.posts = data.posts;
