@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Post, PostList } from '../models';
 import { SquareService } from '../square.service';
+import { webSocket } from 'rxjs/webSocket';
 
 @Component({
   selector: 'app-post-list',
@@ -14,6 +15,7 @@ export class PostListComponent implements OnInit {
   max = -1;
   hasNew = false;
   hasMore = false;
+  subject = null;
 
   constructor(private squareService: SquareService) { }
 
@@ -53,6 +55,7 @@ export class PostListComponent implements OnInit {
     } else {
       this.hasMore = data.hasMore;
     }
+    this.getNotification();
   }
 
   loadMore(): void {
@@ -61,6 +64,7 @@ export class PostListComponent implements OnInit {
   }
 
   loadNew(): void {
+    this.cancleWebsocket();
     this.squareService.getPostsWithOffset("max", this.max)
         .subscribe(data => this.handlePostsResponse(data, 1));
   }
@@ -72,6 +76,26 @@ export class PostListComponent implements OnInit {
       if (post.id == pid) {
         post.comments += 1;
       }
+    }
+  }
+
+  getNotification(): void {
+    let url = 'ws://localhost:8080/newPosts'
+    this.subject = webSocket(url);
+
+    this.subject.subscribe(
+      msg => { 
+        console.log(msg);
+        this.hasNew = true; },
+      err => { console.log(err); }
+    );
+
+    this.subject.next(this.max);
+  }
+
+  cancleWebsocket(): void {
+    if (this.subject != null) {
+      this.subject.complete();
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Post, PostList, PagedList, User, Comment, Mark } from './models';
 import { CookieService } from 'ngx-cookie-service';
 
@@ -28,6 +28,7 @@ export class SquareService {
   private userUrl = this.host + '/user';
   private commentUrl = this.host + '/comments';
   private markUrl = this.host + '/marks';
+  private subject;
 
   // Used for /posts
   getPosts(): Observable<PostList> {
@@ -105,4 +106,5 @@ export class SquareService {
   logout(): Observable<string> {
     return this.http.get<string>(this.host + "/logout", this.httpOptions);
   }
+
 }

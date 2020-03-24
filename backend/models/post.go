@@ -173,3 +173,15 @@ func GetPostById(pid int) (Post, error) {
 		&p.Content, &p.HasNewComments)
 	return p, err
 }
+
+func CheckNewPost(pid int) (int, error) {
+	condition := "WHERE id > $1"
+	values := []interface{} {pid}
+	count, err := lib.QueryCount("post", condition, values)
+	if err != nil {
+		log.Error("Error when checking new post")
+		return -1, err
+	}
+
+	return count, nil
+}

@@ -2,12 +2,15 @@ package apis
 
 import (
 	"fmt"
+	"net/http"
 	"square/lib"
 	"square/models"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	ws "github.com/gorilla/websocket"
 )
 
 type PostList struct {
@@ -238,4 +241,65 @@ func ClearUnreadPosts(uid int) {
 	}
 	user.Comments = 0
 	user.UpdateById(lib.Conn)
+}
+
+func GetNewPostsNumber(c *gin.Context) {
+	var upgrader = ws.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	// Notice the security problem
+	upgrader.CheckOrigin = func(*http.Request) bool {
+		return true
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Error(err)
+		c.String(400, "Cannot establish websocket.")
+	}
+
+	msg, err := readWs(conn)
+	if err != nil {
+		c.Abort()
+		return
+	}
+
+	writeWs(conn, msg)
+}
+
+func readWs(conn *ws.Conn) (string, error) {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Error(err)
+			return "", err
+		}
+
+		return string(message), nil
+}
+
+func writeWs(conn *ws.Conn, msg string) {
+	for {
+		max, _ := strconv.Atoi(msg)
+		count, err := models.CheckNewPost(max)
+
+		if count > 0 { // Notice it should be count > 0 after debug.
+			log.Debug("Writing count ", count)
+			err = conn.WriteMessage(ws.TextMessage, []byte(strconv.Itoa(count)))
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			// After a successful push, the websocket closes.
+			err = conn.Close()
+			if err != nil {
+				log.Error("Cannot close websocket")
+			}
+			return
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 }
