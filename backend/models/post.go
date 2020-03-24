@@ -76,10 +76,10 @@ func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
 	//op: 1 marks, 0 posts, -1 comments; wait further action
 	switch op {
 	case -1:
-		condition = "WHERE uid=$1 AND hasNewComments=$2 ORDER BY id OFFSET $3 LIMIT $4"
+		condition = "WHERE uid=$1 AND hasNewComments=$2 ORDER BY id desc OFFSET $3 LIMIT $4"
 		values = append(values, uid, true, offset, limit)
 	default:
-		condition = "WHERE uid=$1 ORDER BY id OFFSET $2 LIMIT $3"
+		condition = "WHERE uid=$1 ORDER BY id desc OFFSET $2 LIMIT $3"
 		values = append(values, uid, offset, limit)
 		break
 	}
