@@ -16,6 +16,8 @@ import { CookieService } from 'ngx-cookie-service';
 import { AppRoutingModule } from './app-routing.module';
 import { SettingPageComponent } from './setting-page/setting-page.component';
 import { UserComponent } from './user/user.component';
+import { MessageComponent } from './message/message.component';
+import { HelpComponent } from './help/help.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,8 @@ import { UserComponent } from './user/user.component';
     PostComponent,
     SettingPageComponent,
     UserComponent,
+    MessageComponent,
+    HelpComponent,
   ],
   imports: [
     BrowserModule,

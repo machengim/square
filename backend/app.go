@@ -55,7 +55,13 @@ func main() {
 	markAuth := app.Group("/")
 	markAuth.Use(auth.AuthDeleteMark())
 	{
-		public.DELETE("/marks/:mid", apis.DeleteMark)
+		markAuth.DELETE("/marks/:mid", apis.DeleteMark)
+	}
+
+	postAuth := app.Group("/")
+	postAuth.Use(auth.AuthDeletePost())
+	{
+		postAuth.DELETE("/posts/:pid", apis.DeletePost)
 	}
 
 	app.Run(":8080")

@@ -11,10 +11,17 @@ export class PostComponent implements OnInit {
 
   @Input() post: Post;
   @Output() newComment = new EventEmitter<number>();
+  @Output() removePost = new EventEmitter<number>();
+
+  owned = false;
 
   constructor(private squareService: SquareService) { }
 
   ngOnInit(): void {
+    let [uid, _] = this.squareService.getUserInfoFromCookie();
+    if (uid == this.post.uid) {
+      this.owned = true;
+    }
   }
 
   // This function handle the signal of new comment from child component,
@@ -31,5 +38,11 @@ export class PostComponent implements OnInit {
   unmarkPost():void {
     this.squareService.deleteMark(this.post.mid)
         .subscribe(res => { this.post.mid = -1; this.squareService.draftSent(); })
+  }
+
+  deletePost(): void {
+    if (confirm("Confirm to delete it?")) {
+      this.removePost.emit(this.post.id);
+    }
   }
 }

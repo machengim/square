@@ -21,6 +21,7 @@ nav{
     float: left;
     font-size: 28px;
     color: #e1e2d4;
+    margin-right: 30px;
 }
 
 #nav_items {
@@ -58,4 +59,8 @@ nav{
     height: 16px;
     font-size: 14px;
     background-color: #f5f1e3;
+}
+
+#nav_search input:focus {
+    background-color: white;
 }

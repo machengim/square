@@ -79,6 +79,12 @@ export class PostListComponent implements OnInit {
     }
   }
 
+  onDeletePost(pid: number): void {
+    this.posts = this.posts.filter(item => item.id != pid);
+    this.squareService.deletePost(pid)
+        .subscribe(res => {this.squareService.refreshInfo.emit(true)});
+  }
+
   getNotification(): void {
     let url = 'ws://localhost:8080/newPosts'
     this.subject = webSocket(url);

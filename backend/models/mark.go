@@ -46,7 +46,7 @@ func GetMarkIdByInfo(uid int,pid int) (int, error)  {
 }
 
 func GetUidByMid(mid int) (int, error) {
-	columns := []string{"mid"}
+	columns := []string{"id"}
 	values := []interface{}{mid}
 
 	uid, err := getSingleInt(columns, values, 1)

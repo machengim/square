@@ -28,7 +28,6 @@ export class SquareService {
   private userUrl = this.host + '/user';
   private commentUrl = this.host + '/comments';
   private markUrl = this.host + '/marks';
-  private subject;
 
   // Used for /posts
   getPosts(): Observable<PostList> {
@@ -74,6 +73,10 @@ export class SquareService {
 
   deleteMark(mid: number): Observable<string> {
     return this.http.delete<string>(this.markUrl + "/" + mid, this.httpOptions);
+  }
+
+  deletePost(pid: number): Observable<string> {
+    return this.http.delete<string>(this.postUrl + "/" + pid, this.httpOptions);
   }
 
   clearUnreadComments(): Observable<string> {

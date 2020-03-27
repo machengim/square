@@ -14,7 +14,9 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.squareService.logout()
-        .subscribe(res => window.location.href='../login.html');
+    if (confirm("Quit?")) {
+      this.squareService.logout()
+          .subscribe(res => window.location.href='../login.html');
+      }
   }
 }

@@ -90,7 +90,7 @@ func Reflect(model interface{}, op int) []interface{} {
 func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
 	_, err := DeleteEntryById(conn, id, table)
 	if err != nil {
-		log.Error("Error when deleting user.")
+		log.Error("Error when deleting entry.")
 		return false, err
 	}
 	return true, nil

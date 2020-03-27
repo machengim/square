@@ -44,9 +44,9 @@ func RetrieveUserById(conn *sql.DB, id int) (User, error) {
 }
 
 // Retrieve a user by email and password. Used in login section.
-func RetrieveUserByLogin(conn *sql.DB, email string, password string) (User, error) {
-	columns := []string{"email", "password"}
-	values := []interface{}{email, password}
+func RetrieveUserByLogin(conn *sql.DB, email string) (User, error) {
+	columns := []string{"email"}
+	values := []interface{}{email}
 	user, err := readSingleUser(conn, columns, values)
 	if err != nil {
 		log.Error(err)

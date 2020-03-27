@@ -11,7 +11,7 @@ article {
     display: flex;
     width: 700px;
     margin: 0 auto;
-    min-height: calc(85vh - 40px);
+    min-height: calc(80vh - 40px);
 }
 
 article #title {

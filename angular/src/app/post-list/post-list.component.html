@@ -2,7 +2,7 @@
     <button *ngIf="hasNew" id="btn_loadnew" (click)="loadNew()" >Load new posts</button>
 
     <div class="post" *ngFor="let post of posts">
-        <app-post [post]="post" (newComment)="onNewComment($event)"></app-post>
+        <app-post [post]="post" (newComment)="onNewComment($event)" (removePost)="onDeletePost($event)" ></app-post>
         <hr>
     </div>
 

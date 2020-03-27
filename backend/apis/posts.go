@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	ws "github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 type PostList struct {
@@ -187,6 +187,34 @@ func DeleteMark(c *gin.Context) {
 	c.JSON(200, "OK")
 }
 
+func DeletePost(c *gin.Context) {
+	pidVal := c.Param("pid")
+	pid, err := strconv.Atoi(pidVal)
+	if err != nil || pid <= 0 {
+		log.Error("Invalid post request")
+		c.Abort()
+		return
+	}
+
+	success, err := reducePostByOne(pid)
+	if err != nil {
+		log.Error("Cannot reduce post number.")
+		c.Abort()
+		return
+	}
+
+	success, err = lib.DeleteById(lib.Conn, pid, "post")
+	if err != nil || !success {
+		log.Error("Cannot delete post")
+		c.Abort()
+		return
+	}
+
+
+
+	c.JSON(200, "OK")
+}
+
 func checkPostMarked(posts []models.Post, uid int) []models.Post {
 	for i := 0; i < len(posts); i++ {
 		mid, err := models.GetMarkIdByInfo(uid, posts[i].Id)
@@ -222,6 +250,33 @@ func reduceMarkByOne(mid int) (bool, error) {
 		return false, err
 	}
 	user.Marks -= 1
+	user.UpdateById(lib.Conn)
+	return true, nil
+}
+
+func reducePostByOne(pid int) (bool, error) {
+	columns := []string{"id"}
+	values := []interface{} {pid}
+	row, err := lib.QuerySingle(lib.Conn, "post", columns, values)
+	if err != nil {
+		log.Error("Cannot query post: ", err)
+		return false, err
+	}
+
+	var post models.Post
+	err = row.Scan(&post.Id, &post.Ts, &post.Uid, &post.Nickname, &post.IsPrivate, &post.Comments,
+					&post.Content, &post.HasNewComments)
+	if err != nil {
+		log.Error("Cannot scan post: ", err)
+		return false, err
+	}
+
+	user, err := models.RetrieveUserById(lib.Conn, post.Uid)
+	if err != nil {
+		log.Error("Cannot retrieve user by id: ", err)
+		return false, err
+	}
+	user.Posts -= 1
 	user.UpdateById(lib.Conn)
 	return true, nil
 }
@@ -270,13 +325,13 @@ func GetNewPostsNumber(c *gin.Context) {
 }
 
 func readWs(conn *ws.Conn) (string, error) {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Error(err)
-			return "", err
-		}
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
 
-		return string(message), nil
+	return string(message), nil
 }
 
 func writeWs(conn *ws.Conn, msg string) {

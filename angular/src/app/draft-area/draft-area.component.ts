@@ -47,9 +47,10 @@ export class DraftAreaComponent implements OnInit {
     }
   }
 
-  switchSelected(): void {
-    this.selected = !this.selected;
+  switchSelected(focus: boolean): void {
+    this.selected = focus;
   }
+
 
   submitDraft(): void {
     this.generatePost();

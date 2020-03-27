@@ -7,8 +7,14 @@
         <button *ngIf="changing"(click)="clickSubmit()">Submit</button>
         <hr>
         <ul>
-            <li>Posts: <a [routerLink]="['/user', 'posts']" (click)="urlChange('posts')">{{user.posts}}</a></li>
-            <li>Marked: <a [routerLink]="['/user', 'marks']" (click)="urlChange('marks')">{{user.marks}}</a></li>
+            <li>Posts: 
+                <a *ngIf="user.posts > 0" [routerLink]="['/user', 'posts']" (click)="urlChange('posts')">{{user.posts}}</a>
+                <span *ngIf="user.posts == 0">0</span>
+            </li>
+            <li>Marked: 
+                <a *ngIf="user.marks > 0" [routerLink]="['/user', 'marks']" (click)="urlChange('marks')">{{user.marks}}</a>
+                <span *ngIf="user.marks == 0">0</span>
+            </li>
         </ul>
     </div>
 </aside>

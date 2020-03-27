@@ -3,7 +3,7 @@ API Rules
 
 Use `withCredential` with requests, so jwt token can be sent with all methods for authentication. 
 
- Admin, message and search functionalities are waiting in the roadmap.
+Admin, message and search functionalities are in the roadmap.
 
 GET method
 ---
@@ -18,7 +18,8 @@ GET method
 | /posts/user| /{user_id} | Retrive all posts of the user | Yes | multiple posts|
 | /posts/user| /{user_id}?newcomment=1 | Retrieve posts of the user with unread comments | Yes | multiple posts |
 | /marks/user | /{user_id} | Retrieve posts marked by the user | Yes | multiple posts |
- 
+|/newPosts | None | Get the amount of new posts, used in websocket | Yes| a positive number |
+
 
 POST method
 ---
@@ -36,3 +37,11 @@ PUT method
 | Address | Argument | Json format  | Description | Token | Return |
 | ----  | ---- | ----| ---- | ----| ---- |
 | /user | /{user_id} | "nickname", "password"| User updates info | Yes | bool |
+
+DELETE method
+---
+
+| Address | Argument | Description | Token | Return |
+| ----  | ---- | ----| ---- | ---- |
+| /posts | /{pid} | Delete a specific post by author | Yes | bool |
+| /marks | /{mid} | Delete a specific mark | Yes | bool |

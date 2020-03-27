@@ -1,7 +1,7 @@
 <div id="draft_area">
     <span>Write a post:<br></span>
-    <textarea name="draft" [class.selected]="selected" placeholder="Share your thought" (focus)="switchSelected()" [(ngModel)]="draft.content"></textarea>
-    <button *ngIf="selected" (click)="switchSelected()">Collapse</button>
+    <textarea name="draft" maxlength="300" [class.selected]="selected" placeholder="Share your thought" (focus)="switchSelected(true)" [(ngModel)]="draft.content"></textarea>
+    <button *ngIf="selected" (click)="switchSelected(false)">Collapse</button>
     <div id="draft_toolbar" *ngIf="selected">
         <input type="checkbox" name="is_anonymous" [(ngModel)]="draft.isAnonymous">
         <label>Anonymous</label>

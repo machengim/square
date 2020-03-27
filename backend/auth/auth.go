@@ -58,6 +58,32 @@ func AuthDeleteMark() gin.HandlerFunc {
 	}
 }
 
+func AuthDeletePost() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHelper(ctx)
+		uid := ctx.GetInt("id")
+		pidStr := ctx.Param("pid")
+		pid, err := strconv.Atoi(pidStr)
+		if err != nil {
+			log.Error("Cannot retrieve user id")
+			ctx.Abort()
+			return
+		}
+
+		post, err := models.GetPostById(pid)
+		if err != nil {
+			log.Error("Cannot get user id by post id")
+			ctx.Abort()
+			return
+		} else if uid != post.Uid {
+			log.Error("User id not match post record")
+			ctx.Abort()
+			return
+		}
+
+	}
+}
+
 func authHelper(ctx *gin.Context) {
 	token, err := ctx.Cookie("jwt")
 	if err != nil {

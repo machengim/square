@@ -7,7 +7,7 @@ export interface Post {
     comments: number,
     content: string,
     hasNewComments: boolean,
-    mid: number
+    mid: number,
 }
 
 export interface Comment {

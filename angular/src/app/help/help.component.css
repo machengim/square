@@ -4,10 +4,12 @@ content {
     min-width: 1024px;
 }
 
-#wrapper {
+/* Use margin auto to put element in center horizontally, 
+   Use flex to make two grid equal height vertically. */
+article {
     position: relative;
     display: flex;
-    width: 1000px;
+    width: 700px;
     margin: 0 auto;
     min-height: calc(80vh - 40px);
 }
