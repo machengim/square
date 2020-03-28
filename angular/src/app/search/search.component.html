@@ -1,11 +1,14 @@
 <content>
     <div id="wrapper">
         <article>
-            <div id="post_list">
+            <div id="post_list" *ngIf="posts != null && posts.length > 0">
                 <div class="post" *ngFor="let post of posts">
                     <app-post [post]="post"  (newComment)="onNewComment($event)" (removePost)="onDeletePost($event)" ></app-post>
                     <hr> 
                 </div>
+            </div>
+            <div id="post_list" *ngIf="posts == null || posts.length == 0">
+                <h3>No search result for keyword "{{keyword}}".</h3>
             </div>
         </article>
         <app-aside></app-aside>

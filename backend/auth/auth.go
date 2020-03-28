@@ -13,25 +13,6 @@ import (
 
 var secret = "unicorn"
 
-func AuthPub() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authHelper(ctx)
-	}
-}
-
-func AuthPri() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authHelper(ctx)
-		uid := ctx.GetInt("id")
-		claimId := lib.GetUidFromParam(ctx)
-		if claimId != uid {
-			log.Error("User id not match!")
-			ctx.Abort()
-			return
-		}
-	}
-}
-
 func AuthDeleteMark() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHelper(ctx)
@@ -84,28 +65,24 @@ func AuthDeletePost() gin.HandlerFunc {
 	}
 }
 
-func authHelper(ctx *gin.Context) {
-	token, err := ctx.Cookie("jwt")
-	if err != nil {
-		log.Error("Cannot read token: ", err)
-		ctx.Abort()
-		return
-	} else if token == "" {
-		log.Error("Empty token.")
-		ctx.Abort()
-		return
-	}
-
-	id := checkToken(token)
-	if id <= 0 {
-		log.Error("Invalid token")
-		ctx.Abort()
-		return
-	} else {
-		ctx.Set("id", id)
+func AuthPri() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHelper(ctx)
+		uid := ctx.GetInt("id")
+		claimId := lib.GetUidFromParam(ctx)
+		if claimId != uid {
+			log.Error("User id not match!")
+			ctx.Abort()
+			return
+		}
 	}
 }
 
+func AuthPub() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHelper(ctx)
+	}
+}
 
 // This function has been replaced by jwt method.
 /*
@@ -149,6 +126,28 @@ func GenerateToken(id int) string {
 		return ""
 	}
 	return tokenString
+}
+
+func authHelper(ctx *gin.Context) {
+	token, err := ctx.Cookie("jwt")
+	if err != nil {
+		log.Error("Cannot read token: ", err)
+		ctx.Abort()
+		return
+	} else if token == "" {
+		log.Error("Empty token.")
+		ctx.Abort()
+		return
+	}
+
+	id := checkToken(token)
+	if id <= 0 {
+		log.Error("Invalid token")
+		ctx.Abort()
+		return
+	} else {
+		ctx.Set("id", id)
+	}
 }
 
 func checkToken(tokenString string) int {

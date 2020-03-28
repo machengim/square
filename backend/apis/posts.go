@@ -26,6 +26,84 @@ type PagedList struct {
 	Posts []models.Post `json:"posts"`
 }
 
+func DeleteMark(c *gin.Context) {
+	midVal := c.Param("mid")
+	mid, err := strconv.Atoi(midVal)
+	if err != nil || mid <= 0 {
+		log.Error("Invalid mark request")
+		c.Abort()
+		return
+	}
+
+	success, err := reduceMarkByOne(mid)
+	if err != nil || !success {
+		log.Error("Cannot reduce mark by one")
+		c.Abort()
+		return
+	}
+	success, err = lib.DeleteById(lib.Conn, mid, "mark")
+	if err != nil || !success {
+		log.Error("Cannot delete mark")
+		c.Abort()
+		return
+	}
+	c.JSON(200, "OK")
+}
+
+func DeletePost(c *gin.Context) {
+	pidVal := c.Param("pid")
+	pid, err := strconv.Atoi(pidVal)
+	if err != nil || pid <= 0 {
+		log.Error("Invalid post request")
+		c.Abort()
+		return
+	}
+
+	success, err := reducePostByOne(pid)
+	if err != nil {
+		log.Error("Cannot reduce post number.")
+		c.Abort()
+		return
+	}
+
+	success, err = lib.DeleteById(lib.Conn, pid, "post")
+	if err != nil || !success {
+		log.Error("Cannot delete post")
+		c.Abort()
+		return
+	}
+
+
+
+	c.JSON(200, "OK")
+}
+
+func GetNewPostsNumber(c *gin.Context) {
+	var upgrader = ws.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	// Notice the security problem
+	upgrader.CheckOrigin = func(*http.Request) bool {
+		return true
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Error(err)
+		c.String(400, "Cannot establish websocket.")
+	}
+
+	msg, err := readWs(conn)
+	if err != nil {
+		c.Abort()
+		return
+	}
+
+	writeWs(conn, msg)
+}
+
 // Handle /posts, /posts?min={pid}, /posts?max={pid}
 func GetPublicPosts(c *gin.Context) {
 	op, offset := getOpAndOffset(c)
@@ -81,6 +159,56 @@ func GetPrivatePosts(c *gin.Context) {
 	c.JSON(200, list)
 }
 
+func GetSearchPosts(c *gin.Context) {
+	_, page := getOpAndPage(c)
+	if page <= 0 {
+		page = 1
+	}
+
+	keyword := c.Param("keyword")
+	if keyword == "" {
+		log.Error("No keyword found")
+		c.AbortWithStatusJSON(400, "No keyword")
+		return
+	}
+
+	posts, err := models.RetrieveSearchPosts(keyword, page)
+	if err != nil {
+		c.AbortWithStatusJSON(400, "Error when searching")
+		return
+	}
+
+	list := PagedList{-1, posts}
+	if page == 1 {
+		count, err := getTotalPostByKeyword(keyword)
+		log.Debug("count = ", count)
+		if err != nil {
+			log.Error("Cannot get total page by keyword", err)
+		} else if count == 0 {
+			list.Total = 1
+		} else {
+			list.Total = count / lib.Conf.Limit
+			if count%lib.Conf.Limit > 0 {
+				list.Total += 1
+			}
+		}
+	}
+
+	c.JSON(200, list)
+}
+
+func MarkPost(c *gin.Context) {
+	var mark models.Mark
+	c.BindJSON(&mark)
+	if mark.Pid <= 0 || mark.Uid <= 0 {
+		log.Error("Invalid mark request")
+		c.Abort()
+		return
+	}
+	id, _ := mark.Create()
+	c.JSON(200, id)
+}
+
 func PostPosts(c *gin.Context) {
 	var p models.Post
 	c.BindJSON(&p)
@@ -99,6 +227,19 @@ func PostPosts(c *gin.Context) {
 	}
 
 	p.Create(lib.Conn)
+}
+
+func checkPostMarked(posts []models.Post, uid int) []models.Post {
+	for i := 0; i < len(posts); i++ {
+		mid, err := models.GetMarkIdByInfo(uid, posts[i].Id)
+		if err != nil || mid <= 0{
+			posts[i].Mid = -1
+		} else {
+			posts[i].Mid = mid
+		}
+	}
+
+	return posts
 }
 
 // This function has two usage.
@@ -140,6 +281,17 @@ func getOpAndPage(c *gin.Context) (op int, page int) {
 	return op, page
 }
 
+func getTotalPostByKeyword(keyword string) (int, error) {
+	condition := "WHERE content LIKE $1"
+	keyword = "%" + keyword + "%"
+	values := []interface{}{keyword}
+	table := "post"
+
+	count, err := lib.QueryCount(table, condition, values)
+	return count, err
+}
+
+
 func getTotalPostByUid(uid int, op int) (int, error) {
 	condition := "WHERE uid=$1"
 	values := []interface{}{uid}
@@ -151,81 +303,14 @@ func getTotalPostByUid(uid int, op int) (int, error) {
 	return count, err
 }
 
-func MarkPost(c *gin.Context) {
-	var mark models.Mark
-	c.BindJSON(&mark)
-	if mark.Pid <= 0 || mark.Uid <= 0 {
-		log.Error("Invalid mark request")
-		c.Abort()
-		return
-	}
-	id, _ := mark.Create()
-	c.JSON(200, id)
-}
-
-func DeleteMark(c *gin.Context) {
-	midVal := c.Param("mid")
-	mid, err := strconv.Atoi(midVal)
-	if err != nil || mid <= 0 {
-		log.Error("Invalid mark request")
-		c.Abort()
-		return
-	}
-
-	success, err := reduceMarkByOne(mid)
-	if err != nil || !success {
-		log.Error("Cannot reduce mark by one")
-		c.Abort()
-		return
-	}
-	success, err = lib.DeleteById(lib.Conn, mid, "mark")
-	if err != nil || !success {
-		log.Error("Cannot delete mark")
-		c.Abort()
-		return
-	}
-	c.JSON(200, "OK")
-}
-
-func DeletePost(c *gin.Context) {
-	pidVal := c.Param("pid")
-	pid, err := strconv.Atoi(pidVal)
-	if err != nil || pid <= 0 {
-		log.Error("Invalid post request")
-		c.Abort()
-		return
-	}
-
-	success, err := reducePostByOne(pid)
+func readWs(conn *ws.Conn) (string, error) {
+	_, message, err := conn.ReadMessage()
 	if err != nil {
-		log.Error("Cannot reduce post number.")
-		c.Abort()
-		return
+		log.Error(err)
+		return "", err
 	}
 
-	success, err = lib.DeleteById(lib.Conn, pid, "post")
-	if err != nil || !success {
-		log.Error("Cannot delete post")
-		c.Abort()
-		return
-	}
-
-
-
-	c.JSON(200, "OK")
-}
-
-func checkPostMarked(posts []models.Post, uid int) []models.Post {
-	for i := 0; i < len(posts); i++ {
-		mid, err := models.GetMarkIdByInfo(uid, posts[i].Id)
-		if err != nil || mid <= 0{
-			posts[i].Mid = -1
-		} else {
-			posts[i].Mid = mid
-		}
-	}
-
-	return posts
+	return string(message), nil
 }
 
 func reduceMarkByOne(mid int) (bool, error) {
@@ -265,7 +350,7 @@ func reducePostByOne(pid int) (bool, error) {
 
 	var post models.Post
 	err = row.Scan(&post.Id, &post.Ts, &post.Uid, &post.Nickname, &post.IsPrivate, &post.Comments,
-					&post.Content, &post.HasNewComments)
+		&post.Content, &post.HasNewComments)
 	if err != nil {
 		log.Error("Cannot scan post: ", err)
 		return false, err
@@ -279,59 +364,6 @@ func reducePostByOne(pid int) (bool, error) {
 	user.Posts -= 1
 	user.UpdateById(lib.Conn)
 	return true, nil
-}
-
-func ClearUnreadPosts(uid int) {
-	sqlString := "UPDATE post SET hasNewComments=$1 WHERE uid=$2"
-	values := []interface{}{false, uid}
-	success := lib.ComplexExec(sqlString, values)
-	if !success {
-		log.Error("Update posts status error: ")
-		return
-	}
-	user, err := models.RetrieveUserById(lib.Conn, uid)
-	if err != nil {
-		log.Error("Cannot read user: ", err)
-		return
-	}
-	user.Comments = 0
-	user.UpdateById(lib.Conn)
-}
-
-func GetNewPostsNumber(c *gin.Context) {
-	var upgrader = ws.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
-
-	// Notice the security problem
-	upgrader.CheckOrigin = func(*http.Request) bool {
-		return true
-	}
-
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		log.Error(err)
-		c.String(400, "Cannot establish websocket.")
-	}
-
-	msg, err := readWs(conn)
-	if err != nil {
-		c.Abort()
-		return
-	}
-
-	writeWs(conn, msg)
-}
-
-func readWs(conn *ws.Conn) (string, error) {
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Error(err)
-		return "", err
-	}
-
-	return string(message), nil
 }
 
 func writeWs(conn *ws.Conn, msg string) {

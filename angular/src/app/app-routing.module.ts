@@ -5,6 +5,7 @@ import { SettingPageComponent } from './setting-page/setting-page.component';
 import { UserComponent } from './user/user.component';
 import { MessageComponent } from './message/message.component';
 import { HelpComponent } from './help/help.component';
+import { SearchComponent } from './search/search.component';
 
 
 const route: Routes = [
@@ -14,6 +15,7 @@ const route: Routes = [
   { path: 'user/:op', component: UserComponent },
   { path: 'message', component: MessageComponent },
   { path: 'help', component: HelpComponent },
+  { path: 'search/:keyword', component: SearchComponent },
 ]
 
 @NgModule({

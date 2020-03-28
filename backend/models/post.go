@@ -19,6 +19,18 @@ type Post struct {
 	Mid			   int	  `json:"mid"`
 }
 
+func CheckNewPost(pid int) (int, error) {
+	condition := "WHERE id > $1 AND isPrivate = $2"
+	values := []interface{} {pid, false}
+	count, err := lib.QueryCount("post", condition, values)
+	if err != nil {
+		log.Error("Error when checking new post")
+		return -1, err
+	}
+
+	return count, nil
+}
+
 func (post Post) Create(conn *sql.DB) (bool, error) {
 	columns := []string{"uid", "nickname", "isPrivate", "content"}
 	values := []interface{}{post.Uid, post.Nickname, post.IsPrivate, post.Content}
@@ -35,31 +47,37 @@ func (post Post) Create(conn *sql.DB) (bool, error) {
 	return true, nil
 }
 
-func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
-	var (
-		condition string
-		values    []interface{}
-	)
+func GetPostById(pid int) (Post, error) {
+	columns := []string{"id"}
+	values := []interface{}{pid}
+	row, err := lib.QuerySingle(lib.Conn, "post", columns, values)
+	var p Post
+	if err != nil {
+		return p, err
+	}
+	err = row.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
+		&p.Content, &p.HasNewComments)
+	return p, err
+}
 
-	private := false
-	switch op {
-	case 1:
-		condition = "WHERE id>$1 AND isPrivate=$2 ORDER BY id DESC LIMIT $3"
-		values = append(values, offset, private, limit)
-		break
-	case -1:
-		condition = "WHERE id<$1 AND isPrivate=$2 ORDER BY id DESC LIMIT $3"
-		values = append(values, offset, private, limit)
-		break
-	default:
-		condition = "WHERE isPrivate=$1 ORDER BY id DESC LIMIT $2"
-		values = append(values, private, limit)
-		break
+// Used to increment comments number by 1 when user sends a comment to this post.
+func (post Post) IncrementCommentsById() (bool, error) {
+	columns := []string{"comments", "hasNewComments"}
+	values := []interface{}{post.Comments + 1, true}
+
+	_, err := lib.UpdateEntryById("post", post.Id, columns, values)
+	if err != nil {
+		log.Error("Cannot update post.")
 	}
 
-	// All errors has been caught by sub function.
-	posts, err := readPosts(condition, values)
-	return posts, err
+	user, err := RetrieveUserById(lib.Conn, post.Uid)
+	if err != nil {
+		log.Error("Cannot retrieve user by id: ", err)
+		return false, err
+	}
+	user.Comments += 1
+	_, err = user.UpdateById(lib.Conn)
+	return true, err
 }
 
 func RetrievePrivatePosts(op int, page int, uid int) ([]Post, error) {
@@ -108,6 +126,48 @@ func RetrievePrivateMarks(page int, uid int) ([]Post, error) {
 	return posts, err
 }
 
+func RetrievePublicPosts(op int, offset int, limit int) ([]Post, error) {
+	var (
+		condition string
+		values    []interface{}
+	)
+
+	private := false
+	switch op {
+	case 1:
+		condition = "WHERE id>$1 AND isPrivate=$2 ORDER BY id DESC LIMIT $3"
+		values = append(values, offset, private, limit)
+		break
+	case -1:
+		condition = "WHERE id<$1 AND isPrivate=$2 ORDER BY id DESC LIMIT $3"
+		values = append(values, offset, private, limit)
+		break
+	default:
+		condition = "WHERE isPrivate=$1 ORDER BY id DESC LIMIT $2"
+		values = append(values, private, limit)
+		break
+	}
+
+	// All errors has been caught by sub function.
+	posts, err := readPosts(condition, values)
+	return posts, err
+}
+
+func RetrieveSearchPosts(keyword string, page int) ([]Post, error) {
+	limit := lib.Conf.Limit
+	offset := (page - 1) * limit
+	condition := "WHERE content LIKE $1 ORDER BY id desc OFFSET $2 LIMIT $3"
+	keyword = "%" + keyword + "%"
+	values := []interface{}{keyword, offset, limit}
+
+	posts, err := readPosts(condition, values)
+	if err != nil {
+		log.Error("Cannot read posts by keyword.")
+	}
+
+	return posts, err
+}
+
 func readPosts(condition string, values []interface{}) ([]Post, error) {
 	var posts []Post
 	rows, err := lib.QueryMultiple(lib.Conn, "post", condition, values)
@@ -141,47 +201,6 @@ func readRows(rows *sql.Rows) ([]Post, error) {
 	return posts, nil
 }
 
-// Used to increment comments number by 1 when user sends a comment to this post.
-func (post Post) IncrementCommentsById() (bool, error) {
-	columns := []string{"comments", "hasNewComments"}
-	values := []interface{}{post.Comments + 1, true}
 
-	_, err := lib.UpdateEntryById("post", post.Id, columns, values)
-	if err != nil {
-		log.Error("Cannot update post.")
-	}
 
-	user, err := RetrieveUserById(lib.Conn, post.Uid)
-	if err != nil {
-		log.Error("Cannot retrieve user by id: ", err)
-		return false, err
-	}
-	user.Comments += 1
-	_, err = user.UpdateById(lib.Conn)
-	return true, err
-}
 
-func GetPostById(pid int) (Post, error) {
-	columns := []string{"id"}
-	values := []interface{}{pid}
-	row, err := lib.QuerySingle(lib.Conn, "post", columns, values)
-	var p Post
-	if err != nil {
-		return p, err
-	}
-	err = row.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
-		&p.Content, &p.HasNewComments)
-	return p, err
-}
-
-func CheckNewPost(pid int) (int, error) {
-	condition := "WHERE id > $1"
-	values := []interface{} {pid}
-	count, err := lib.QueryCount("post", condition, values)
-	if err != nil {
-		log.Error("Error when checking new post")
-		return -1, err
-	}
-
-	return count, nil
-}

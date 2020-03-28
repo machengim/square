@@ -4,28 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func OpenDb(config Config) (*sql.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
-		"dbname=%s sslmode=disable", config.Host, config.Port, config.User,
-		config.Password, config.Dbname)
-
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Fatal("Error when opening Db: ", err)
-		return db, err
-	}
-
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(3)
-	db.SetConnMaxLifetime(30 * time.Minute)
-
-	return db, nil
+func CloseDb(conn *sql.DB) {
+	conn.Close()
 }
 
 func CreateEntry(conn *sql.DB, table string, columns []string, values []interface{}) (bool, error) {
@@ -65,6 +50,22 @@ func CreateEntry(conn *sql.DB, table string, columns []string, values []interfac
 	return true, nil
 }
 
+func ComplexQueryMultiple(sqlString string, values []interface{}) (*sql.Rows, error) {
+	var rows *sql.Rows
+	stmt, err := Conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return rows, err
+	}
+
+	rows, err = stmt.Query(values...)
+	if err != nil {
+		log.Error("Error when querying entries: ", err)
+	}
+
+	return rows, err
+}
+
 func DeleteEntryById(conn *sql.DB, id int, table string) (bool, error) {
 	sqlString := "DELETE FROM " + table + " WHERE id=$1"
 	stmt, err := conn.Prepare(sqlString)
@@ -80,6 +81,43 @@ func DeleteEntryById(conn *sql.DB, id int, table string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func OpenDb(config Config) (*sql.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
+		"dbname=%s sslmode=disable", config.Host, config.Port, config.User,
+		config.Password, config.Dbname)
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Fatal("Error when opening Db: ", err)
+		return db, err
+	}
+
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(3)
+	db.SetConnMaxLifetime(30 * time.Minute)
+
+	return db, nil
+}
+
+func QueryCount(table string, condition string, values []interface{}) (int, error) {
+	sqlString := "SELECT count(id) FROM " + table + " " + condition
+
+	stmt, err := Conn.Prepare(sqlString)
+	if err != nil {
+		log.Error("Error when preparing statement: ", err)
+		return -1, err
+	}
+
+	count := -1
+	row := stmt.QueryRow(values...)
+	err = row.Scan(&count)
+	if err != nil {
+		log.Error("Error when scanning count: ", err)
+	}
+
+	return count, err
 }
 
 func QuerySingle(conn *sql.DB, table string, columns []string, values []interface{}) (*sql.Row, error) {
@@ -118,56 +156,6 @@ func QueryMultiple(conn *sql.DB, table string, condition string, values []interf
 	return rows, err
 }
 
-func ComplexQueryMultiple(sqlString string, values []interface{}) (*sql.Rows, error) {
-	var rows *sql.Rows
-	stmt, err := Conn.Prepare(sqlString)
-	if err != nil {
-		log.Error("Error when preparing statement: ", err)
-		return rows, err
-	}
-
-	rows, err = stmt.Query(values...)
-	if err != nil {
-		log.Error("Error when querying entries: ", err)
-	}
-
-	return rows, err
-}
-
-func ComplexExec(sqlString string, values []interface{}) bool {
-	stmt, err := Conn.Prepare(sqlString)
-	if err != nil {
-		log.Error("Error when preparing statement: ", err)
-		return false
-	}
-
-	_, err = stmt.Exec(values...)
-	if err != nil  {
-		log.Error("Error when querying entries: ", err)
-	}
-
-	return true
-}
-
-func QueryCount(table string, condition string, values []interface{}) (int, error) {
-	sqlString := "SELECT count(id) FROM " + table + " " + condition
-
-	stmt, err := Conn.Prepare(sqlString)
-	if err != nil {
-		log.Error("Error when preparing statement: ", err)
-		return -1, err
-	}
-
-	count := -1
-	row := stmt.QueryRow(values...)
-	err = row.Scan(&count)
-	if err != nil {
-		log.Error("Error when scanning count: ", err)
-	}
-
-	return count, err
-}
-
 func UpdateEntryById(table string, id int, columns []string, values []interface{}) (bool, error) {
 	if len(columns) != len(values) {
 		log.Error("Columns and values lengthes not match.")
@@ -199,6 +187,3 @@ func UpdateEntryById(table string, id int, columns []string, values []interface{
 	return true, nil
 }
 
-func CloseDb(conn *sql.DB) {
-	conn.Close()
-}

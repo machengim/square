@@ -4,15 +4,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"regexp"
 	"strconv"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -31,62 +30,6 @@ var (
 
 const configPath = "assets/config.json"
 
-func InitSystem() {
-	var err error
-	Conf, err = readConfig(configPath)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	Conn, err = OpenDb(Conf)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	log.Info("Database connection opened.")
-}
-
-func readConfig(path string) (Config, error) {
-	var config Config
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal("Cannot read config file. ", err)
-		return config, err
-	}
-
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		fmt.Println(err)
-		return config, err
-	}
-
-	return config, nil
-}
-
-// op == 0 means getting values, op==1 means getting fields name, op==2 means getting fields address
-func Reflect(model interface{}, op int) []interface{} {
-	getType := reflect.TypeOf(model)
-	getValue := reflect.ValueOf(model)
-	var results []interface{}
-	var v interface{}
-	for i := 0; i < getType.NumField(); i++ {
-		if op == 0 {
-			v = getValue.Field(i).Interface()
-		} else if op == 1 {
-			v = getType.Field(i).Name
-		} else {
-			// This part of code has some problems.
-			t := reflect.ValueOf(model).Elem()
-			v = t.Field(i).Addr().Interface()
-		}
-		results = append(results, v)
-	}
-
-	return results
-}
-
-// TODO: the functions below need for further considerations.
 func DeleteById(conn *sql.DB, id int, table string) (bool, error) {
 	_, err := DeleteEntryById(conn, id, table)
 	if err != nil {
@@ -111,24 +54,41 @@ func GetUidFromParam(c *gin.Context) int {
 	return uid
 }
 
-// Convert a time string to an array of int.
-// User regex to split the timestamp from postgres.
-// s[] : 0 year, 1 month, 2 day, 3 hour, 4 min, 5 sec, 6 millsec.
-func timeSplit(ts string) [6]int16 {
-	s := regexp.MustCompile("[-:T. ]").Split(ts, 7)
-	var splitTime [6]int16
-	for i := 0; i < 6; i++ {
-		fig, err := strconv.ParseInt(s[i], 10, 16) // this method always return int64
-		if err != nil {
-			log.Error(err)
-		}
-		if fig < 0 || fig > 2020 {
-			log.Error("Invalid date input")
-		}
-		splitTime[i] = int16(fig)
+func InitSystem() {
+	var err error
+	Conf, err = readConfig(configPath)
+	if err != nil {
+		os.Exit(1)
 	}
 
-	return splitTime
+	Conn, err = OpenDb(Conf)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	log.Info("Database connection opened.")
+}
+
+// op == 0 means getting values, op==1 means getting fields name, op==2 means getting fields address
+func Reflect(model interface{}, op int) []interface{} {
+	getType := reflect.TypeOf(model)
+	getValue := reflect.ValueOf(model)
+	var results []interface{}
+	var v interface{}
+	for i := 0; i < getType.NumField(); i++ {
+		if op == 0 {
+			v = getValue.Field(i).Interface()
+		} else if op == 1 {
+			v = getType.Field(i).Name
+		} else {
+			// This part of code has some problems.
+			t := reflect.ValueOf(model).Elem()
+			v = t.Field(i).Addr().Interface()
+		}
+		results = append(results, v)
+	}
+
+	return results
 }
 
 // Calculate the time diffence between post time and current time
@@ -161,3 +121,43 @@ func TimeFromNow(ts string) string {
 		return fmt.Sprint(gap/mins[i]) + " " + units[i] + " ago"
 	}
 }
+
+func readConfig(path string) (Config, error) {
+	var config Config
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Cannot read config file. ", err)
+		return config, err
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println(err)
+		return config, err
+	}
+
+	return config, nil
+}
+
+// Convert a time string to an array of int.
+// User regex to split the timestamp from postgres.
+// s[] : 0 year, 1 month, 2 day, 3 hour, 4 min, 5 sec, 6 millsec.
+func timeSplit(ts string) [6]int16 {
+	s := regexp.MustCompile("[-:T. ]").Split(ts, 7)
+	var splitTime [6]int16
+	for i := 0; i < 6; i++ {
+		fig, err := strconv.ParseInt(s[i], 10, 16) // this method always return int64
+		if err != nil {
+			log.Error(err)
+		}
+		if fig < 0 || fig > 2020 {
+			log.Error("Invalid date input")
+		}
+		splitTime[i] = int16(fig)
+	}
+
+	return splitTime
+}
+
+

@@ -39,6 +39,7 @@ func main() {
 		public.GET("/comments", apis.GetComments)
 		public.GET("/logout", apis.Logout)
 		public.GET("/newPosts", apis.GetNewPostsNumber)
+		public.GET("/search/:keyword", apis.GetSearchPosts)
 		public.POST("/posts", apis.PostPosts)
 		public.POST("/comments", apis.PostComments)
 		public.POST("/marks", apis.MarkPost)

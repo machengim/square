@@ -13,3 +13,7 @@ article {
     margin: 0 auto;
     min-height: calc(80vh - 40px);
 }
+
+li {
+    margin: 6px auto;
+}

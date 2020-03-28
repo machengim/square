@@ -55,22 +55,6 @@ func RetrieveUserByLogin(conn *sql.DB, email string) (User, error) {
 	return user, err
 }
 
-func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
-	var u User
-	row, err := lib.QuerySingle(conn, "customer", columns, values)
-	if err != nil {
-		log.Error("Error when reading user.")
-		return u, err
-	}
-
-	err = row.Scan(&u.Id, &u.Email, &u.Password, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
-	if err != nil {
-		log.Error("Error when scanning row to user: ", err)
-		return u, err
-	}
-	return u, nil
-}
-
 // Notice this method cannot change id, email and password.
 func (user User) UpdateById(conn *sql.DB) (bool, error) {
 	columns := []string{"nickname", "posts", "marks", "messages", "comments"}
@@ -94,4 +78,20 @@ func (user User) UpdatePassword(conn *sql.DB) (bool, error) {
 	}
 
 	return true, err
+}
+
+func readSingleUser(conn *sql.DB, columns []string, values []interface{}) (User, error) {
+	var u User
+	row, err := lib.QuerySingle(conn, "customer", columns, values)
+	if err != nil {
+		log.Error("Error when reading user.")
+		return u, err
+	}
+
+	err = row.Scan(&u.Id, &u.Email, &u.Password, &u.Nickname, &u.Posts, &u.Marks, &u.Messages, &u.Comments)
+	if err != nil {
+		log.Error("Error when scanning row to user: ", err)
+		return u, err
+	}
+	return u, nil
 }

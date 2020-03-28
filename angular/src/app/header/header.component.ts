@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { SquareService } from '../square.service';
+import { RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -8,7 +9,11 @@ import { SquareService } from '../square.service';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(private squareService: SquareService) { }
+  keyword = "";
+
+  constructor(
+    private router: Router,
+    private squareService: SquareService) { }
 
   ngOnInit(): void {
   }
@@ -18,5 +23,17 @@ export class HeaderComponent implements OnInit {
       this.squareService.logout()
           .subscribe(res => window.location.href='../login.html');
       }
+  }
+
+  @HostListener('document:keydown.enter', ['$event'])
+  onKeydownHandler(event: KeyboardEvent) {
+    this.keyword = this.keyword.trim();
+    if (this.keyword == "") {
+      alert("Empty input not allowed!");
+      return;
+    }
+    this.router.navigate(['./search/' + this.keyword]);
+    this.squareService.changeKeyword(this.keyword);
+    this.keyword = "";
   }
 }

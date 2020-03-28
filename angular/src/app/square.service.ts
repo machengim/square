@@ -11,6 +11,7 @@ export class SquareService {
 
   @Output() refreshUser = new EventEmitter<string>();
   @Output() refreshInfo = new EventEmitter<boolean>();
+  @Output() refreshKeyword = new EventEmitter<string>();
 
   constructor(private http: HttpClient,
               private cookie: CookieService) { }
@@ -42,6 +43,14 @@ export class SquareService {
   getPrivatePost(op: number, page: number): Observable<PagedList> {
     let [uid, nickname] = this.getUserInfoFromCookie();
     let url = this.postUrl + '/user/' + uid + '?op=' + op + '&page=' + page;
+    return this.http.get<PagedList>(url, this.httpOptions);
+  }
+
+  getSearchPosts(keyword: string, page: number): Observable<PagedList> {
+    let url = this.host + '/search/' + keyword
+    if (page > 0) {
+      url += '?page=' + page;
+    }
     return this.http.get<PagedList>(url, this.httpOptions);
   }
 
@@ -104,6 +113,10 @@ export class SquareService {
 
   draftSent(): void {
     this.refreshInfo.emit(true);
+  }
+
+  changeKeyword(keyword: string):void {
+    this.refreshKeyword.emit(keyword);
   }
 
   logout(): Observable<string> {

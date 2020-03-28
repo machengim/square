@@ -18,6 +18,7 @@ import { SettingPageComponent } from './setting-page/setting-page.component';
 import { UserComponent } from './user/user.component';
 import { MessageComponent } from './message/message.component';
 import { HelpComponent } from './help/help.component';
+import { SearchComponent } from './search/search.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { HelpComponent } from './help/help.component';
     UserComponent,
     MessageComponent,
     HelpComponent,
+    SearchComponent,
   ],
   imports: [
     BrowserModule,

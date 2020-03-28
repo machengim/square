@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SquareService } from '../square.service';
 import { Post, PagedList } from '../models';
 
@@ -19,7 +19,6 @@ export class UserComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private squareService: SquareService
   ) {}
 
@@ -74,6 +73,20 @@ export class UserComponent implements OnInit {
     this.current = page;
     this.squareService.getPrivatePost(this.op, page)
         .subscribe(data => this.handlePostsResponse(data));
+  }
+
+  onNewComment(pid: number): void{
+    for (let post of this.posts){
+      if (post.id == pid) {
+        post.comments += 1;
+      }
+    }
+  }
+
+  onDeletePost(pid: number): void {
+    this.posts = this.posts.filter(item => item.id != pid);
+    this.squareService.deletePost(pid)
+        .subscribe(res => {this.squareService.refreshInfo.emit(true)});
   }
 
 }

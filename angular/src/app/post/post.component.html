@@ -5,7 +5,7 @@
     <span class="toolbar">
         <a *ngIf="owned" (click)="deletePost()">Delete</a>&nbsp;
         <a  (click)="child.switchShow()">Comments({{post.comments}})</a>&nbsp;
-        <a *ngIf="post.mid < 0" (click)="markPost()">Mark</a>
+        <a *ngIf="post.mid < 1" (click)="markPost()">Mark</a>
         <a *ngIf="post.mid > 0" (click)="unmarkPost()">Marked</a>
     </span>
 </div>
