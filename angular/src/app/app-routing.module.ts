@@ -6,16 +6,19 @@ import { UserComponent } from './user/user.component';
 import { MessageComponent } from './message/message.component';
 import { HelpComponent } from './help/help.component';
 import { SearchComponent } from './search/search.component';
+import { LoginComponent } from './login/login.component';
 
 
 const route: Routes = [
-  { path: '', component: ContentComponent, pathMatch: 'full' },
+  { path: '', component: LoginComponent },
   { path: 'home', component: ContentComponent, pathMatch: 'full' },
   { path: 'setting', component: SettingPageComponent },
   { path: 'user/:op', component: UserComponent },
   { path: 'message', component: MessageComponent },
   { path: 'help', component: HelpComponent },
   { path: 'search/:keyword', component: SearchComponent },
+  { path: 'login', component: LoginComponent},
+  { path: 'login.html', component:LoginComponent},
 ]
 
 @NgModule({

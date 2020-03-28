@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { SquareService } from './square.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -8,13 +9,18 @@ import { SquareService } from './square.service';
 })
 export class AppComponent {
   title = 'angular';
+  show = true;
 
-  constructor(private squareService: SquareService){
-    let [id, _] = this.squareService.getUserInfoFromCookie();
-    if (id <= 0) {
-      window.location.href="../login.html";
-    }
+  constructor(
+    private squareService: SquareService,
+    private router: Router) {
+      let [id, _] = this.squareService.getUserInfoFromCookie();
+      if (id <= 0) {
+        this.router.navigate(['/home']);
+        this.show = false;
+      } else {
+        this.router.navigate(['/home']);
+      }
   }
-
 
 }

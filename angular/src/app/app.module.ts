@@ -19,6 +19,8 @@ import { UserComponent } from './user/user.component';
 import { MessageComponent } from './message/message.component';
 import { HelpComponent } from './help/help.component';
 import { SearchComponent } from './search/search.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +39,8 @@ import { SearchComponent } from './search/search.component';
     MessageComponent,
     HelpComponent,
     SearchComponent,
+    LoginComponent,
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,

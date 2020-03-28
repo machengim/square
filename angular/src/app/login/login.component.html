@@ -1,0 +1,16 @@
+<div class="index">
+    <form id="login" class="box">
+        <h1>Anon Square</h1>
+        <input type="email" name="email" maxlength="30" placeholder="Email" [(ngModel)]="email" required>
+        <input type="password" name="passwd" placeholder="Password" minlength="6" maxlength="36" [(ngModel)]="password" required>
+        <div class="btns">
+                <button class="btn1" (click)="login()">Login</button>
+                <button class="btn2">Register</button>
+        </div>
+        <div class="other"><a href="#">Forget password?</a></div>
+    </form>
+
+    <footer>
+        Copyright @2020 Anon Square test version. All rights reserved.
+    </footer>
+</div>

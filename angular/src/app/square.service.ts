@@ -58,6 +58,11 @@ export class SquareService {
     return this.http.get<User>(this.userUrl + '/' + id, this.httpOptions);
   }
 
+  login(email: string, password: string): Observable<string> {
+    let data = {"email": email, "password": password};
+    return this.http.post<string>(this.host + '/login', data, this.httpOptions);
+  }
+
   putUserInfo(user: User): Observable<User> {
     return this.http.put<User>(this.userUrl, user, this.httpOptions);
   }

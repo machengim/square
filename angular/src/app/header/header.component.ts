@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   logout(): void {
     if (confirm("Quit?")) {
       this.squareService.logout()
-          .subscribe(res => window.location.href='../login.html');
+          .subscribe(res => this.router.navigate(['/login']));
       }
   }
 
