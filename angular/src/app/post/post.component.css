@@ -20,3 +20,9 @@
     position: absolute;
     right: 10px;
 }
+
+img {
+    margin: 5px 30px;
+    max-width: 400px;
+    max-height: 150px;
+}

@@ -12,6 +12,7 @@ export class SquareService {
   @Output() refreshUser = new EventEmitter<string>();
   @Output() refreshInfo = new EventEmitter<boolean>();
   @Output() refreshKeyword = new EventEmitter<string>();
+  @Output() refreshLogin = new EventEmitter<boolean>();
 
   constructor(private http: HttpClient,
               private cookie: CookieService) { }
@@ -61,6 +62,11 @@ export class SquareService {
   login(email: string, password: string): Observable<string> {
     let data = {"email": email, "password": password};
     return this.http.post<string>(this.host + '/login', data, this.httpOptions);
+  }
+
+  register(email: string, password: string, nickname: string): Observable<string> {
+    let data = {"email": email, "password": password, "nickname": nickname};
+    return this.http.post<string>(this.host + '/register', data, this.httpOptions);
   }
 
   putUserInfo(user: User): Observable<User> {
@@ -122,6 +128,10 @@ export class SquareService {
 
   changeKeyword(keyword: string):void {
     this.refreshKeyword.emit(keyword);
+  }
+
+  newLogin(): void {
+    this.refreshLogin.emit(true);
   }
 
   logout(): Observable<string> {

@@ -17,6 +17,7 @@ type Post struct {
 	Content        string `json:"content"`
 	HasNewComments bool   `json:"hasNewComments"`
 	Mid			   int	  `json:"mid"`
+	Img			   string	`json:"img"`
 }
 
 func CheckNewPost(pid int) (int, error) {
@@ -32,8 +33,8 @@ func CheckNewPost(pid int) (int, error) {
 }
 
 func (post Post) Create(conn *sql.DB) (bool, error) {
-	columns := []string{"uid", "nickname", "isPrivate", "content"}
-	values := []interface{}{post.Uid, post.Nickname, post.IsPrivate, post.Content}
+	columns := []string{"uid", "nickname", "isPrivate", "content", "img"}
+	values := []interface{}{post.Uid, post.Nickname, post.IsPrivate, post.Content, post.Img}
 	_, err := lib.CreateEntry(conn, "post", columns, values)
 	if err != nil {
 		log.Error("Error when inserting new post.")
@@ -56,7 +57,7 @@ func GetPostById(pid int) (Post, error) {
 		return p, err
 	}
 	err = row.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
-		&p.Content, &p.HasNewComments)
+		&p.Content, &p.HasNewComments, &p.Img)
 	return p, err
 }
 
@@ -190,7 +191,7 @@ func readRows(rows *sql.Rows) ([]Post, error) {
 	for rows.Next() {
 		var p Post
 		err := rows.Scan(&p.Id, &p.Ts, &p.Uid, &p.Nickname, &p.IsPrivate, &p.Comments,
-			&p.Content, &p.HasNewComments)
+			&p.Content, &p.HasNewComments, &p.Img)
 		if err != nil {
 			log.Error("Error when reading post results: ", err)
 			return posts, err

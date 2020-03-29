@@ -34,6 +34,11 @@ export class PostListComponent implements OnInit {
     if (data.posts == null) {
       this.hasMore = false; return;
     }
+    for (let post of data.posts) {
+      if (post.img.length > 0) {
+        post.img = 'http://localhost/' + post.img
+      }
+    }
     if (this.posts == null) {
       this.posts = data.posts;
     } else if (op == -1) {

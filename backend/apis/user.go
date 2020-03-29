@@ -28,7 +28,7 @@ func Login(c *gin.Context) {
 	c.BindJSON(&u)
 	if u.Email == "" || u.Password == "" {
 		log.Info("Login info not enough.")
-		c.Abort()
+		c.AbortWithStatusJSON(400, "Info not enough!")
 		return
 	}
 
@@ -58,6 +58,7 @@ func Register(c *gin.Context) {
 	log.Info("Enter register process")
 	var u models.User
 	c.BindJSON(&u)
+	log.Debug(u.Nickname)
 	// Use simple validation first.
 	if strings.TrimSpace(u.Email) == "" || strings.TrimSpace(u.Password) == "" {
 		log.Info("Register info not enough.")

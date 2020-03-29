@@ -29,7 +29,6 @@ export class HeaderComponent implements OnInit {
   onKeydownHandler(event: KeyboardEvent) {
     this.keyword = this.keyword.trim();
     if (this.keyword == "") {
-      alert("Empty input not allowed!");
       return;
     }
     this.router.navigate(['./search/' + this.keyword]);

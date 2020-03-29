@@ -23,9 +23,16 @@ export class LoginComponent implements OnInit {
   login(): void {
     this.squareService.login(this.email, this.password)
         .subscribe(
-          data => this.router.navigate(['/home']),
-          error => alert(error),
+          data => {
+            this.squareService.newLogin();
+            this.router.navigate(['/home'])
+          },
+          error=> alert(error.error),
           );
+  }
+
+  goToRegister(): void {
+    this.router.navigate(['/register']);
   }
 
 }

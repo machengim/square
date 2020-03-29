@@ -17,7 +17,8 @@ CREATE TABLE post (
     isPrivate boolean default false not null,
     comments integer default 0 not null,
     content varchar(300) not null,
-    hasNewComments boolean default false not null
+    hasNewComments boolean default false not null,
+    img varchar(36) not null default ''
 );
 
 CREATE TABLE comment (

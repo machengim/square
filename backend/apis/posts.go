@@ -1,11 +1,14 @@
 package apis
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
 	"square/lib"
 	"square/models"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -217,7 +220,7 @@ func PostPosts(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if p.Content == "" {
+	if p.Content == "" && p.Img == ""{
 		log.Error("No content in the post.")
 		c.Abort()
 		return
@@ -225,7 +228,17 @@ func PostPosts(c *gin.Context) {
 	if p.Nickname == "" {
 		p.Nickname = "Anonymous"
 	}
+	if p.Img != "" {
+		imageName := generateImageFileName()
+		success, err := saveImageFile(imageName, &p)
+		if err != nil || !success {
+			log.Error("Error happens when processing image attachment.")
+			c.Abort()
+			return
+		}
 
+		p.Img = imageName
+	}
 	p.Create(lib.Conn)
 }
 
@@ -240,6 +253,15 @@ func checkPostMarked(posts []models.Post, uid int) []models.Post {
 	}
 
 	return posts
+}
+
+func generateImageFileName() string {
+	current := time.Now().UTC()
+	t := current.Format(time.RFC3339)
+	t = strings.ReplaceAll(t, ":", "")
+	t = strings.ReplaceAll(t, "-", "")
+
+	return t + ".png"
 }
 
 // This function has two usage.
@@ -290,7 +312,6 @@ func getTotalPostByKeyword(keyword string) (int, error) {
 	count, err := lib.QueryCount(table, condition, values)
 	return count, err
 }
-
 
 func getTotalPostByUid(uid int, op int) (int, error) {
 	condition := "WHERE uid=$1"
@@ -350,7 +371,7 @@ func reducePostByOne(pid int) (bool, error) {
 
 	var post models.Post
 	err = row.Scan(&post.Id, &post.Ts, &post.Uid, &post.Nickname, &post.IsPrivate, &post.Comments,
-		&post.Content, &post.HasNewComments)
+		&post.Content, &post.HasNewComments, &post.Img)
 	if err != nil {
 		log.Error("Cannot scan post: ", err)
 		return false, err
@@ -363,6 +384,35 @@ func reducePostByOne(pid int) (bool, error) {
 	}
 	user.Posts -= 1
 	user.UpdateById(lib.Conn)
+	return true, nil
+}
+
+func saveImageFile(fileName string, post *models.Post) (bool, error) {
+	input := post.Img
+	b64data := input[strings.IndexByte(input, ',')+1:]
+	dec, err := base64.StdEncoding.DecodeString(b64data)
+	if err != nil {
+		log.Error("Cannot decode base64 string to image: ", err)
+		return false, err
+	}
+
+	path := "../angular/dist/" + fileName
+	f, err := os.Create(path)
+	if err != nil {
+		log.Error("Cannot create image file in specific path: ", err)
+		return false, err
+	}
+	defer f.Close()
+
+	if _, err := f.Write(dec); err != nil {
+		log.Error("Cannot write image file.")
+		return  false, err
+	}
+	if err := f.Sync(); err != nil {
+		log.Error("Cannot sync file.")
+		return false, err
+	}
+
 	return true, nil
 }
 

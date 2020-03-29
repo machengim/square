@@ -16,11 +16,14 @@ export class AppComponent {
     private router: Router) {
       let [id, _] = this.squareService.getUserInfoFromCookie();
       if (id <= 0) {
-        this.router.navigate(['/home']);
+        this.router.navigate(['/login']);
         this.show = false;
       } else {
         this.router.navigate(['/home']);
       }
+
+      this.squareService.refreshLogin
+          .subscribe(isLogin => this.show = isLogin);
   }
 
 }

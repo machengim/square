@@ -8,6 +8,7 @@ export interface Post {
     content: string,
     hasNewComments: boolean,
     mid: number,
+    img: string,
 }
 
 export interface Comment {
@@ -25,6 +26,7 @@ export interface Draft {
     content: string,
     isAnonymous: boolean,
     isPrivate: boolean,
+    img: string,
 }
 
 export interface PostList {

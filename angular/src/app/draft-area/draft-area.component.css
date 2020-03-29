@@ -24,6 +24,7 @@
     background-color: dimgray;
     color: white;
     border-radius: 5px;
+    font-size: 11px;
 }
 
 #draft_area button:hover{
@@ -40,4 +41,27 @@
 
 #draft_toolbar input, label {
     margin-right: 10px;
+}
+
+#file {
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
+}
+
+#file + label {
+    display: inline-block;
+    width: 100px;
+    padding: 5px 10px;
+    margin-right: 30px;
+    background-color: dimgray;
+    color: white;
+    border-radius: 5px;
+    font-family: sans-serif;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+#file + label:hover {
+    background-color: black;
 }

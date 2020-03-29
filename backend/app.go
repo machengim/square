@@ -28,6 +28,7 @@ func main() {
 	// Cooperate with axios withCredentials to transfer cookie in cors mode.
 	corsConfig.AllowCredentials = true
 	app.Use(cors.New(corsConfig))
+	app.MaxMultipartMemory = 8 << 20 // Max file size allowed is 8MB.
 
 	app.POST("/login", apis.Login)
 	app.POST("/register", apis.Register)

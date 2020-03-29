@@ -7,10 +7,12 @@ import { MessageComponent } from './message/message.component';
 import { HelpComponent } from './help/help.component';
 import { SearchComponent } from './search/search.component';
 import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { AppComponent } from './app.component';
 
 
 const route: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: AppComponent },
   { path: 'home', component: ContentComponent, pathMatch: 'full' },
   { path: 'setting', component: SettingPageComponent },
   { path: 'user/:op', component: UserComponent },
@@ -18,7 +20,7 @@ const route: Routes = [
   { path: 'help', component: HelpComponent },
   { path: 'search/:keyword', component: SearchComponent },
   { path: 'login', component: LoginComponent},
-  { path: 'login.html', component:LoginComponent},
+  { path: 'register', component: RegisterComponent},
 ]
 
 @NgModule({

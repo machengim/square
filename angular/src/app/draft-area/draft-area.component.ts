@@ -13,11 +13,14 @@ export class DraftAreaComponent implements OnInit {
   selected = false;
   draft: Draft;
   post: Post;   // Used to generate a temporaral post from the draft.
+  selectedFile: File;
+  btn_text: string;
 
   constructor(private squareService: SquareService) { }
 
   ngOnInit(): void {
     this.initDraft();
+    this.resetBtnText();
   }
 
   initDraft(): void {
@@ -27,7 +30,12 @@ export class DraftAreaComponent implements OnInit {
       content: "",
       isAnonymous: false,
       isPrivate: false,
+      img: "",
     }
+  }
+
+  resetBtnText(): void {
+    this.btn_text = "Choose an image..";
   }
 
   generatePost(): void {
@@ -43,7 +51,8 @@ export class DraftAreaComponent implements OnInit {
       comments: 0,
       content: this.draft.content,
       hasNewComments: false,
-      mid: -1
+      mid: -1,
+      img: this.draft.img,
     }
   }
 
@@ -53,16 +62,49 @@ export class DraftAreaComponent implements OnInit {
 
 
   submitDraft(): void {
-    this.generatePost();
-    this.squareService.postDraft(this.post)
-        .subscribe(data => this.handleSubmitRes());
+    if (this.draft.content.trim() == "" && this.selectedFile == null) {
+      alert("No content.");
+      return;
+    }
+
+    if (this.selectedFile == null) {
+      this.generatePost();
+      this.squareService.postDraft(this.post)
+      .subscribe(data => this.handleSubmitRes());
+    } else {
+      let myReader = new FileReader();
+      myReader.readAsDataURL(this.selectedFile);
+      myReader.onloadend = (e) => {
+        this.draft.img = String(myReader.result);
+        this.generatePost();
+        this.squareService.postDraft(this.post)
+            .subscribe(data => this.handleSubmitRes());
+      }
+    }
+
   }
 
   handleSubmitRes(): void {
     this.selected = false;
     this.initDraft();
+    this.resetBtnText();
     this.submitted.emit(true);
     this.squareService.draftSent();
+  }
+
+  onFileChanged(event) {
+    this.selectedFile = event.target.files[0];
+    if (this.selectedFile == null) {
+      this.resetBtnText();
+      return;
+    }
+
+    let name = this.selectedFile.name;
+    if (name.length > 20) {
+      name = name.slice(-20, );
+    } 
+
+    this.btn_text = name;
   }
 
 }

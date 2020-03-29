@@ -1,11 +1,11 @@
 <div class="index">
-    <form id="login" class="box">
+    <form id="login" class="box" method="POST" (submit)="login()" ngNativeValidate>
         <h1>Anon Square</h1>
-        <input type="email" name="email" maxlength="30" placeholder="Email" [(ngModel)]="email" required>
-        <input type="password" name="passwd" placeholder="Password" minlength="6" maxlength="36" [(ngModel)]="password" required>
+        <input type="email" name="email" maxlength="30" placeholder="Email" autocomplete="off" required [(ngModel)]="email">
+        <input type="password" name="passwd" placeholder="Password" minlength="6" maxlength="36" required [(ngModel)]="password">
         <div class="btns">
-                <button class="btn1" (click)="login()">Login</button>
-                <button class="btn2">Register</button>
+                <button type="submit" class="btn1">Login</button>
+                <button class="btn2" (click)="goToRegister()">Register</button>
         </div>
         <div class="other"><a href="#">Forget password?</a></div>
     </form>
