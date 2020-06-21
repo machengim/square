@@ -1,7 +1,5 @@
 .vscode/*
-**/config.json
-**/docker-compose.yml
-**/pgdata
+**/pgdata/*
 **/square
 **/.idea/
 **/node_modules
