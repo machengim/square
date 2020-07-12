@@ -1,0 +1,47 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: rgb(24, 105, 59);
+}
+
+a:hover {
+    color: rgb(26, 221, 26);
+    text-decoration: underline;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: lightgray;
+}
+
+main {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+#wrapper {
+    position: relative;
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    min-height: calc(88vh - 40px);
+}
+
+article {
+    width: 650px;
+    margin: 0 20px;
+    float: left;
+}
+
+aside {
+    margin: 0 10px;
+    float: left;
+    width: 270px;
+}
