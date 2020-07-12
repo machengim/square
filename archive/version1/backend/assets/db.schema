@@ -1,0 +1,30 @@
+/***
+* Comments are considered as posts as well.
+* uid: the id of user that posted this content;
+* status: 0 means public, 1 means private, 2 means it's a comment;
+* rid: for comments, the originial post it refers to.
+* comments: the comment number of this post.
+***/
+
+CREATE TABLE post (
+    id serial primary key,
+    ts timestamp without time zone default(timezone('utc', now())) not null,
+    uid integer not null,
+    nickname varchar(16) not null,
+    status integer default 0 not null,
+    rid integer default 0,
+    comments integer default 0 not null,
+    content text not null
+);
+
+CREATE TABLE customer (
+    id serial primary key,
+    email varchar(24) not null,
+    password varchar(16) not null,
+    nickname varchar(16) default 'Anonymous',
+    ip varchar(15),
+    posts integer not null default 0,
+    marks integer not null default 0,
+    messages integer not null default 0,
+    comments integer not null default 0
+);

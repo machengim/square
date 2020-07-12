@@ -1,0 +1,296 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: lightgray;
+}
+
+label {
+    padding: 40px 20px 0 0;
+    font-size: 14px;
+}
+
+header{
+    position: relative;
+    margin-bottom: 50px;
+    overflow: hidden;
+    min-width: 1024px;
+    background-color: #1e3f35;
+}
+
+nav{
+    position: relative; 
+    /* Important for serach bar, since absolute layout cannot have a static paretent */
+    width: 1000px;
+    overflow: hidden;
+    padding-top: 12px;
+    margin: auto;   /* make div center */
+}
+
+.nav_logo{
+    width: 150px;
+    height: 60px;
+    float: left;
+    font-size: 28px;
+    color: #e1e2d4;
+}
+
+.nav_items {
+    float: left;
+    margin-top: 15px;
+    color: #e1e2d4;
+}
+
+.nav_items li {
+    display: inline;
+    margin-right: 20px;
+}
+
+.nav_items a{
+    color: #e1e2d4;
+}
+
+.nav_items a:hover{
+    color: rgb(160, 250, 183);
+}
+
+.nav_search {
+    position: absolute;
+    right: 0;
+    margin-top: 15px;
+    overflow: hidden;
+    padding: 10px 100px 15px 0;
+}
+
+#top_search {
+    border: 1px solid #b9b6b6;
+    padding: 5px;
+    width: 200px;
+    height: 16px;
+    font-size: 14px;
+    background-color: #f5f1e3;
+}
+
+#top_search:focus {
+    background-color: white;
+}
+
+content {
+    position: relative;
+    overflow: hidden;
+    min-width: 1024px;
+}
+
+/* Use margin auto to put element in center horizontally, 
+   Use flex to make two grid equal height vertically. */
+#wrapper {
+    position: relative;
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    min-height: calc(85vh - 40px);
+}
+
+article {
+    width: 650px;
+    margin: 0 20px;
+    float: left;
+}
+
+aside {
+    margin: 0 10px;
+    float: left;
+    width: 270px;
+}
+
+#draft {
+    border: 1px solid #b9b6b6;
+    padding: 5px;
+    width: 600px;
+    height: 20px;
+    font-size: 14px;
+}
+
+#submit {
+    float: right;
+    margin: 0 40px 0 0;
+}
+
+#hide {
+    margin: 0 40px 0 0;
+}
+
+#write_box {
+    margin-bottom: 30px;
+}
+
+.input_btn{
+    height: 25px;
+    padding: 0 10px;
+    background-color: dimgray;
+    color: white;
+    border-radius: 5px;
+}
+
+.input_btn:hover {
+    background-color: black;
+}
+
+.post_options {
+    float: right;
+}
+
+.post{
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.post .author{
+    color: #585757;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.text {
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+}
+
+.post .foot {
+    font-size: 14px;
+    color: grey;
+}
+
+.post .tool {
+    position: absolute;
+    right: 10px;
+}
+
+.loadmore {
+    width: 650px;
+    margin: 0 0 30px 0;
+}
+
+.btnmore {
+    height: 30px;
+    width: 100%;
+    background-color: #1e3f35;
+    color: #e1e2d4;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #e1e2d4;
+}
+
+.btnmore:hover{
+    background-color: #1b6b53;
+}
+
+.btnmore_out {
+    margin: 0 100px;
+}
+
+.btnnew {
+    margin: 0 auto;
+    border: 0;
+    height: 25px;
+    width: 100%;
+    background-color: #fcfae6;
+    color: rgb(27, 22, 8);
+    letter-spacing: 2px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.nickname {
+    display: inline-block;
+    font-family: sans-serif;
+    font-size: 18px;
+    color: darkslategray;
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.changing {
+    border: none;
+    border-width: 0;
+    max-width: 140px;
+    background-color: white;
+}
+
+.nickname_right {
+    position: relative;
+    display: inline-block;
+    margin-left: 25px;
+}
+
+.btn_change {
+    position:  absolute;
+    bottom: 0;
+    height: 20px;
+    background-color: rgb(235, 229, 229);
+    border-radius: 5px;
+}
+
+.btn_change:hover {
+    background-color: white;
+}
+
+#user_info {
+    background-color: whitesmoke;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.info_list {
+    margin: 8px auto;
+}
+.info_title {
+    display: inline;
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+.info_detail {
+    display: inline;
+    margin-left: 15px;
+    color: rgb(38, 77, 1);
+    font-size: 16px;
+}
+
+.info_detail a {
+    color: rgb(38, 77, 1);
+}
+
+.info_detail a:hover {
+    color: rgb(104, 33, 60);
+}
+
+.comment_input {
+    border: 1px solid #b9b6b6;
+    margin:20px 20px 10px 20px;
+    padding: 5px;
+    width: 500px;
+    height: 40px;
+    font-size: 14px;
+}
+
+footer{
+    margin: 0 auto;
+    width: 800;
+    padding-right: 100px;
+    height: 30px;
+    font-size: 14px;
+    text-align: center;
+    color: grey;
+}

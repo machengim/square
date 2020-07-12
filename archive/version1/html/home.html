@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Square</title>
+        <link rel="stylesheet" href="home.css">
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        
+    </head>
+    <body>
+        <header>
+            <nav>
+                <div class="nav_logo">Square</div>
+                <div class="nav_items">
+                    <ul>
+                        <li><a href='home.html' target="_self">Home</a></li>
+                        <li>Message</li>
+                        <li>Setting</li>
+                        <li>Help</li>
+                        <li><a href="#" onclick="quit()">Quit</a></li>
+                    </ul>
+                </div>
+                <div class="nav_search">
+                    <form>
+                        <input id="top_search" placeholder="Search">
+                    </form>
+                </div>
+            </nav> 
+        </header>
+
+        <content>
+            <div id="wrapper">
+                <article>
+                    <form id="draft_form" onsubmit="return submit_post();">
+                        <div id="write_box">
+                            <div class="text">Write a post:</div>
+                            <textarea ref="draft" id="draft" name="draft" placeholder="Share your thought" v-on:focus="show_area"></textarea>
+                            <div v-show="show">
+                                <button id="hide" class="input_btn" type="button" v-on:click="hide_area">Collapse</button>
+                                <div class="post_options">
+                                    <input type="checkbox" name="is_anonymous">
+                                    <label>Anonymous</label>
+                                    <input type="checkbox" name="is_private">
+                                    <label>Private only</label>
+                                    <button id="submit" class="input_btn" type="submit">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="post_list">
+                        <div v-if="hasNew>0" class="loadmore"><button class="btnnew">Load {{hasNew}} new posts</button></div>
+                        <div class="post" v-for="item in items">
+                            <div class="author">{{ item.nickname }} said:</div>
+                            <div class="text">{{ item.content }}</div>
+                            <div class="foot">
+                                <span class="time">{{ item.ts }}</span>
+                                <span class="tool"><a @click="readComments(item.id)">Comments({{ item.comments }})</a> Mark</span>
+                            </div>
+                            <div v-show="item.showComments">
+                                <div v-for="comment in item.comments">
+                                    <div>{{ comment.content }}</div>
+                                </div>
+                                <div>
+                                    <textarea v-model="item.newComment" placeholder="comments" class="comment_input"></textarea>
+                                    <button class="input_btn" @click="sendComment(item.id)">Send</button>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                        <div class="loadmore" v-if="hasOld"><div class="btnmore_out"><button class="btnmore" @click="loadOld">Load More</button></div></div>
+                    </div>
+                </article>
+
+                <aside>
+                    <div id="user_info">
+                        <p> </p>
+                        <div class="nickname" v-if="changing">
+                            <input ref="newNameInput" v-model="newName" class="nickname changing">
+                        </div>
+                        <div class="nickname" v-else>{{info.nickname}}</div>
+                        <div class="nickname_right">
+                            <button v-if="changing" class="btn_change" @click="submitChangeName()">Submit</button>
+                            <button v-else class="btn_change" @click="changeName()">Change</button>
+                        </div>
+                        <hr>
+                        <div class="info_list">
+                            <div class="info_title">Posts:</div>
+                            <div class="info_detail"><a href="#">{{info.posts}}</a></div>
+                        </div>
+                        <div class="info_list">
+                            <div class="info_title">Marked:</div>
+                            <div class="info_detail"><a href="#">{{info.marked}}</a></div>
+                        </div>
+                        <div class="info_list">
+                            <div class="info_title">New comments:</div>
+                            <div class="info_detail"><a href="#">{{info.comments}}</a></div>
+                        </div>
+                    </div>
+                </aside>
+            </div>            
+        </content>
+        <footer>
+            Copyright 2020 Square test version.
+        </footer>
+        <script src="home.js"></script>
+        <script type="text/javascript"> </script>
+
+    </body>
+</html>
