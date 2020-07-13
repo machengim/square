@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import Home from './pages/home';
 import Message from './pages/message';
 import Setting from './pages/setting';
+import About from './pages/about';
 import Header from './components/header';
 import './index.css';
 
@@ -20,6 +21,9 @@ ReactDOM.render(
             </Route>
             <Route exact path="/setting">
                 <Setting />
+            </Route>
+            <Route exact path="/about">
+                <About />
             </Route>
         </Switch>
     </BrowserRouter>,

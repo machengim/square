@@ -12,7 +12,7 @@ export default function Header() {
                     <li><Link to='/'>Home</Link></li>
                     <li><Link to='/message'>Message</Link></li>
                     <li><Link to='/setting'>Setting</Link></li>
-                    <li><a>Quit</a></li>
+                    <li><Link to='/setting'>About</Link></li>
                 </ul>
             </div>
             <div id="nav_search">

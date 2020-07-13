@@ -45,3 +45,7 @@ aside {
     float: left;
     width: 270px;
 }
+
+div .hidden{
+    display: none;
+}

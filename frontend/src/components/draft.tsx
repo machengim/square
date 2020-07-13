@@ -1,8 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import './draft.css';
 
+/**
+ * TODO: form submit validation;
+ *       file size limit.
+ */
+
 export default function Draft() {
-    let limit = 15;
 
     const [writing, setWriting] = useState(false);
     const [anonymous, setAnonymous] = useState(false);
@@ -21,6 +25,8 @@ export default function Draft() {
     }
 
     useEffect(() => {
+        let limit = 15;     // max length of the text shown on the 'Choose image' button.
+
         if (selectedFile) {     // means 'selectedFile' is not null, undefined, 0, empty or false.
             let name = selectedFile.name;
             if (name.length > limit) name = '..' + name.slice(-limit, );
