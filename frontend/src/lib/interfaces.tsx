@@ -1,30 +1,37 @@
 export interface Post {
-    pid: number;
+    pid?: number;   // not required in request.
     uid?: number;   // not required in response for user's privacy.
     uname: string;
     content: string;
     ctime: string;
     comments: number;
     marked?: boolean;   // not required in request.
-    showComments?: boolean;     //not required in response.
+}
+
+export interface Comment {
+    cid?: number;   // not required in request.
+    pid: number;
+    uid?: number; // not required in response for user's privacy.
+    uname: string;
+    content: string;
+    ctime: string;
 }
 
 // Response from the API server.
-export interface Response {
+export interface PostsResponse {
     hasMore: boolean;
     maxPid: number;
     minPid: number;
     posts: Array<Post>;
 }
 
+export interface CommentsResponse {
+    hasMore: boolean;
+    minCid: number;
+    comments: Array<Comment>;
+}
+
 export interface PostProps {
     value: Post;
-}
-
-export interface NumberProps {
-    value: number;
-}
-
-export interface BooleanProps {
-    value: boolean;
+    show?: boolean;
 }
