@@ -3,6 +3,10 @@ body{
     padding: 0;
 }
 
+body .modal-open {
+    overflow: hidden;
+}
+
 a {
     text-decoration: none;
     cursor: pointer;
@@ -31,7 +35,7 @@ main {
     display: flex;
     width: 1000px;
     margin: 0 auto;
-    min-height: calc(88vh - 40px);
+    min-height: calc(85vh - 20px);
 }
 
 article {
@@ -48,4 +52,14 @@ aside {
 
 div .hidden{
     display: none;
+}
+
+footer{
+    margin: 0 auto;
+    width: 80%;
+    padding-right: 100px;
+    height: 20px;
+    font-size: 14px;
+    text-align: center;
+    color: grey;
 }

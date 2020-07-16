@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps} from '../lib/interfaces';
+import {Post, Comment, PostsResponse, CommentsResponse, PostProps, Image, ImageList} from '../lib/interfaces';
+import Lightbox from './lightbox';
 import {request} from '../lib/utils';
 import './postlist.css';
 
@@ -14,6 +15,10 @@ export default function PostList() {
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
     useState(() => request(apiUrl, handleResponse, handleError));    // used to init data.
+
+    useEffect(() => {
+        console.log('min pid is ' + minPid);
+    }, [minPid]);
 
     function handleResponse(res: globalThis.Response) {
         res.json().then(
@@ -37,10 +42,6 @@ export default function PostList() {
         const apiUrl2 = 'https://5f0bdaca9d1e150016b377f6.mockapi.io/api/endposts';
         request(apiUrl2, handleResponse, handleError);
     }
-
-    useEffect(() => {
-        console.log('min pid is ' + minPid);
-    }, [minPid]);
 
     return (
         <div id="post_list">
@@ -72,12 +73,13 @@ function PostEntry(props: PostProps) {
     const post = props.value;
     const [showComments, setShowComments] = useState(false);
     const [marked, setMarked] = useState(post.marked);
+    const [images, setImages] = useState(new Array<Image>());
 
-    function switchShowComments() {
+    function toggleShowComments() {
         setShowComments(!showComments);
     }
 
-    function switchMark() {
+    function toggleMarked() {
         setMarked(!marked);
     }
 
@@ -87,11 +89,12 @@ function PostEntry(props: PostProps) {
         <>
             <div className="author">{post.uname} said:</div>
             <div className="content">{post.content}</div>
+            <Lightbox value={images} />
             <div className="foot">
                 <span>5 minutes ago</span>
                 <span className="toolbar">
-                    <a onClick={() => switchShowComments()}>Comments({post.comments})</a>
-                    &nbsp;<a onClick={() => switchMark()}>{marked? 'Marked': 'Mark'}</a></span>
+                    <a onClick={() => toggleShowComments()}>Comments({post.comments})</a>
+                    &nbsp;<a onClick={() => toggleMarked()}>{marked? 'Marked': 'Mark'}</a></span>
             </div>
             <CommentList value={post} show={showComments}/>
         </>
@@ -113,7 +116,7 @@ function CommentList(props: PostProps) {
         request(commentUrl, handleResponse, handleError);
     }, [show]);
 
-    if (!show || !post || post.comments === 0) return null;
+    if (!show || !post) return null;
 
     function handleResponse(res: globalThis.Response) {
         res.json().then(
@@ -139,4 +142,18 @@ function CommentList(props: PostProps) {
             <button>Send</button>
         </div>
     )
+}
+
+// used to test Lightbox, needs to remove later.
+function test(): Image[] {
+    let i1: Image = {
+        pid: 4,
+        thumbnail: 'https://pbs.twimg.com/media/Ec8VfxDXYAM53Hj?format=jpg&name=900x900',
+        url: 'https://pbs.twimg.com/media/Ec8VfxDXYAM53Hj?format=jpg&name=large'};
+    let i2: Image = {
+        pid: 4,
+        thumbnail: 'https://pbs.twimg.com/media/Ec_uexnXkAAA_Cl?format=jpg&name=small',
+        url: 'https://pbs.twimg.com/media/Ec_uexnXkAAA_Cl?format=jpg&name=medium'};
+    
+    return [i1, i2];
 }

@@ -197,6 +197,16 @@ article #title {
     margin-bottom: 5px;
 }
 
+.post .attachment {
+    margin: 10px 0 10px 20px;
+}
+
+.post .attachment img{
+    max-width: 400px;
+    max-height: 150px;
+    border-radius: 20px;
+}
+
 .post .foot {
     font-size: 14px;
     color: grey;

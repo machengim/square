@@ -12,9 +12,9 @@
 
 #btn_loadmore {
     display: block;
-    margin: 0 auto;
+    margin: 5px auto 15px auto;
     height: 30px;
-    width: 60%;
+    width: 80%;
     background-color: #1e3f35;
     color: #e1e2d4;
     font-size: 16px;
@@ -37,6 +37,15 @@
     font-size: 16px;
     font-family: sans-serif;
     margin-bottom: 5px;
+}
+
+.post .attachment {
+    margin: 10px 0 10px 20px;
+}
+
+.post .attachment img{
+    max-width: 500px;
+    border-radius: 20px;
 }
 
 .post .foot {

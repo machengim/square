@@ -4,8 +4,10 @@ import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import Home from './pages/home';
 import Message from './pages/message';
 import Setting from './pages/setting';
+import PageNotFound from './pages/404';
 import About from './pages/about';
 import Header from './components/header';
+import Footer from './components/footer';
 import './index.css';
 
 
@@ -25,7 +27,9 @@ ReactDOM.render(
             <Route exact path="/about">
                 <About />
             </Route>
+            <Route component={PageNotFound} />
         </Switch>
+        <Footer />
     </BrowserRouter>,
     document.getElementById('root')
 );
