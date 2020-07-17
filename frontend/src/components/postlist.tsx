@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps, Image, ImageList} from '../lib/interfaces';
+import {Post, Comment, PostsResponse, CommentsResponse, PostProps, Image} from '../lib/interfaces';
 import Lightbox from './lightbox';
 import {request} from '../lib/utils';
 import './postlist.css';
@@ -73,7 +73,7 @@ function PostEntry(props: PostProps) {
     const post = props.value;
     const [showComments, setShowComments] = useState(false);
     const [marked, setMarked] = useState(post.marked);
-    const [images, setImages] = useState(new Array<Image>());
+    const [images, setImages] = useState(new Array<Image>());   //TODO: needs to init.
 
     function toggleShowComments() {
         setShowComments(!showComments);
@@ -144,7 +144,7 @@ function CommentList(props: PostProps) {
     )
 }
 
-// used to test Lightbox, needs to remove later.
+//TODO: used to test Lightbox, needs to remove later.
 function test(): Image[] {
     let i1: Image = {
         pid: 4,

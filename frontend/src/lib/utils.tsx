@@ -9,3 +9,8 @@ export function request(url: string, callback: Function, errorHandler: Function)
             }
         })
 }
+
+// a place holder to fill in the UserForContext fields 'setUid' and 'setUname'.
+export function empty() {
+    return;
+}

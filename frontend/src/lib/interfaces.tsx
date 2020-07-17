@@ -1,3 +1,10 @@
+export interface UserForContext {
+    uid: number;
+    uname: string;
+    setUid: Function;
+    setUname: Function;
+}
+
 export interface Post {
     pid?: number;   // not required in request.
     uid?: number;   // hidden in response for user's privacy.
