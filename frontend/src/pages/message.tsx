@@ -2,6 +2,10 @@ import React from 'react';
 
 export default function Message() {
     return (
-        <div>Message</div>
+        <main>
+            <div id='wrapper'>
+                Message
+            </div>
+        </main>
     );
 }

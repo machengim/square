@@ -5,9 +5,7 @@ import './draft.css';
  * TODO: form submit validation;
  *       file size limit.
  */
-
 export default function Draft() {
-
     const [writing, setWriting] = useState(false);
     const [anonymous, setAnonymous] = useState(false);
     const [isPrivate, setPrivate] = useState(false);

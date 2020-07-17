@@ -12,7 +12,7 @@
 }
 
 /* The Modal (background) */
-.modal {
+.lightbox {
   display: none;
   position: fixed;
   z-index: 1;
@@ -26,7 +26,7 @@
   text-align: center;
 }
 
-.modal img {
+.lightbox img {
   margin: auto;
   width: auto;
   height: auto;

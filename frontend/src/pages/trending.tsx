@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function About() {
+export default function Trending() {
     return (
         <main>
             <div id='wrapper'>
-                About
+                Trending
             </div>
         </main>
     );

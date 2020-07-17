@@ -12,7 +12,8 @@ export interface Post {
     content: string;
     ctime: string;
     comments: number;
-    marked?: boolean;   // not required in request.
+    marked?: boolean;   // whether it's marked by current user. Not required in request.
+    owner?: boolean;    // whether it's owned by current user. Not required in request.
     attachments?: number;    // not required in request
 }
 
@@ -53,5 +54,12 @@ export interface CommentsResponse {
 
 export interface PostProps {
     value: Post;
-    show?: boolean;
+    onDelete: Function; // function to delete current post.
+    show?: boolean;     // whether the comments are shown.
+}
+
+export interface UserSummary {
+    posts: number;
+    marks: number;
+    messages: number;
 }

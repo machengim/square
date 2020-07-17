@@ -2,6 +2,10 @@ import React from 'react';
 
 export default function Setting() {
     return (
-        <div>Setting</div>
+        <main>
+            <div id='wrapper'>
+                Setting
+            </div>
+        </main>
     );
 }

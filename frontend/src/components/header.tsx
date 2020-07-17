@@ -10,9 +10,9 @@ export default function Header() {
             <div id="nav_items">
                 <ul>
                     <li><Link to='/'>Home</Link></li>
-                    <li><Link to='/message'>Message</Link></li>
+                    <li><Link to='/trending'>Trending</Link></li>
                     <li><Link to='/setting'>Setting</Link></li>
-                    <li><Link to='/setting'>About</Link></li>
+                    <li><Link to='/about'>About</Link></li>
                 </ul>
             </div>
             <div id="nav_search">

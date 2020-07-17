@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import Home from './pages/home';
-import Message from './pages/message';
+import Trending from './pages/trending';
 import Setting from './pages/setting';
 import PageNotFound from './pages/404';
 import About from './pages/about';
@@ -20,8 +20,8 @@ ReactDOM.render(
                 <Route exact path='/'>
                     <Home />
                 </Route>
-                <Route exact path='/message'>
-                    <Message />
+                <Route exact path='/trending'>
+                    <Trending />
                 </Route>
                 <Route exact path='/setting'>
                     <Setting />

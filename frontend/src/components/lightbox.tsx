@@ -7,6 +7,7 @@ import './lightbox.css';
  * TODO: image access authentication:
  * approach 1: signed URL in limited period, has security problem;
  * apporach 2: blob response, suffers in performance.
+ * TODO: clean css file.
  */
 export default function Lightbox(props: ImageList) {
     const [images] = useState(props.value);
@@ -19,7 +20,7 @@ export default function Lightbox(props: ImageList) {
         // prevent the scrollbar from missing after closing a modal.
         document.body.style.overflow = (showModal)? 'hidden': 'auto';
 
-        let modal = document.getElementById('myModal');
+        let modal = document.getElementById('lightbox');
         if (!modal) return;
         modal.style.display = (showModal)? 'block': 'none';
     }, [showModal]);
@@ -42,7 +43,7 @@ export default function Lightbox(props: ImageList) {
             </div>
             
             {showModal && (
-                <div id='myModal' className='modal'>
+                <div id='lightbox' className='lightbox'>
                     <span className="close cursor" onClick={() => setShowModal(false)}>&times;</span>
                     <img src={images[current].url} alt='' onClick={() => moveIndex(1)} />
                     {length > 0 &&  (
