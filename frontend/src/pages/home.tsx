@@ -6,7 +6,7 @@ import {UserContext} from '../lib/context';
 
 export default function Home() {
     const user = React.useContext(UserContext);
-    user.setUname('Harry Potter');
+    user.setUname('Harry Potter');  // Test setState. TODO: needs to remove later.
 
     return (
         <main>

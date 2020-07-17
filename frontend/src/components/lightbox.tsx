@@ -33,7 +33,6 @@ export default function Lightbox(props: ImageList) {
         setCurrent(temp);
     }
 
-
     return (
         <>
             <div className="attachments">

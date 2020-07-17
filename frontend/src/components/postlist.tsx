@@ -16,10 +16,6 @@ export default function PostList() {
     const [maxPid, setMaxPid] = useState(-1);
     useState(() => request(apiUrl, handleResponse, handleError));    // used to init data.
 
-    useEffect(() => {
-        console.log('min pid is ' + minPid);
-    }, [minPid]);
-
     function handleResponse(res: globalThis.Response) {
         res.json().then(
             (result: PostsResponse) => {
@@ -69,6 +65,7 @@ export default function PostList() {
 
 }
 
+
 function PostEntry(props: PostProps) {
     const post = props.value;
     const [showComments, setShowComments] = useState(false);
@@ -100,6 +97,7 @@ function PostEntry(props: PostProps) {
         </>
     );
 }
+
 
 function CommentList(props: PostProps) {
     const post = props.value;
@@ -143,6 +141,7 @@ function CommentList(props: PostProps) {
         </div>
     )
 }
+
 
 //TODO: used to test Lightbox, needs to remove later.
 function test(): Image[] {

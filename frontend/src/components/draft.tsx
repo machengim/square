@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, ChangeEvent } from 'react';
 import './draft.css';
 
 /**
@@ -14,16 +14,6 @@ export default function Draft() {
     const [btnText, setBtnText] = useState("Choose image");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    function triggerSelectFile(): void {
-        let ele = document.getElementById('file');
-        if (ele)
-            ele.click();
-    }
-
-    function handleFileChange(event: any): void {
-        setSelectedFile(event.target.files[0]);
-    }
-
     useEffect(() => {
         let limit = 15;     // max length of the text shown on the 'Choose image' button.
 
@@ -35,6 +25,17 @@ export default function Draft() {
             setBtnText('Choose image');
         }
     }, [selectedFile]);
+
+    function triggerSelectFile(): void {
+        let element;
+        if (element = document.getElementById('file'))
+            element.click();
+    }
+
+    function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
+        if (event.target.files)
+            setSelectedFile(event.target.files[0]);
+    }
 
     return (
         <div id="draft_area">
