@@ -13,7 +13,7 @@ export const UserContext = createContext(fakeUser());
 export function UserProvider(props: any) {
     // Default user info.
     const [uid, setUid] = useState(1);  // TODO: Guest uid should be set to 0.
-    const [uname, setUname] = useState('Guest');
+    const [uname, setUname] = useState('Harry');
 
     useEffect(() => {
         console.log(uid + uname);

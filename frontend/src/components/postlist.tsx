@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps, Image} from '../lib/interfaces';
+import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image, Range} from '../lib/interfaces';
 import Lightbox from './lightbox';
 import {BaseUrl, request} from '../lib/utils';
 import './postlist.css';
@@ -7,59 +7,95 @@ import './postlist.css';
 /**
  * TODO: comments, update state from child components..
  * TODO: when user clicks mark or delete a post in the list, it should reflect on the panel component.
+ * TODO: display different elements according to the 'op' value passed from 'home.tsx'.
  */
-export default function PostList(props: any) {
-    // control which post list to display.
-    // 0 for default public posts, 1 for user's own posts, 2 for user's marks.
-    const [op, setOp] = useState(props.op);     
+export default function PostList(props: PageOptionProps) {
+    const [op, setOp] = useState(props.op);
     //TODO: wait for websocket implementation.
     const [newPost, setNewPost] = useState(0);  
-    const [hasMore, setHasMore] = useState(true);
+    const [hasMore, setHasMore] = useState(false);
     const [posts, setPosts] = useState(new Array<Post>());
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
+    const [loading, setLoading] = useState(true);
+    const opRange: Range = {min: 0, max: 2};
+    // !! Note: the leading '() =>' can NOT be ignored!
+    useState(() => requestByOption());
 
-    // Used to monitor the parent component change.
+    // monitor the page change by the 'props' value.
     useEffect(() => {
-        setOp(props.op);
-    }, [props]);
+        reset();
 
-    // Request for different posts when 'op' changes.
-    // TODO: set different api urls.
-    useEffect(() => {
-        // Whenever 'op' is changed, the post list needs to be cleared before request.
-        // But this approach has some flaw, since both setPost() and request() are async operations,
-        // theoretically there are slight chances the request() finishes first which would cause a mistake.
-        setPosts(new Array<Post>());
-
-        let url: string;
-        switch (op) {
-            case 1:
-                url = BaseUrl; break;
-            case 2:
-                url = BaseUrl; break;   
-            default:
-                url = BaseUrl + 'posts'; 
+        if (props.op === null || ! validateOp(props.op)) {
+            console.log('Invalid op value: ' + props.op );
+            return;
         }
 
-        request(url, handleResponse, handleError);
+        setOp(props.op);
+        setLoading(true);
+    }, [props]);
+
+    // 'op' value change means openning a different page.
+    useEffect(() => {
+        requestByOption();
     }, [op]);
 
+    // Note this 'reset()' function dosen't include 'setOp()'.
+    function reset() {
+        setPosts(new Array<Post>());
+        setHasMore(false);
+        setMinPid(-1);
+        setMaxPid(-1);
+    }
+
+    function validateOp(opValue: number) {
+        if (opValue === undefined || opValue > 2 || opValue < 0) 
+            return false;
+
+        return true;
+    }
+
+    // TODO: send different request according to the 'op' value.
+    function requestByOption() {
+        let url = '';
+        switch (op) {
+            case 1:
+                // fake URL to test error handling.
+                url = 'https://run.mocky.io/v3/5a17e854-64a7-4398-a416-88ec6b6f8d72';
+                break;
+            case 2:
+                break;
+            default:
+                url = BaseUrl + 'posts';
+        }
+
+        console.log('request for url: ' + url);
+        request(url, handleResponse, handleError);
+    }
+
+    // Don't forget to handle the error of 'json()'.
     function handleResponse(res: globalThis.Response) {
         res.json().then(
             (result: PostsResponse) => {
-                console.log('request in postlist');
+                console.log('got result: ' + result);
                 if (!result) return;
 
                 setPosts(posts.concat(result.posts.slice()));
                 setHasMore(result.hasMore);
                 if (result.maxPid > maxPid) setMaxPid(result.maxPid);
                 if (minPid > result.minPid || minPid <= 0) setMinPid(result.minPid);
+
+                // No matter what response got, loading is finished. Same in catch block.
+                setLoading(false);
             }
-        )
+        ).catch(() => {
+            setLoading(false);
+            console.log('json parse error!\n' + res.body);
+        })
     }
 
     function handleError(res: globalThis.Response) {
+        setLoading(false);
         console.log(res);
     }
 
@@ -72,12 +108,13 @@ export default function PostList(props: any) {
         setPosts(newPostList);
     }
 
-    // LoadNewButton and LoadMoreButton only display in default option (op === 0).
     return (
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
-            {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} /><hr/></div>)}   
-            {op === 0 && hasMore && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
+            {loading && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
+            {!loading && posts.length === 0 && <h2>No posts found.</h2>}
+            {!loading && posts.length > 0 && posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} /><hr/></div>)}   
+            {hasMore && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
         </div>
     );
 

@@ -17,18 +17,12 @@ ReactDOM.render(
         <BrowserRouter>
             <Header />
             <Switch>
-                <Route exact path='/'>
-                    <Home />
-                </Route>
-                <Route exact path='/trending'>
-                    <Trending />
-                </Route>
-                <Route exact path='/setting'>
-                    <Setting />
-                </Route>
-                <Route exact path='/about'>
-                    <About />
-                </Route>
+                <Route exact path='/' component={() => <Home op={0} />}/>
+                <Route exact path='/posts' component={() => <Home op={1} />}/>
+                <Route exact path='/marks' component={() => <Home op={2} />}/>
+                <Route exact path='/trending' component={Trending} />
+                <Route exact path='/setting' component={Setting} />
+                <Route exact path='/about' component={About} />
                 <Route component={PageNotFound} />
             </Switch>
             <Footer />

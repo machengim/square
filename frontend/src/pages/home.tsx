@@ -1,28 +1,30 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import {PageOptionProps} from '../lib/interfaces';
 import Draft from '../components/draft';
 import PostList from '../components/postlist';
 import Panel from '../components/panel';
 
 
-export default function Home() {
-    // control which post list to display.
-    // op === 0 means default public posts, 1 for user's own posts, 2 for user's marks.
-    const [op, setOp] = useState(0);
+/**
+ * @param props: contains a number 'op' that represents which page to show.
+ * op === 0 means '/', 1 means '/posts', 2 means '/marks', and maybe more later.
+ */
+export default function Home(props: PageOptionProps) {
+    const [op, setOp] = useState(props.op);
 
-    // Note setOp() is not a function so it cannot pass to the child component.
-    function changeOption(i: number) {
-        setOp(i);
-    }
+    useEffect(() => {
+        setOp(props.op);
+    }, [props]);
 
     return (
         <main>
-            <div id="wrapper">
-                <article>
-                    {op === 0 && <Draft />}
-                    <PostList op={op} />
-                </article>
-                <Panel setOp={changeOption}/>
-            </div>
-        </main>
+        <div id="wrapper">
+            <article>
+                <Draft />
+                <PostList op={op}/>
+            </article>
+            <Panel/>
+        </div>
+    </main>
     );
 }

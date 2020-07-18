@@ -12,6 +12,7 @@ export interface Post {
     content: string;
     ctime: string;
     comments: number;
+    private: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
     attachments?: number;    // not required in request
@@ -62,4 +63,14 @@ export interface UserSummary {
     posts: number;
     marks: number;
     messages: number;
+}
+
+// used to wrap the option that represents which page to display.
+export interface PageOptionProps {
+    op: number;
+}
+
+export interface Range {
+    min: number;
+    max: number;
 }

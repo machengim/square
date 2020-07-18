@@ -1,11 +1,12 @@
 import React, {useState, useEffect, useContext, ChangeEvent} from 'react';
+import {Link} from 'react-router-dom';
 import {UserSummary} from '../lib/interfaces';
 import {UserContext} from '../lib/context';
 import {BaseUrl, request} from '../lib/utils';
 import './panel.css';
 
 
-export default function Panel(props: any) {
+export default function Panel() {
     const user = useContext(UserContext);
     const [changing, setChanging] = useState(false);
     const [btnText, setBtnText] = useState('Change');
@@ -72,8 +73,8 @@ export default function Panel(props: any) {
                 {user.uid > 0 && <button id='btn_change_name' onClick={() => clickChangeButton()}>{btnText}</button>}
                 <hr />
                 <ul>
-                    <li>Posts: {(summary.posts > 0)? <a onClick={() => props.setOp(1)}>{summary.posts}</a> : 0}</li>
-                    <li>Marks: {(summary.marks > 0)? <a onClick={() => props.setOp(2)}>{summary.marks}</a> : 0}</li>
+                    <li>Posts: {(summary.posts > 0)? <Link to='/posts'>{summary.posts}</Link> : 0}</li>
+                    <li>Marks: {(summary.marks > 0)? <Link to='/marks'>{summary.marks}</Link> : 0}</li>
                     <li>Messages: {(summary.messages > 0)? <a>{summary.messages}</a> : 0}</li>
                 </ul>
                 <hr />

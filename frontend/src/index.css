@@ -48,6 +48,11 @@ div .hidden{
     display: none;
 }
 
+div .loading-img {
+    text-align: center;
+    margin: 80px auto;
+}
+
 footer{
     margin: 0 auto;
     width: 80%;

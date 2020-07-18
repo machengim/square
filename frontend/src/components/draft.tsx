@@ -25,8 +25,8 @@ export default function Draft() {
     }, [selectedFile]);
 
     function triggerSelectFile(): void {
-        let element;
-        if (element = document.getElementById('file'))
+        let element = document.getElementById('file');
+        if (element)
             element.click();
     }
 
