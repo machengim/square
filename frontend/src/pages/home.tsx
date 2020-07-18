@@ -13,6 +13,12 @@ export default function Home(props: PageOptionProps) {
     const [op, setOp] = useState(props.op);
 
     useEffect(() => {
+        let newOp = props.op;
+        if (newOp === undefined || newOp > 2 || newOp < 0) {
+            console.log('Invalid op value: ' + newOp);
+            return;
+        }
+            
         setOp(props.op);
     }, [props]);
 

@@ -1,8 +1,18 @@
-export interface UserForContext {
+// This interface is used for user info and its response.
+// The reason why 'posts', 'marks' and 'messages' are put here is to
+// avoid request when switching to another page.
+export interface UserInfo {
     uid: number;
     uname: string;
-    setUid: Function;
-    setUname: Function;
+    posts: number;
+    marks: number;
+    messages: number;
+}
+
+// Pass user info and its set methods to the children components.
+export interface UserInfoForContext {
+    user: UserInfo
+    setUser: Function;
 }
 
 export interface Post {
@@ -15,15 +25,23 @@ export interface Post {
     private: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
-    attachments?: number;    // not required in request
+    attachments?: ImageList;    // not required in request.
+}
+
+// Response from the API server.
+export interface PostsResponse {
+    hasMore: boolean;
+    maxPid: number;
+    minPid: number;
+    posts: Array<Post>;
 }
 
 // This interface needs more consideration.
 export interface Image {
-    aid?: number;   // not required in request
+    aid?: number;   // not required in request.
     pid: number;
-    url?: string;    // not required in request
-    thumbnail?: string;     // not required in request
+    url?: string;    // not required in request.
+    thumbnail?: string;     // not required in request.
 }
 
 export interface ImageList {
@@ -39,14 +57,6 @@ export interface Comment {
     ctime: string;
 }
 
-// Response from the API server.
-export interface PostsResponse {
-    hasMore: boolean;
-    maxPid: number;
-    minPid: number;
-    posts: Array<Post>;
-}
-
 export interface CommentsResponse {
     hasMore: boolean;
     minCid: number;
@@ -59,18 +69,7 @@ export interface PostProps {
     show?: boolean;     // whether the comments are shown.
 }
 
-export interface UserSummary {
-    posts: number;
-    marks: number;
-    messages: number;
-}
-
 // used to wrap the option that represents which page to display.
 export interface PageOptionProps {
     op: number;
-}
-
-export interface Range {
-    min: number;
-    max: number;
 }

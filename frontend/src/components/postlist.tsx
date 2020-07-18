@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image, Range} from '../lib/interfaces';
+import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image} from '../lib/interfaces';
 import Lightbox from './lightbox';
 import {BaseUrl, request} from '../lib/utils';
 import './postlist.css';
@@ -18,27 +18,20 @@ export default function PostList(props: PageOptionProps) {
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
     const [loading, setLoading] = useState(true);
-    const opRange: Range = {min: 0, max: 2};
     // !! Note: the leading '() =>' can NOT be ignored!
     useState(() => requestByOption());
 
     // monitor the page change by the 'props' value.
     useEffect(() => {
         reset();
-
-        if (props.op === null || ! validateOp(props.op)) {
-            console.log('Invalid op value: ' + props.op );
-            return;
-        }
-
         setOp(props.op);
         setLoading(true);
     }, [props]);
 
-    // 'op' value change means openning a different page.
+    // 'loading' value triggers the request.
     useEffect(() => {
-        requestByOption();
-    }, [op]);
+        if (loading) requestByOption();
+    }, [loading]);
 
     // Note this 'reset()' function dosen't include 'setOp()'.
     function reset() {
@@ -46,13 +39,6 @@ export default function PostList(props: PageOptionProps) {
         setHasMore(false);
         setMinPid(-1);
         setMaxPid(-1);
-    }
-
-    function validateOp(opValue: number) {
-        if (opValue === undefined || opValue > 2 || opValue < 0) 
-            return false;
-
-        return true;
     }
 
     // TODO: send different request according to the 'op' value.
@@ -100,7 +86,7 @@ export default function PostList(props: PageOptionProps) {
     }
 
     function loadMore() {
-        request(BaseUrl + 'endposts', handleResponse, handleError);
+        request(BaseUrl + 'nextposts', handleResponse, handleError);
     }
 
     function deletePost(pid: number) {  // TODO: ask user to confirm and send request to server.
@@ -112,7 +98,7 @@ export default function PostList(props: PageOptionProps) {
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
             {loading && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
-            {!loading && posts.length === 0 && <h2>No posts found.</h2>}
+            {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
             {!loading && posts.length > 0 && posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} /><hr/></div>)}   
             {hasMore && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
         </div>

@@ -1,7 +1,7 @@
-import {UserForContext} from './interfaces';
+import {UserInfoForContext, UserInfo} from './interfaces';
 
 
-export const BaseUrl = 'https://5f0bdaca9d1e150016b377f6.mockapi.io/api/';
+export const BaseUrl = 'http://localhost:8080/';
 
 // Helper function to start a request. Don't forget the error handler.
 export function request(url: string, callback: Function, errorHandler: Function) {
@@ -20,9 +20,27 @@ export function request(url: string, callback: Function, errorHandler: Function)
 }
 
 // Generate a fake user to init the context in 'context.tsx'.
-export function fakeUser(): UserForContext {
-    let u: UserForContext = {uid: -1, uname: '', setUid: nan, setUname: nan};
-    return u;
+export function fakeUser(): UserInfo {
+    let user: UserInfo = {
+        uid: -1,
+        uname: 'Guest',
+        posts: 0,
+        marks: 0,
+        messages: 0,
+    }
+
+    return user;
+}
+
+export function fakeUserCtx(): UserInfoForContext {
+    let user = fakeUser();
+    
+    let userCtx: UserInfoForContext = {
+        user: user,
+        setUser: nan,
+    };
+
+    return userCtx;
 
     function nan() {
         return;
