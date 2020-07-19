@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useContext, ChangeEvent} from 'react';
 import {Link} from 'react-router-dom';
+import {fakeUser} from '../lib/utils';
 import {UserContext} from './context';
 import './panel.css';
 
@@ -29,10 +30,8 @@ export default function Panel() {
     }, [user]);
 
     function clickChangeButton() {
-        if (changing) {
-            if (username !== user.uname) {
-                // TODO: validate input and send new username to server.
-            }
+        if (changing && username !== user.uname) {
+            // TODO: validate input and send new username to server.
         } 
 
         setChanging(!changing);
@@ -40,6 +39,16 @@ export default function Panel() {
 
     function handleUnameChange(event: ChangeEvent<HTMLInputElement>) {
         setUsername(event.target.value);
+    }
+
+    function logOut() {
+        let confirm = window.confirm('Confirm to log out?');
+        if (confirm) {
+            let newUser = fakeUser();
+            userCtx.setUser(newUser);
+            // After logging out, user should be redirected to index page.
+            window.location.replace('/');
+        } 
     }
 
     return (
@@ -57,7 +66,7 @@ export default function Panel() {
                 </ul>
                 <hr />
                 <div className='center'>
-                    {user.uid > 0 && <button id='button_logout'>Logout</button>}
+                    {user.uid > 0 && <button id='button_logout' onClick={() => logOut()}>Logout</button>}
                     {user.uid <= 0 && 
                         <><button className='btn_login' onClick={() => setDialogOption(1)}>Log in</button>
                         <button className='btn_login' onClick={() => setDialogOption(2)}>Sign up</button></>}

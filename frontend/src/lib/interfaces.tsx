@@ -73,3 +73,10 @@ export interface PostProps {
 export interface PageOptionProps {
     op: number;
 }
+
+// used to pass props to alert box.
+export interface AlertBoxProps {
+    text: string;
+    onConfirm: Function;
+    onClose: Function;
+}

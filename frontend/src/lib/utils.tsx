@@ -5,17 +5,18 @@ export const BaseUrl = 'http://localhost:8080/';
 
 // Helper function to start a request. Don't forget the error handler.
 export function request(url: string, callback: Function, errorHandler: Function) {
-        fetch(url)
+    console.log('request to ' + url);
+
+    fetch(url)
         .then(res => {
             if (res.status === 200) {
                 callback(res);
             } else {
                 errorHandler(res);
             }
-        })
-        .catch((res) => {
+        }).catch((res) => {
             errorHandler(res);
-        })
+        });
 }
 
 // Generate a fake user to init the context in 'context.tsx'.

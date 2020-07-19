@@ -1,5 +1,6 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image} from '../lib/interfaces';
+import {UserContext} from './context';
 import Lightbox from './lightbox';
 import {BaseUrl, request} from '../lib/utils';
 import './postlist.css';
@@ -14,6 +15,7 @@ import './postlist.css';
  *  Finally, setLoading() triggers request().
  */
 export default function PostList(props: PageOptionProps) {
+    const userCtx = useContext(UserContext);
     const firstRun = useRef(true);
     const [op, setOp] = useState(props.op);
     //TODO: wait for websocket implementation.
@@ -23,12 +25,14 @@ export default function PostList(props: PageOptionProps) {
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
     const [destUrl, setDestUrl] = useState<string>();
-    const [loading, setLoading] = useState<boolean>();
+    const [loading, setLoading] = useState(false);
 
     // monitor the page change by the 'props' value.
     // Use 'useRef()' to skip the update following the first render.
     useEffect(() => {
+        console.log('props changed');
         if (firstRun.current) {
+            console.log('first run.');
             firstRun.current = false;
             return;
         }
@@ -39,6 +43,7 @@ export default function PostList(props: PageOptionProps) {
     // op change always means a new page, so construct default url here.
     useEffect(() => {
         let url = getDefaultUrlByOption();
+        console.log('current op is ' + op + ' and url is ' + url);
         setDestUrl(url);
     }, [op]);
 
@@ -48,15 +53,20 @@ export default function PostList(props: PageOptionProps) {
 
     // 'loading' value triggers the request.
     useEffect(() => {
-        // without the validation of 'destUrl', typescript will complain about 'string | undefined'.
+        // If user has no permission on current page, stop requesting.
+        if (!validateUser()) {
+            setLoading(false);
+            return;
+        }
+        // Typescript will complain if `destUrl` is not checked.
         if (loading && destUrl) {
             setHasMore(false);  // Hide hasMore button when requesting.
             request(destUrl, handleResponse, handleError); 
-        }
+        } 
     }, [loading]);
 
     function getDefaultUrlByOption(): string {
-        let url = '';
+        let url = BaseUrl;
         switch (op) {
             case 1:
                 // fake URL to test error handling.
@@ -65,7 +75,7 @@ export default function PostList(props: PageOptionProps) {
             case 2:
                 break;
             default:
-                url = BaseUrl + 'posts';
+                url += 'posts';
         }
 
         return url;
@@ -89,6 +99,13 @@ export default function PostList(props: PageOptionProps) {
         } else { 
             setDestUrl(newUrl);
         }  
+    }
+
+    function validateUser() {
+        let uid = userCtx.user.uid;
+        // Unlogged users are not allowed to see '/posts' or '/marks' or others later.
+        if (uid <= 0 && (op == 1 || op == 2)) return false;
+        return true;
     }
 
     // Don't forget to handle the error of 'json()'.
@@ -121,11 +138,15 @@ export default function PostList(props: PageOptionProps) {
     }
 
     function deletePost(pid: number): void {  // TODO: ask user to confirm and send request to server.
-        let newPostList = posts.filter(post => post.pid !== pid);
-        setPosts(newPostList);
+        let confirmDelete = window.confirm('Confirm to delete it?');
+
+        if (confirmDelete) {
+            let newPostList = posts.filter(post => post.pid !== pid);
+            setPosts(newPostList);
+        }
     }
 
-    // Note loading image should be put under the postlist to prevent re-render when requesting for more posts.
+    // Note loading.svg should be put under the postlist to prevent re-render when requesting for more posts.
     return (
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
