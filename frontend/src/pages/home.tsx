@@ -15,7 +15,7 @@ export default function Home(props: PageOptionProps) {
     useEffect(() => {
         let newOp = props.op;
         if (newOp === undefined || newOp > 2 || newOp < 0) {
-            console.log('Invalid op value: ' + newOp);
+            console.error('Invalid op value: ' + newOp);
             return;
         }
             

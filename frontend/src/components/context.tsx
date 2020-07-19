@@ -24,12 +24,12 @@ export function UserProvider(props: any) {
         .then((result: UserInfo) => {
             setUser(result);
         }).catch(() => {
-            console.log('Json parse error!\n' + res);
+            console.error('Json parse error!\n' + res);
         })
     }
 
     function handleError(res: globalThis.Response) {
-        console.log(res);
+        console.error(res);
     }
 
     return (

@@ -12,6 +12,7 @@
     width: 95%;
     height: 20px;
     font-size: 14px;
+    resize: none;
 }
 
 #draft_area textarea.selected {

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image} from '../lib/interfaces';
 import Lightbox from './lightbox';
 import {BaseUrl, request} from '../lib/utils';
@@ -8,8 +8,13 @@ import './postlist.css';
  * TODO: comments, update state from child components..
  * TODO: when user clicks mark or delete a post in the list, it should reflect on the panel component.
  * TODO: display different elements according to the 'op' value passed from 'home.tsx'.
+ * The full work flow looks as below:
+ *  User clicks a page -> props changes -> reset() except firstRun -> op change triggers setDestUrl() -> triggers setLoading();
+ *  User clicks a link -> setDestUrl() -> triggers setLoading();
+ *  Finally, setLoading() triggers request().
  */
 export default function PostList(props: PageOptionProps) {
+    const firstRun = useRef(true);
     const [op, setOp] = useState(props.op);
     //TODO: wait for websocket implementation.
     const [newPost, setNewPost] = useState(0);  
@@ -17,32 +22,40 @@ export default function PostList(props: PageOptionProps) {
     const [posts, setPosts] = useState(new Array<Post>());
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
-    const [loading, setLoading] = useState(true);
-    // !! Note: the leading '() =>' can NOT be ignored!
-    useState(() => requestByOption());
+    const [destUrl, setDestUrl] = useState<string>();
+    const [loading, setLoading] = useState<boolean>();
 
     // monitor the page change by the 'props' value.
+    // Use 'useRef()' to skip the update following the first render.
     useEffect(() => {
+        if (firstRun.current) {
+            firstRun.current = false;
+            return;
+        }
+        
         reset();
-        setOp(props.op);
-        setLoading(true);
     }, [props]);
+
+    // op change always means a new page, so construct default url here.
+    useEffect(() => {
+        let url = getDefaultUrlByOption();
+        setDestUrl(url);
+    }, [op]);
+
+    useEffect(() => {
+        if (destUrl) setLoading(true);
+    }, [destUrl]);
 
     // 'loading' value triggers the request.
     useEffect(() => {
-        if (loading) requestByOption();
+        // without the validation of 'destUrl', typescript will complain about 'string | undefined'.
+        if (loading && destUrl) {
+            setHasMore(false);  // Hide hasMore button when requesting.
+            request(destUrl, handleResponse, handleError); 
+        }
     }, [loading]);
 
-    // Note this 'reset()' function dosen't include 'setOp()'.
-    function reset() {
-        setPosts(new Array<Post>());
-        setHasMore(false);
-        setMinPid(-1);
-        setMaxPid(-1);
-    }
-
-    // TODO: send different request according to the 'op' value.
-    function requestByOption() {
+    function getDefaultUrlByOption(): string {
         let url = '';
         switch (op) {
             case 1:
@@ -55,18 +68,36 @@ export default function PostList(props: PageOptionProps) {
                 url = BaseUrl + 'posts';
         }
 
-        console.log('request for url: ' + url);
-        request(url, handleResponse, handleError);
+        return url;
+    }
+
+    function reset(): void {
+        setPosts(new Array<Post>());
+        setHasMore(false);
+        setMinPid(-1);
+        setMaxPid(-1);
+        // If user click 'Home' in home page, the 'op' value will not change nor does it trigger the request.
+        if (props.op !== op) {
+            setOp(props.op); 
+            return;
+        } 
+
+        //if the current url === default url, the trigger will not work as well.
+        let newUrl = getDefaultUrlByOption();
+        if (newUrl === destUrl) {
+            setLoading(true);
+        } else { 
+            setDestUrl(newUrl);
+        }  
     }
 
     // Don't forget to handle the error of 'json()'.
-    function handleResponse(res: globalThis.Response) {
+    function handleResponse(res: globalThis.Response): void {
         res.json().then(
             (result: PostsResponse) => {
-                console.log('got result: ' + result);
                 if (!result) return;
 
-                setPosts(posts.concat(result.posts.slice()));
+                setPosts(posts.concat(result.posts));
                 setHasMore(result.hasMore);
                 if (result.maxPid > maxPid) setMaxPid(result.maxPid);
                 if (minPid > result.minPid || minPid <= 0) setMinPid(result.minPid);
@@ -76,30 +107,31 @@ export default function PostList(props: PageOptionProps) {
             }
         ).catch(() => {
             setLoading(false);
-            console.log('json parse error!\n' + res.body);
+            console.error('json parse error!\n' + res.body);
         })
     }
 
-    function handleError(res: globalThis.Response) {
+    function handleError(res: globalThis.Response): void {
         setLoading(false);
-        console.log(res);
+        console.error(res);
     }
 
-    function loadMore() {
-        request(BaseUrl + 'nextposts', handleResponse, handleError);
+    function loadMore(): void {
+        setDestUrl(BaseUrl + 'nextposts');
     }
 
-    function deletePost(pid: number) {  // TODO: ask user to confirm and send request to server.
+    function deletePost(pid: number): void {  // TODO: ask user to confirm and send request to server.
         let newPostList = posts.filter(post => post.pid !== pid);
         setPosts(newPostList);
     }
 
+    // Note loading image should be put under the postlist to prevent re-render when requesting for more posts.
     return (
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
+            {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} key={p.pid}/><hr/></div>)}   
             {loading && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
             {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
-            {!loading && posts.length > 0 && posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} /><hr/></div>)}   
             {hasMore && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
         </div>
     );
@@ -125,7 +157,7 @@ function PostEntry(props: PostProps) {
         props.onDelete(post.pid);
     }
 
-    if (post === null || post === undefined)    return null;
+    if (post === null || post === undefined) return null;
 
     return (
         <>
@@ -154,19 +186,17 @@ function CommentList(props: PostProps) {
     const [minCid, setMinCid] = useState(-1);
     
     useEffect(() => {
-        console.log(show);
         if (!show || post.comments <= 0) return;
         request(BaseUrl + 'comments', handleResponse, handleError);
     }, [show]);
 
     if (!show || !post) return null;
 
-    function handleResponse(res: globalThis.Response) {
+    function handleResponse(res: globalThis.Response): void {
         res.json().then(
             (result: CommentsResponse) => {
                 if (result === null) return;
 
-                console.log('request in comments');
                 setComments(result.comments.slice());
                 setHasMore(result.hasMore);
                 if (minCid > result.minCid || minCid <= 0) setMinCid(result.minCid);
@@ -174,8 +204,8 @@ function CommentList(props: PostProps) {
         )
     }
 
-    function handleError(res: globalThis.Response) {
-        console.log(res);
+    function handleError(res: globalThis.Response): void {
+        console.error(res);
     }
 
     return (

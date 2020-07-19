@@ -78,6 +78,7 @@
     width: 80%;
     height: 15px;
     font-size: 13px;
+    resize: none;
 }
 
 /* Used to send the comment for the post */

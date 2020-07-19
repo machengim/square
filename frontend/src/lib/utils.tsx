@@ -7,7 +7,6 @@ export const BaseUrl = 'http://localhost:8080/';
 export function request(url: string, callback: Function, errorHandler: Function) {
         fetch(url)
         .then(res => {
-            console.log('raw response: ' + res);
             if (res.status === 200) {
                 callback(res);
             } else {
