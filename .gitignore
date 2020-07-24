@@ -1,6 +1,6 @@
 .vscode/*
 **/pgdata
-**/square
+**/redisdata
 **/.idea/
 **/node_modules
 **/build
