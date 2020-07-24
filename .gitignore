@@ -1,5 +1,5 @@
 .vscode/*
-**/pgdata/*
+**/pgdata
 **/square
 **/.idea/
 **/node_modules
