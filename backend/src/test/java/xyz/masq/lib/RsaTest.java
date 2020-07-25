@@ -14,7 +14,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SecurityTest {
+public class RsaTest {
 
     @RepeatedTest(10)
     public void rsaEncryptTest()
@@ -22,20 +22,20 @@ public class SecurityTest {
             IllegalBlockSizeException, InvalidKeyException,
             BadPaddingException, NoSuchPaddingException {
 
-        KeyPair kp = Security.generateRsaKeyPair();
+        KeyPair kp = Rsa.generateRsaKeyPair();
 
-        String privateKeyStr = Security.encodeKeyBase64(kp.getPrivate());
-        String publicKeyStr = Security.encodeKeyBase64(kp.getPublic());
+        String privateKeyStr = Rsa.encodeKeyBase64(kp.getPrivate());
+        String publicKeyStr = Rsa.encodeKeyBase64(kp.getPublic());
         System.out.println(publicKeyStr + "\n" + privateKeyStr);
 
-        Key privateKey = Security.decodeKeyBase64(privateKeyStr, 0);
-        Key publicKey = Security.decodeKeyBase64(publicKeyStr, 1);
+        Key privateKey = Rsa.decodeKeyBase64(privateKeyStr, 0);
+        Key publicKey = Rsa.decodeKeyBase64(publicKeyStr, 1);
         System.out.println(publicKey + "\n" + privateKey);
 
         String plain = generateRandomStr();
         System.out.println(plain);
-        String cipher = Security.encryptText(plain, publicKey);
-        String decipher = Security.decryptText(cipher, privateKey);
+        String cipher = Rsa.encryptText(plain, publicKey);
+        String decipher = Rsa.decryptText(cipher, privateKey);
         assertEquals(plain, decipher);
     }
 
