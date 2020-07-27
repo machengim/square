@@ -22,7 +22,7 @@ export interface Post {
     content: string;
     ctime: string;
     comments: number;
-    private: number;    // 0 means public, 1 means private, maybe more options later.
+    isPrivate: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
     attachments?: ImageList;    // not required in request.

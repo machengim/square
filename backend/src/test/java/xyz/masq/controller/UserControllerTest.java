@@ -17,8 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
 
-    private static final String BASE_URL = "http://localhost:8080";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -27,13 +25,14 @@ public class UserControllerTest {
 
     @Test
     public void getAllUsers() throws Exception {
-        String url = BASE_URL + "/user";
-        this.mockMvc.perform(get(url)).andDo(print()).andExpect(status().isOk());
+        this.mockMvc.perform(get("/user"))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
     public void postUser() throws Exception {
-        String url = BASE_URL + "/user/register";
+        String url = "/user/register";
         String json = "{\"email\": \"a@b.c\", \"password\": \"123456\"}";
         this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())

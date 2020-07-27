@@ -15,7 +15,7 @@ CREATE TABLE post (
     uid integer not null,
     uname varchar(32) not null,
     content varchar(320) not null,
-    private integer default 0 not null,
+    isPrivate integer default 0 not null,
     comments integer default 0 not null,
     attachments integer default 0 not null,
     ctime timestamp without time zone default(timezone('utc', now())) not null
@@ -44,3 +44,11 @@ CREATE TABLE attachment (
 	thumbnail varchar(64) not null,
     ctime timestamp without time zone default(timezone('utc', now())) not null
 );
+
+CREATE TABLE login (
+    lid serial primary key,
+    uid integer not null,
+    ip varchar(16) not null,
+    device varchar(32) not null,
+    ctime timestamp without time zone default(timezone('utc', now())) not null
+)

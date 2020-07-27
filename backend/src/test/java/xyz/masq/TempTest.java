@@ -1,6 +1,5 @@
 package xyz.masq;
 
-import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
 
 import javax.crypto.BadPaddingException;
@@ -11,13 +10,24 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TempTest {
     public static void main(String[] args) {
+    }
 
+    public static void intParse() {
+        String s = "";
+        int i = Integer.parseInt(s);
+        System.out.println(i);
+        s = "xz";
+        i = Integer.parseInt(s);
+        System.out.println(i);
+    }
+
+    private static void strParse(int i) {
+        System.out.println(Integer.toString(i));
     }
 
     public static void rsaKey() throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
