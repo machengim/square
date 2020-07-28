@@ -1,6 +1,8 @@
 package xyz.masq.entity;
 
 import lombok.Data;
+import xyz.masq.annotation.ValidEmail;
+import xyz.masq.annotation.ValidPassword;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -13,7 +15,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int uid;
     private String uname = "Anonymous";
+    @ValidEmail
     private String email;
+    @ValidPassword
     private String password;
     // type == 0 means inactive, 1 means normal, 2 means admin, -1 means blocked;
     private int type = 0;

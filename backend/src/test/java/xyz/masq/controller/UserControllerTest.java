@@ -24,19 +24,39 @@ public class UserControllerTest {
     private UserRepository userRepository;
 
     @Test
-    public void getAllUsers() throws Exception {
+    public void getAllUsersTest() throws Exception {
         this.mockMvc.perform(get("/user"))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void postUser() throws Exception {
+    public void registerTest() throws Exception {
         String url = "/user/register";
-        String json = "{\"email\": \"a@b.c\", \"password\": \"123456\"}";
+        String json = "{\"email\": \"ab@cd.com\", \"password\": \"qwer1234\"}";
         this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(json))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string("Saved"));
+    }
+
+    //Invalid password format, should get rejected with http status 400.
+    @Test
+    public void registerInvalidPasswordTest() throws Exception {
+        String url = "/user/register";
+        String json = "{\"email\": \"a@b.c\", \"password\": \"1234\"}";
+        this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+
+    //Invalid email format, should get rejected with http status 400.
+    @Test
+    public void registerInvalidEmailTest() throws Exception {
+        String url = "/user/register";
+        String json = "{\"email\": \"abc\", \"password\": \"qwer1234\"}";
+        this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(json))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
     }
 }

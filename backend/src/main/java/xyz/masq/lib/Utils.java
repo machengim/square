@@ -1,6 +1,7 @@
 package xyz.masq.lib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import ua_parser.Client;
 import ua_parser.Parser;
@@ -8,6 +9,8 @@ import ua_parser.Parser;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import javax.validation.ConstraintValidatorContext;
 import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
@@ -70,5 +73,20 @@ public class Utils {
 
     public static boolean checkBcrypt(String current, String saved) {
         return BCrypt.checkpw(current, saved);
+    }
+
+    public static void validationErrorMessage(ConstraintValidatorContext context, String message) {
+        context.disableDefaultConstraintViolation();
+        context.buildConstraintViolationWithTemplate(message)
+                .addConstraintViolation();
+    }
+
+    public static DataSource getDataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/test");
+        dataSource.setUsername("square");
+        dataSource.setPassword("qwer1234");
+
+        return dataSource;
     }
 }

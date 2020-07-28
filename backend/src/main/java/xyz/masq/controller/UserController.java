@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.dao.UserRepository;
 import xyz.masq.entity.User;
+import xyz.masq.lib.Utils;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 @RestController
 @Slf4j
@@ -24,8 +26,9 @@ public class UserController {
 
     @PostMapping(path = "/register")
     @ResponseBody
-    public String register(@RequestBody User user) {
-        log.debug("Get user: " + user);
+    public String register(@Valid @RequestBody User user) {
+        String hashPw = Utils.bcrypt(user.getPassword());
+        user.setPassword(hashPw);
         userRepository.save(user);
         return "Saved";
     }
@@ -37,4 +40,5 @@ public class UserController {
 
         return "logged in";
     }
+
 }
