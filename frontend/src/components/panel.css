@@ -182,3 +182,7 @@
 .box button:hover{
     background: #2ecc71;
 }
+
+.box button.disabled {
+    background-color: #aaa;
+}

@@ -47,7 +47,6 @@ public class EmailConstraintValidator implements ConstraintValidator<ValidEmail,
         // queryForList() method can only query for one column, so use uid instead of *.
         String sql = "SELECT uid FROM users WHERE email=?";
         List<Integer> ids = jdbc.queryForList(sql, Integer.class, email);
-        System.out.println(ids);
         return ids.size() > 0;
     }
 

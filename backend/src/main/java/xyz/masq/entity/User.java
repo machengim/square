@@ -5,6 +5,7 @@ import xyz.masq.annotation.ValidEmail;
 import xyz.masq.annotation.ValidPassword;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.time.Instant;
 
 @Entity
@@ -15,7 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int uid;
     private String uname = "Anonymous";
-    @ValidEmail
+    @Email
     private String email;
     @ValidPassword
     private String password;

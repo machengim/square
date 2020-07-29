@@ -12,8 +12,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Component
-@Slf4j
 @Order(1)
+@Slf4j
 public class AuthFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req,

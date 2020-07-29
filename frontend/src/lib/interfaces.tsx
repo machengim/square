@@ -7,6 +7,8 @@ export interface UserInfo {
     posts: number;
     marks: number;
     messages: number;
+    email?: string;
+    password?: string;
 }
 
 // Pass user info and its set methods to the children components.

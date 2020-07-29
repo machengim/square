@@ -42,6 +42,7 @@ public class Utils {
         javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie("u", Integer.toString(uid));
         cookie.setMaxAge(daysToLive * 24 * 60 * 60);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         res.addCookie(cookie);
     }
 

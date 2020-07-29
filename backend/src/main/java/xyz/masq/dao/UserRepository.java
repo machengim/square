@@ -11,6 +11,5 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Query(value = "SELECT * FROM users WHERE email=? LIMIT 1", nativeQuery = true)
     List<User> checkDuplicateEmail(String email);
 
-    @Query(value = "SELECT * FROM users WHERE email=? AND password=? LIMIT 1", nativeQuery = true)
-    List<User> loginUser(String email, String hashPw);
+    public User findByEmail(String email);
 }

@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.dao.UserRepository;
 import xyz.masq.entity.User;
+import xyz.masq.error.LoginError;
 import xyz.masq.lib.Utils;
 
-import javax.transaction.Transactional;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -27,18 +30,36 @@ public class UserController {
     @PostMapping(path = "/register")
     @ResponseBody
     public String register(@Valid @RequestBody User user) {
+        User userInDb = userRepository.findByEmail(user.getEmail());
+        if (userInDb != null) {
+            throw new LoginError("Email already existed.");
+        }
+
         String hashPw = Utils.bcrypt(user.getPassword());
         user.setPassword(hashPw);
         userRepository.save(user);
-        return "Saved";
+        return "Register successfully.";
     }
 
     @PostMapping(path = "/login")
     @ResponseBody
-    @Transactional
-    public String login(@RequestBody User user) {
+    public String login(@Valid @RequestBody User user, HttpServletRequest request,
+                        HttpServletResponse response) {
+        User userInDb = userRepository.findByEmail(user.getEmail());
+        if (userInDb == null) {
+            throw new LoginError("Email not registered.");
+        }
 
-        return "logged in";
+        if (!Utils.checkBcrypt(user.getPassword(), userInDb.getPassword())) {
+            throw new LoginError("Email or password error.");
+        }
+        //TODO: check user status.
+        //TODO: record user login IP and device.
+        int uid = userInDb.getUid();
+        System.out.println("login uid: " + uid);
+        Utils.setUidCookie(uid, 7, response);
+
+        return "Login successfully.";
     }
 
 }

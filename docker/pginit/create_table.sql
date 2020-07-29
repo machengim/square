@@ -1,7 +1,7 @@
 CREATE TABLE users (
     uid serial primary key,
     uname varchar(32) default 'Anonymous' not null,
-    email varchar(32) not null,
+    email varchar(32) not null unique,
     password varchar(256) not null,
     type integer default 0 not null,
     posts integer default 0 not null,

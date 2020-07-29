@@ -19,6 +19,28 @@ export function request(url: string, callback: Function, errorHandler: Function)
         });
 }
 
+export function postRequest(url: string, json: string,
+     callback: Function, errorHandler: Function) {
+
+        console.log('post request to ' + url);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: json,
+            credentials: "include"
+        }).then(res => {
+            if (res.status === 200) {
+                callback(res);
+            } else {
+                errorHandler(res);
+            }
+        }).catch(res => {
+            errorHandler(res);
+        });
+}
+
 // Generate a fake user to init the context in 'context.tsx'.
 export function fakeUser(): UserInfo {
     let user: UserInfo = {
