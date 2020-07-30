@@ -2,7 +2,9 @@ package xyz.masq.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 import xyz.masq.lib.Utils;
 
 import javax.servlet.*;
@@ -10,60 +12,67 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
 
+
+/**
+ * This filter is used to check whether user has a cookie declaring the identity,
+ * if so, check whether the cookie info is valid against session or login history.
+ * Note that the it's `uid` in session but `u` in cookie.
+ * Four cases coud happen:
+ * 1. No cookie nor session: do nothing;
+ * 2. No cookie but has session: set cookie.
+ * 3. Has cookie but no session: check against database;
+ *      3.a found: set session and refresh cookie; 4.b not found: remove cookie;
+ * 4. Has both: check equality.
+ *      4.a true: do nothing; 4.b false: remove session and cookie.
+ */
 @Component
-@Order(1)
 @Slf4j
-public class AuthFilter implements Filter {
+@Order(1)
+public class AuthFilter extends OncePerRequestFilter {
+
     @Override
-    public void doFilter(ServletRequest req,
-                         ServletResponse res,
-                         FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
 
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
         HttpSession session = request.getSession();
-        String uidFromCookieStr = Utils.getCookieByName(request, "uid");
-        String uidFromSessionStr = (String) session.getAttribute("uid");
+        int uidCookie = Utils.parseUid(Utils.getCookieByName(request, "u"));
+        String uidFromSessionStr = (session.getAttribute("uid") == null)? null: session.getAttribute("uid").toString();
+        int uidSession = Utils.parseUid(uidFromSessionStr);
 
-        // Direct bypass cases:
-        // 1. uidFromSessionStr == null && uidFromCookieStr == null;
-        // 2. uidFromSessionStr == uidFromCookieStr;
-        if (uidFromSessionStr == null && uidFromCookieStr != null && uidFromCookieStr.length() > 0) {
-            // first request after long leave, with cookie and without session.
-            int uidFromCookie = parseUid(uidFromCookieStr);
-            if (uidFromCookie > 0 && checkLoginHistory(uidFromCookie)) {
-                session.setAttribute("uid", uidFromCookie);
-                Utils.setUidCookie(uidFromCookie, 7, response);
-            } else if (uidFromCookie > 0) {
-                log.error("Invalid or expired user info in cookie: " + uidFromCookieStr);
-                Utils.setUidCookie(-1, -1, response);
+        if (uidCookie < 0 && uidSession > 0) {
+            Utils.setUidCookie(uidSession, 7, response);
+        } else if (uidCookie > 0 && uidSession < 0) {
+            if (checkLoginHistory(request, uidCookie)) {
+                session.setAttribute("uid", uidCookie);
+                Utils.setUidCookie(uidCookie, 7, response);
+            } else {
+                Utils.setUidCookie(-1, 0, response);
             }
-        } else if (uidFromSessionStr != null && !uidFromSessionStr.equals(uidFromCookieStr)) {
-            // inconsistent uids.
-            log.error("Different uids from session and cookie");
-            session.setAttribute("uid", null);
-            Utils.setUidCookie(-1, -1, response);
+        } else if (uidCookie > 0 && uidSession > 0 && uidCookie != uidSession) {
+            session.removeAttribute("uid");
+            Utils.setUidCookie(-1, 0, response);
         }
 
-        chain.doFilter(req, res);
+        chain.doFilter(request, response);
     }
 
-    private boolean checkLoginHistory(int uid) {
-        // check user login history against db, and throw exception if fails.
-        return true;
-    }
 
-    private int parseUid(String uidStr) {
-        int uid = -1;
-        try {
-            uid = Integer.parseInt(uidStr);
-        } catch (NumberFormatException e) {
-            log.error("Cannot parse uid.");
-        }
 
-        return uid;
+    private boolean checkLoginHistory(HttpServletRequest request, int uid) {
+        String ip = Utils.extractIp(request);
+        String device = Utils.getDeviceDetails(request);
+        JdbcTemplate jdbc = new JdbcTemplate(Utils.getDataSource());
+        String sql = "SELECT ctime FROM login WHERE uid=? AND ip=? AND device=? ORDER BY ctime DESC LIMIT 1";
+        List<Instant> logins = jdbc.queryForList(sql, Instant.class, uid, ip, device);
+        System.out.println(logins);
+        if (logins.size() == 0) return false;
+
+        Instant lastLogin = logins.get(0);
+        Instant threshold = Instant.now().minusSeconds(60 * 60 * 24 * 7);
+        return (lastLogin.compareTo(threshold) > 0);
     }
 
 }

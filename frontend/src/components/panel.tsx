@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useContext, useRef, ChangeEvent} from 'react';
 import {Link} from 'react-router-dom';
-import {fakeUser, BaseUrl, postRequest} from '../lib/utils';
+import {fakeUser, BaseUrl, postRequest, request} from '../lib/utils';
 import {UserContext} from './context';
 import './panel.css';
 import { UserInfo } from '../lib/interfaces';
@@ -51,6 +51,7 @@ export default function Panel() {
     function logOut() {
         let confirm = window.confirm('Confirm to log out?');
         if (confirm) {
+            // TODO: logout request.
             let newUser = fakeUser();
             userCtx.setUser(newUser);
             // After logging out, user should be redirected to index page.

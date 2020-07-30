@@ -12,4 +12,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     List<User> checkDuplicateEmail(String email);
 
     public User findByEmail(String email);
+
+    public User findByUid(int uid);
 }

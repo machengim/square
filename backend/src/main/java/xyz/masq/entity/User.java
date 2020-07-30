@@ -1,7 +1,6 @@
 package xyz.masq.entity;
 
 import lombok.Data;
-import xyz.masq.annotation.ValidEmail;
 import xyz.masq.annotation.ValidPassword;
 
 import javax.persistence.*;

@@ -82,6 +82,17 @@ public class Utils {
                 .addConstraintViolation();
     }
 
+    public static int parseUid(String uidStr) {
+        int uid = -1;
+        try {
+            uid = Integer.parseInt(uidStr);
+        } catch (NumberFormatException e) {
+            log.info("Cannot parse uid from: " + uidStr);
+        }
+
+        return uid;
+    }
+
     public static DataSource getDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl("jdbc:postgresql://localhost:5432/test");

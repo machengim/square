@@ -1,4 +1,4 @@
-import React, {useState, createContext} from 'react';
+import React, {useState, useEffect, createContext} from 'react';
 import {BaseUrl, fakeUser, fakeUserCtx, request} from '../lib/utils';
 import {UserInfo} from '../lib/interfaces';
 
@@ -16,7 +16,7 @@ export function UserProvider(props: any) {
     let fake = fakeUser();
     const [user, setUser] = useState(fake);
     useState(() => {
-        request(BaseUrl + 'summary', handleUserInfoResponse, handleError);
+        request(BaseUrl + 'user/summary', handleUserInfoResponse, handleError);
     });
 
     function handleUserInfoResponse(res: globalThis.Response) {
