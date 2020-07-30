@@ -3,7 +3,6 @@ package xyz.masq.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import xyz.masq.annotation.ValidEmail;
 import xyz.masq.dao.LoginInfoRepository;
 import xyz.masq.dao.UserRepository;
 import xyz.masq.entity.LoginInfo;
@@ -27,6 +26,7 @@ public class UserController {
     @Autowired
     private LoginInfoRepository loginInfoRepository;
 
+    // TODO: this api is not available to normal users.
     @GetMapping(path={"", "/"})
     @ResponseBody
     public Iterable<User> getAllUsers() {
@@ -51,7 +51,7 @@ public class UserController {
 
     @PostMapping(path = "/login")
     @ResponseBody
-    public String login(@Valid @RequestBody User user, HttpServletRequest request,
+    public UserSummary login(@Valid @RequestBody User user, HttpServletRequest request,
                         HttpServletResponse response) {
         User userInDb = userRepository.findByEmail(user.getEmail());
         if (userInDb == null) {
@@ -70,8 +70,7 @@ public class UserController {
         recordLoginInfo(request, uid);
         request.getSession().setAttribute("uid", uid);
         Utils.setUidCookie(uid, 7, response);
-
-        return "Login successfully.";
+        return new UserSummary(userInDb);
     }
 
     @GetMapping(path = "/summary")

@@ -51,12 +51,24 @@ export default function Panel() {
     function logOut() {
         let confirm = window.confirm('Confirm to log out?');
         if (confirm) {
-            // TODO: logout request.
-            let newUser = fakeUser();
-            userCtx.setUser(newUser);
-            // After logging out, user should be redirected to index page.
-            window.location.replace('/');
+            request(BaseUrl + 'user/logout', logoutDone, logoutError);
         } 
+    }
+
+    function logoutDone(res: globalThis.Response) {
+        res.text().then((text: string) => {
+            if (text.includes('Success')) {
+                window.location.href = '/';
+            } else {
+                alert('Logout failed, please try again.');
+            }
+        }).catch(() => {
+            alert('Logout failed, please try again.');
+        })
+    }
+
+    function logoutError() {
+        alert('Logout failed, please try again.');
     }
 
     return (
@@ -164,9 +176,15 @@ export default function Panel() {
                     loginDone, loginFailed);
         }
 
-        function loginDone() {
+        function loginDone(res: globalThis.Response) {
             setLogging(false);
-            alert('Login successfully!');
+            res.json()
+                .then((result: UserInfo) => {
+                    userCtx.setUser(result);
+                    setDialogOption(0);
+                }).catch(() => {
+                    console.log('Cannot parse json!\n' + res);
+                });
         }
 
         function loginFailed(res: globalThis.Response) {

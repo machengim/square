@@ -110,6 +110,7 @@ export default function PostList(props: PageOptionProps) {
 
     // Don't forget to handle the error of 'json()'.
     function handleResponse(res: globalThis.Response): void {
+        if (!res) return;   // get null response.
         res.json().then(
             (result: PostsResponse) => {
                 if (!result) return;

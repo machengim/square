@@ -83,6 +83,7 @@ public class Utils {
     }
 
     public static int parseUid(String uidStr) {
+        if (uidStr == null || uidStr.length() == 0) return -1;
         int uid = -1;
         try {
             uid = Integer.parseInt(uidStr);

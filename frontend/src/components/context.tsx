@@ -24,7 +24,7 @@ export function UserProvider(props: any) {
         .then((result: UserInfo) => {
             setUser(result);
         }).catch(() => {
-            console.error('Json parse error!\n' + res);
+            console.log('Cannot parse json!\n' + res);
         })
     }
 

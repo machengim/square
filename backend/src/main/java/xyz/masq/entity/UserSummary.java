@@ -1,6 +1,5 @@
 package xyz.masq.entity;
 
-
 import lombok.Data;
 
 @Data

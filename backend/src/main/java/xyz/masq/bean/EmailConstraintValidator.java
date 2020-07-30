@@ -1,6 +1,5 @@
 package xyz.masq.bean;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import xyz.masq.annotation.ValidEmail;
 import xyz.masq.lib.Utils;
