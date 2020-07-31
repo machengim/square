@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import xyz.masq.dao.PostRepository;
+import xyz.masq.repository.PostRepository;
 import xyz.masq.entity.Post;
 import xyz.masq.entity.PostResponse;
 

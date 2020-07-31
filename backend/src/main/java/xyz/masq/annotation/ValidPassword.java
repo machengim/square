@@ -1,7 +1,5 @@
 package xyz.masq.annotation;
 
-import xyz.masq.bean.PasswordConstraintValidator;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.ElementType;

@@ -1,7 +1,6 @@
-package xyz.masq.bean;
+package xyz.masq.annotation;
 
 import org.passay.*;
-import xyz.masq.annotation.ValidPassword;
 import xyz.masq.lib.Utils;
 
 import javax.validation.ConstraintValidator;

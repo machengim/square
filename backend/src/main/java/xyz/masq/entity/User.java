@@ -19,7 +19,7 @@ public class User {
     private String email;
     @ValidPassword
     private String password;
-    // type == 0 means inactive, 1 means normal, 2 means admin, -1 means blocked;
+    // type == 0 means inactive, 1 means normal, 99 means admin, -1 means blocked;
     private int type = 0;
     private int posts = 0;
     private int marks = 0;

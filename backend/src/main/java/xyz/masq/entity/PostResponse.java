@@ -1,7 +1,7 @@
 package xyz.masq.entity;
 
 import lombok.Data;
-import xyz.masq.dao.PostRepository;
+import xyz.masq.repository.PostRepository;
 
 import java.util.List;
 

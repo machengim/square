@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.test.web.servlet.MockMvc;
-import xyz.masq.dao.PostRepository;
+import xyz.masq.repository.PostRepository;
 
 @WebMvcTest(PostController.class)
 public class PostControllerTest {

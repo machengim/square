@@ -1,20 +1,20 @@
 package xyz.masq.filter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import xyz.masq.repository.UserRepository;
+import xyz.masq.entity.User;
 import xyz.masq.lib.Utils;
-
+import xyz.masq.service.CookieService;
+import xyz.masq.service.LoginInfoService;
+import xyz.masq.service.SessionService;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
-
 
 /**
  * This filter is used to check whether user has a cookie declaring the identity,
@@ -33,46 +33,43 @@ import java.util.List;
 @Order(1)
 public class AuthFilter extends OncePerRequestFilter {
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SessionService sessionService;
+
+    @Autowired
+    private CookieService cookieService;
+
+    @Autowired
+    private LoginInfoService loginInfoService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
-        int uidCookie = Utils.parseUid(Utils.getCookieByName(request, "u"));
-        String uidFromSessionStr = (session.getAttribute("uid") == null)? null: session.getAttribute("uid").toString();
-        int uidSession = Utils.parseUid(uidFromSessionStr);
+        int uidCookie = cookieService.readUid();
+        int uidSession = sessionService.readIntByKey("uid");
 
         if (uidCookie < 0 && uidSession > 0) {
-            Utils.setUidCookie(uidSession, 7, response);
+            cookieService.writeCookie("u", uidSession);
         } else if (uidCookie > 0 && uidSession < 0) {
-            if (checkLoginHistory(request, uidCookie)) {
-                session.setAttribute("uid", uidCookie);
-                Utils.setUidCookie(uidCookie, 7, response);
+            if (loginInfoService.checkLoginHistory(uidCookie)) {
+                User user = userRepository.findByUid(uidCookie);
+                if (user != null && user.getType() > 0) {
+                    sessionService.setUserInfo(user);
+                    cookieService.writeCookie("u", user.getUid());
+                }
             } else {
-                Utils.setUidCookie(-1, 0, response);
+                cookieService.removeCookie("u");
             }
         } else if (uidCookie > 0 && uidSession > 0 && uidCookie != uidSession) {
-            session.removeAttribute("uid");
-            Utils.setUidCookie(-1, 0, response);
+            sessionService.removeSession();
+            cookieService.removeCookie("u");
         }
 
         chain.doFilter(request, response);
-    }
-
-
-
-    private boolean checkLoginHistory(HttpServletRequest request, int uid) {
-        String ip = Utils.extractIp(request);
-        String device = Utils.getDeviceDetails(request);
-        JdbcTemplate jdbc = new JdbcTemplate(Utils.getDataSource());
-        String sql = "SELECT ctime FROM login WHERE uid=? AND ip=? AND device=? ORDER BY ctime DESC LIMIT 1";
-        List<Instant> logins = jdbc.queryForList(sql, Instant.class, uid, ip, device);
-        System.out.println(logins);
-        if (logins.size() == 0) return false;
-
-        Instant lastLogin = logins.get(0);
-        Instant threshold = Instant.now().minusSeconds(60 * 60 * 24 * 7);
-        return (lastLogin.compareTo(threshold) > 0);
     }
 
 }

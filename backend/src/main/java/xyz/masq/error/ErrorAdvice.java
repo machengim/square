@@ -17,11 +17,11 @@ public class ErrorAdvice {
         return "Resource not found.";
     }
 
-    @ExceptionHandler(LoginError.class)
+    @ExceptionHandler({AuthError.class, GenericError.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     public String handleLoginFailed(Exception e) {
-        log.error("Login failed: " + e.getMessage());
+        log.error("Auth or session failed: " + e.getMessage());
         return e.getMessage();
     }
 

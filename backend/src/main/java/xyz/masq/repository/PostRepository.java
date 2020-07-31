@@ -1,4 +1,4 @@
-package xyz.masq.dao;
+package xyz.masq.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

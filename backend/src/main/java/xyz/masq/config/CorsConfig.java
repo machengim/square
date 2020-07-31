@@ -1,4 +1,4 @@
-package xyz.masq.bean;
+package xyz.masq.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,7 @@
 import React, {useState, useEffect, createContext} from 'react';
 import {BaseUrl, fakeUser, fakeUserCtx, request} from '../lib/utils';
 import {UserInfo} from '../lib/interfaces';
+import Cookies from 'js-cookie';
 
 /**
  * This file is the ACTUAL entry point of the whole app.
@@ -14,9 +15,14 @@ export const UserContext = createContext(fakeUserCtx());
 export function UserProvider(props: any) {
     // Default user info.
     let fake = fakeUser();
+    let uidCookie = Cookies.get('u');
+    if (uidCookie) {
+        fake.uid = +uidCookie;
+    }
     const [user, setUser] = useState(fake);
     useState(() => {
-        request(BaseUrl + 'user/summary', handleUserInfoResponse, handleError);
+        if (user.uid > 0)
+            request(BaseUrl + 'user/summary/' + user.uid, handleUserInfoResponse, handleError);
     });
 
     function handleUserInfoResponse(res: globalThis.Response) {

@@ -3,17 +3,15 @@ package xyz.masq.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import xyz.masq.dao.LoginInfoRepository;
-import xyz.masq.dao.UserRepository;
-import xyz.masq.entity.LoginInfo;
+import xyz.masq.annotation.Auth;
+import xyz.masq.repository.UserRepository;
 import xyz.masq.entity.User;
 import xyz.masq.entity.UserSummary;
-import xyz.masq.error.LoginError;
+import xyz.masq.error.AuthError;
 import xyz.masq.lib.Utils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import xyz.masq.service.CookieService;
+import xyz.masq.service.LoginInfoService;
+import xyz.masq.service.SessionService;
 import javax.validation.Valid;
 
 @RestController
@@ -24,10 +22,16 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
-    private LoginInfoRepository loginInfoRepository;
+    private SessionService sessionService;
 
-    // TODO: this api is not available to normal users.
+    @Autowired
+    private CookieService cookieService;
+
+    @Autowired
+    private LoginInfoService loginInfoService;
+
     @GetMapping(path={"", "/"})
+    @Auth(value = "admin")
     @ResponseBody
     public Iterable<User> getAllUsers() {
         log.debug("Getting all users!");
@@ -39,77 +43,66 @@ public class UserController {
     public String register(@Valid @RequestBody User user) {
         User userInDb = userRepository.findByEmail(user.getEmail());
         if (userInDb != null) {
-            throw new LoginError("Email already existed.");
+            throw new AuthError("Email already existed.");
         }
 
         String hashPw = Utils.bcrypt(user.getPassword());
         user.setPassword(hashPw);
-        user.setType(1);    // TODO: Temporary use as no email sending service set up.
+        user.setType(1);    // TODO: Temporary use as no email service set up.
         userRepository.save(user);
         return "Register successfully.";
     }
 
     @PostMapping(path = "/login")
     @ResponseBody
-    public UserSummary login(@Valid @RequestBody User user, HttpServletRequest request,
-                        HttpServletResponse response) {
+    public UserSummary login(@Valid @RequestBody User user) {
         User userInDb = userRepository.findByEmail(user.getEmail());
-        if (userInDb == null) {
-            throw new LoginError("Email not registered.");
-        }
+        validateUserLogin(user, userInDb);
 
-        if (!Utils.checkBcrypt(user.getPassword(), userInDb.getPassword())) {
-            throw new LoginError("Email or password error.");
-        }
+        loginInfoService.recordUserLogin(userInDb.getUid());
+        sessionService.setUserInfo(userInDb);
+        cookieService.writeCookie("u", userInDb.getUid());
 
-        if (userInDb.getType() <= 0) {
-            throw new LoginError("User status abnormal.");
-        }
-
-        int uid = userInDb.getUid();
-        recordLoginInfo(request, uid);
-        request.getSession().setAttribute("uid", uid);
-        Utils.setUidCookie(uid, 7, response);
         return new UserSummary(userInDb);
     }
 
-    @GetMapping(path = "/summary")
+    @GetMapping(path = "/summary/{uid}")
     @ResponseBody
-    public UserSummary getUserSummary(HttpServletRequest request) {
-        int uid = getUidFromSession(request);
-        if (uid <= 0) return null;
+    @Auth(value = "owner")
+    public UserSummary getUserSummary(@PathVariable int uid) {
+        if (uid <= 0 || uid != sessionService.readIntByKey("uid")) {
+            log.info("Invalid uid to retrieve summary: " + uid);
+            return null;
+        }
         User user = userRepository.findByUid(uid);
-        if (user == null) return null;
+        if (user == null) {
+            log.info("Cannot retrieve user by uid: " + uid);
+            return null;
+        }
+
         return new UserSummary(user);
     }
 
     @GetMapping(path = "/logout")
     @ResponseBody
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession(false);
-        int uid = getUidFromSession(request);
-        if (session != null)
-            session.invalidate();
-        if (uid > 0)
-            Utils.setUidCookie(-1, 0, response);
+    public String logout() {
+        cookieService.removeCookie("u");
+        sessionService.removeSession();
 
         return "Success.";
     }
 
-    private void recordLoginInfo(HttpServletRequest request, int uid) {
-        String ip = Utils.extractIp(request);
-        String device = Utils.getDeviceDetails(request);
-        LoginInfo loginInfo = new LoginInfo();
-        loginInfo.setUid(uid);
-        loginInfo.setIp(ip);
-        loginInfo.setDevice(device);
-        loginInfoRepository.save(loginInfo);
-    }
+    private void validateUserLogin(User user, User userInDb) {
+        if (userInDb == null) {
+            throw new AuthError("Email not registered.");
+        }
 
-    private int getUidFromSession(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("uid") == null) return -1;
-        return Utils.parseUid(session.getAttribute("uid").toString());
-    }
+        if (!Utils.checkBcrypt(user.getPassword(), userInDb.getPassword())) {
+            throw new AuthError("Email or password error.");
+        }
 
+        if (userInDb.getType() <= 0) {
+            throw new AuthError("User status abnormal.");
+        }
+    }
 }
