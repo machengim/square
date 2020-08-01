@@ -52,8 +52,9 @@ public class AuthFilter extends OncePerRequestFilter {
         int uidCookie = cookieService.readUid();
         int uidSession = sessionService.readIntByKey("uid");
 
-        if (uidCookie < 0 && uidSession > 0) {
-            cookieService.writeCookie("u", uidSession);
+        if (uidCookie < 0 && uidSession > 0) {  // has session but no cookie, this is weird.
+            //cookieService.writeCookie("u", uidSession);
+            sessionService.removeSession();
         } else if (uidCookie > 0 && uidSession < 0) {
             if (loginInfoService.checkLoginHistory(uidCookie)) {
                 User user = userRepository.findByUid(uidCookie);

@@ -2,8 +2,10 @@ package xyz.masq.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.annotation.Auth;
+import xyz.masq.error.GenericError;
 import xyz.masq.repository.UserRepository;
 import xyz.masq.entity.User;
 import xyz.masq.entity.UserSummary;
@@ -47,6 +49,7 @@ public class UserController {
         }
 
         String hashPw = Utils.bcrypt(user.getPassword());
+        if (!Utils.checkUname(user.getUname())) user.setUname("Anonymous");
         user.setPassword(hashPw);
         user.setType(1);    // TODO: Temporary use as no email service set up.
         userRepository.save(user);
@@ -70,14 +73,32 @@ public class UserController {
     @ResponseBody
     @Auth(value = "owner")
     public UserSummary getUserSummary(@PathVariable int uid) {
-        if (uid <= 0 || uid != sessionService.readIntByKey("uid")) {
-            log.info("Invalid uid to retrieve summary: " + uid);
-            return null;
-        }
         User user = userRepository.findByUid(uid);
         if (user == null) {
-            log.info("Cannot retrieve user by uid: " + uid);
+            log.info("Cannot find user by uid: " + uid);
             return null;
+        }
+
+        return new UserSummary(user);
+    }
+
+    // receive post body as {"uname": some_name}.
+    @PostMapping(path = "/{uid}/uname")
+    @ResponseBody
+    @Auth(value = "owner")
+    public UserSummary changeUname(@PathVariable int uid, @RequestBody String entity)  {
+        User user = userRepository.findByUid(uid);
+        if (user == null) {
+            log.info("Cannot find user by uid: " + uid);
+            return null;
+        }
+
+        String newUname = Utils.readJsonValue(entity, "uname");
+        if (Utils.checkUname(newUname)) {
+            user.setUname(newUname);
+            userRepository.save(user);
+        } else {
+            throw new GenericError("Only alphanumeric characters and underscore allowed for username");
         }
 
         return new UserSummary(user);

@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useContext, useRef, ChangeEvent} from 'react';
 import {Link} from 'react-router-dom';
-import {fakeUser, BaseUrl, postRequest, request} from '../lib/utils';
+import {fakeUser, BaseUrl, postRequest, request, clearStorage, setupStorage} from '../lib/utils';
 import {UserContext} from './context';
 import './panel.css';
 import { UserInfo } from '../lib/interfaces';
@@ -37,11 +37,33 @@ export default function Panel() {
     }, [user]);
 
     function clickChangeButton() {
+        console.log(username + ' and ' + user.uname);
         if (changing && username !== user.uname) {
             // TODO: validate input and send new username to server.
+            let body = {"uname": username};
+            postRequest(BaseUrl + 'user/' + user.uid + '/uname', JSON.stringify(body),
+                changeUnameDone, changeUnameFail);
         } 
 
         setChanging(!changing);
+    }
+
+    function changeUnameDone(res: globalThis.Response) {
+        res.json()
+            .then((summary: UserInfo) => {
+                userCtx.setUser(summary);
+                setupStorage(summary);
+            }).catch(() => {
+                console.log('Cannot parse json!\n' + res);
+            });
+    }
+
+    function changeUnameFail(res: globalThis.Response) {
+        res.text()
+            .then((result) => {
+                alert(result);
+                setUsername(user.uname);
+            });
     }
 
     function handleUnameChange(event: ChangeEvent<HTMLInputElement>) {
@@ -58,6 +80,7 @@ export default function Panel() {
     function logoutDone(res: globalThis.Response) {
         res.text().then((text: string) => {
             if (text.includes('Success')) {
+                clearStorage();
                 window.location.href = '/';
             } else {
                 alert('Logout failed, please try again.');
@@ -170,7 +193,6 @@ export default function Panel() {
         function login() {
             const newUser = getLoginInfo();
             if (!newUser.email || !newUser.password) return;
-            console.log(newUser.email + ': ' + newUser.password);
             setLogging(true);
             postRequest(BaseUrl + 'user/login', JSON.stringify(newUser),
                     loginDone, loginFailed);
@@ -179,8 +201,9 @@ export default function Panel() {
         function loginDone(res: globalThis.Response) {
             setLogging(false);
             res.json()
-                .then((result: UserInfo) => {
-                    userCtx.setUser(result);
+                .then((summary: UserInfo) => {
+                    userCtx.setUser(summary);
+                    setupStorage(summary);
                     setDialogOption(0);
                 }).catch(() => {
                     console.log('Cannot parse json!\n' + res);
@@ -200,7 +223,7 @@ export default function Panel() {
             if (!emailInput) return newUser;
 
             const passwordInput = getPasswordInput(0);
-            if (! passwordInput) return newUser;
+            if (!passwordInput) return newUser;
 
             newUser.email = emailInput;
             newUser.password = passwordInput;

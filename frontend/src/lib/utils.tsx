@@ -69,3 +69,13 @@ export function fakeUserCtx(): UserInfoForContext {
         return;
     }
 }
+
+export function clearStorage() {
+    window.localStorage.removeItem('summary');
+    window.localStorage.removeItem('lastUpdate');
+}
+
+export function setupStorage(summary: UserInfo) {
+    localStorage.setItem('summary', JSON.stringify(summary));
+    localStorage.setItem('lastUpdate', JSON.stringify(new Date()));
+}

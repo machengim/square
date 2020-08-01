@@ -60,7 +60,7 @@ public class CookieService {
     }
 
     private void setCookie(Cookie cookie) {
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false); //set to false so it can be read by client js.
         cookie.setPath("/");
         //cookie.setSecure(true);
         response.addCookie(cookie);
