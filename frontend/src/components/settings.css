@@ -1,0 +1,63 @@
+#setting {
+    width: 400px;
+    margin-left: 100px;
+}
+
+#setting h3 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#setting label {
+    margin: 5px auto;
+}
+
+#setting input {
+    width: 100%;
+    margin: 5px auto 15px auto;
+    height: 25px;
+    color: sienna;
+}
+
+#setting .btn_wrapper{
+    text-align: center;
+}
+
+#setting button {
+    height: 30px;
+    background-color: rgb(235, 229, 229);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+#setting button:hover{
+    background-color: white;
+}
+
+#setting .right {
+    float: right;
+    margin-top: 5px;
+}
+
+.tooltip {
+    position: relative;
+    float: right;
+    margin-top: 5px;
+    border-bottom: 1px dotted black;
+  }
+  
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: black;
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px;
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+  
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

@@ -61,7 +61,7 @@ public class Utils {
     }
 
     public static boolean checkUname(String uname) {
-        String pattern = ("^[a-zA-Z0-9_]*");
+        String pattern = ("^[a-zA-Z0-9_ ]*");
         return Pattern.matches(pattern, uname);
     }
 
