@@ -1,16 +1,27 @@
-import React, {useState, useEffect, ChangeEvent } from 'react';
+import React, {useState, useEffect, ChangeEvent, useContext, useRef} from 'react';
+import {Image, PostRequest} from '../lib/interfaces';
 import './draft.css';
+import { resolve } from 'dns';
+import { rejects } from 'assert';
+import { read } from 'fs';
+import { UserContext } from './context';
+import { postRequest, BaseUrl } from '../lib/utils';
 
 /**
  * TODO: form submit validation;
  *       file size limit.
  */
 export default function Draft() {
+    const userCtx = useContext(UserContext);
+    const [user] = useState(userCtx.user);
     const [writing, setWriting] = useState(false);
+    const [content, setContent] = useState('');
     const [anonymous, setAnonymous] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
-    const [btnText, setBtnText] = useState("Choose image");
+    const [btnText, setBtnText] = useState('Choose image');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [sending, setSending] = useState(false);
+    const fileSelector = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         let limit = 15;     // max length of the text shown on the 'Choose image' button.
@@ -25,30 +36,107 @@ export default function Draft() {
     }, [selectedFile]);
 
     function triggerSelectFile(): void {
-        let element = document.getElementById('file');
-        if (element)
-            element.click();
+        if (fileSelector && fileSelector.current) {
+            fileSelector.current.click();
+        }
     }
 
-    function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
-        if (event.target.files)
-            setSelectedFile(event.target.files[0]);
+
+    function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+        if (event.target.files) {
+            let file = event.target.files[0];
+            if (checkChosenFile(file)) {
+                setSelectedFile(file);
+            }
+        }
+    }
+
+    function checkChosenFile(file: File): boolean {
+        if (!file) {
+            alert('No file found.');
+            return false;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Max file size is 5MB.');
+            return false;
+        } else if (!file.type.includes('image')) {
+            alert('Only image file allowed.');
+            return false;
+        }
+
+        return true;
+    }
+
+
+    function handleTextChange(event: ChangeEvent<HTMLTextAreaElement>, func: Function) {
+        func(event.target.value);
+    }
+
+    function toBase64(file: File) {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                if (reader && reader.result)
+                    resolve(reader.result.toString());
+            }
+
+            reader.onerror = reject;
+        });
+    }
+
+    async function uploadPost() {
+        let imageStr = '';
+        if (selectedFile) {
+            imageStr = await toBase64(selectedFile);
+        } else if (content.trim().length === 0) {
+            alert('No content found.');
+            return;
+        }
+
+        let username = (isPrivate)? 'Anonymous': user.uname;
+        const post: PostRequest = {
+            uid: (user.uid)? user.uid: -1,
+            uname: username,
+            content: content,
+            ctime: new Date(),
+            isPrivate: (isPrivate)? 1: 0,
+            image: (imageStr)? imageStr: null,
+        };
+
+        setSending(true);
+        postRequest(BaseUrl + 'posts', JSON.stringify(post), postDone, postFail);
+    }
+
+    // TODO: refresh postlist.
+    function postDone(res: globalThis.Response) {
+        setContent('');
+        setSelectedFile(null);
+        setSending(false);
+        alert('Done');
+    }
+
+    function postFail(res: globalThis.Response) {
+        setSending(false);
+        alert(res);
     }
 
     return (
-        <div id="draft_area">
+        <div id='draft_area'>
             <span>Write a post:<br/></span>
-            <textarea name="draft" className={writing? 'selected': ''}
-                placeholder="Share your thought" onFocus={() =>setWriting(true)} />
+            <textarea name='draft' value={content} className={writing? 'selected': ''}
+                placeholder='Share your thought' onFocus={() =>setWriting(true)}
+                onChange={(e) => handleTextChange(e, setContent)} />
             <button className={writing? '': 'hidden'} onClick={() => setWriting(false)}>Collapse</button>
-            <div id="draft_toolbar" className={writing? '': 'hidden'}>
-                <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.bmp,.gif" onChange={(e) => handleFileChange(e)} />
+            <div id='draft_toolbar' className={writing? '': 'hidden'}>
+                <input type='file' id='file' name='file' ref={fileSelector} accept='.jpg,.jpeg,.png,.bmp,.gif' onChange={(e) => handleFileChange(e)} />
                 <button id='select_file' onClick={() => triggerSelectFile()}>{btnText}</button>
-                <input type="checkbox" name="is_anonymous" checked={anonymous} onChange={() => setAnonymous(!anonymous)}/>
+                <input type='checkbox' name='is_anonymous' checked={anonymous} onChange={() => setAnonymous(!anonymous)}/>
                 <label>Anonymous</label>
-                <input type="checkbox" name="is_private" checked={isPrivate} onChange={() => setPrivate(!isPrivate)} />
+                <input type='checkbox' name='is_private' checked={isPrivate} onChange={() => setPrivate(!isPrivate)} />
                 <label>Private</label>
-                <button>Send</button>
+                {!sending && <button onClick={() => uploadPost()}>Send</button>}
+                {sending && <button disabled>Send</button>}
             </div>
         </div>
     );

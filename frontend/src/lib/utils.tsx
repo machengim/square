@@ -10,7 +10,7 @@ export function request(url: string, callback: Function, errorHandler: Function)
     fetch(url, {
         credentials: 'include'
     }).then(res => {
-            if (res.status === 200) {
+            if (res.ok) {
                 callback(res);
             } else {
                 errorHandler(res);

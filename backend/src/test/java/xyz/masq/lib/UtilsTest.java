@@ -25,4 +25,19 @@ public class UtilsTest {
         assertFalse(Utils.checkBcrypt(fake, hashed));
     }
 
+    @Test
+    public void passwordTest() {
+        String pw = "11111111a";
+        assertTrue(Utils.checkPassword(pw));
+        pw = "111AA111";
+        assertTrue(Utils.checkPassword(pw));
+        pw = "aa11aa+-";
+        assertTrue(Utils.checkPassword(pw));
+
+        pw = "aa 11aa+-";
+        assertFalse(Utils.checkPassword(pw));
+        pw = "123abc";
+        assertFalse(Utils.checkPassword(pw));
+    }
+
 }

@@ -5,7 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+
+import javax.imageio.ImageIO;
 import javax.validation.ConstraintValidatorContext;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -61,8 +68,30 @@ public class Utils {
     }
 
     public static boolean checkUname(String uname) {
+        if (uname.length() > 32) return false;
         String pattern = ("^[a-zA-Z0-9_ ]*");
         return Pattern.matches(pattern, uname);
+    }
+
+    public static boolean checkPassword(String pw) {
+        if (pw == null || pw.length() < 8) return false;
+
+        return Pattern.matches(".*\\d.*", pw) && Pattern.matches(".*[a-zA-Z]+.*", pw)
+                && !Pattern.matches(".*\\s.*", pw);
+    }
+
+    // TODO: check path exist; check filename available; check image format.
+    public static String base64ToImage(String imageStr) throws IOException {
+        String body = imageStr.split(",")[1];
+        byte[] imageBytes = Base64.getDecoder().decode(body);
+        ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+        BufferedImage image = ImageIO.read(bis);
+        bis.close();
+
+        String fileName = generateUuid() + ".png";
+        File output = new File("target" + File.separator + fileName);
+        ImageIO.write(image, "png", output);
+        return fileName;
     }
 
 }

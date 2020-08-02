@@ -2,7 +2,6 @@ package xyz.masq.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.annotation.Auth;
 import xyz.masq.error.GenericError;
@@ -36,7 +35,6 @@ public class UserController {
     @Auth(value = "admin")
     @ResponseBody
     public Iterable<User> getAllUsers() {
-        log.debug("Getting all users!");
         return userRepository.findAll();
     }
 
@@ -45,15 +43,14 @@ public class UserController {
     public String register(@Valid @RequestBody User user) {
         User userInDb = userRepository.findByEmail(user.getEmail());
         if (userInDb != null) {
-            throw new AuthError("Email already existed.");
+            throw new GenericError("Email already existed.");
         }
 
-        String hashPw = Utils.bcrypt(user.getPassword());
         if (!Utils.checkUname(user.getUname())) user.setUname("Anonymous");
-        user.setPassword(hashPw);
+        user.setPassword(Utils.bcrypt(user.getPassword()));
         user.setType(1);    // TODO: Temporary use as no email service set up.
         userRepository.save(user);
-        return "Register successfully.";
+        return "Success.";
     }
 
     @PostMapping(path = "/login")
@@ -94,6 +91,7 @@ public class UserController {
         }
 
         String newUname = Utils.readJsonValue(entity, "uname");
+        if (newUname == null || newUname.length() == 0) newUname = "Anonymous";
         if (Utils.checkUname(newUname)) {
             user.setUname(newUname);
             userRepository.save(user);
@@ -102,6 +100,30 @@ public class UserController {
         }
 
         return new UserSummary(user);
+    }
+
+    // Receive post body as {"oldPassword": old, "newPassword": new}.
+    @PostMapping(path = "/{uid}/password")
+    @ResponseBody
+    @Auth(value = "owner")
+    public String changePassword(@PathVariable int uid, @RequestBody String entity) {
+        User user = userRepository.findByUid(uid);
+        if (user == null) {
+            log.info("Cannot find user by uid: " + uid);
+            return null;
+        }
+
+        String oldPassword = Utils.readJsonValue(entity, "oldPassword");
+        String newPassword = Utils.readJsonValue(entity, "newPassword");
+        if (!Utils.checkBcrypt(oldPassword, user.getPassword())) {
+            throw new GenericError("Incorrect password.");
+        } else if (!Utils.checkPassword(newPassword)) {
+            throw new GenericError("Invalid new password format.");
+        }
+
+        user.setPassword(Utils.bcrypt(newPassword));
+        userRepository.save(user);
+        return "Success.";
     }
 
     @GetMapping(path = "/logout")

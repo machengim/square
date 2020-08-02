@@ -22,12 +22,21 @@ export interface Post {
     uid?: number;   // hidden in response for user's privacy.
     uname: string;
     content: string;
-    ctime: string;
+    ctime: Date;
     comments: number;
     isPrivate: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
-    attachments?: ImageList;    // not required in request.
+    attachment?: string; // only one image attachment allowed for now. In request, attchment contains the base64 string of image.
+}
+
+export interface PostRequest {
+    uid: number;
+    uname: string;
+    content: string;
+    ctime: Date;
+    isPrivate: number;
+    image: string | null;
 }
 
 // Response from the API server.
@@ -38,14 +47,16 @@ export interface PostsResponse {
     posts: Array<Post>;
 }
 
-// This interface needs more consideration.
+// Keep it for future use.
 export interface Image {
     aid?: number;   // not required in request.
-    pid: number;
+    pid?: number;   // not required in post.
     url?: string;    // not required in request.
     thumbnail?: string;     // not required in request.
+    content?: string;       // not required in response.
 }
 
+// Keep it for future use.
 export interface ImageList {
     value: Array<Image>;
 }

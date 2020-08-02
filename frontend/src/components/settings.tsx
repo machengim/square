@@ -8,13 +8,13 @@ export default function Settings() {
     const userCtx = useContext(UserContext);
     const [user] = useState(userCtx.user);
     const [nickname, setNickname] = useState(user.uname);
-    const [oldPassword] = useState('');
-    const [newPassword] = useState('');
-    const [repeatPassword] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [repeatPassword, setRepeatPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    function handleNicknameChange(event: ChangeEvent<HTMLInputElement>) {
-        setNickname(event.target.value);
+    function handleInputChange(event: ChangeEvent<HTMLInputElement>, func: Function) {
+        func(event.target.value);
     }
 
     function submitNewNickname() {
@@ -26,6 +26,38 @@ export default function Settings() {
         setLoading(true);
         postRequest(BaseUrl + 'user/' + user.uid + '/uname', JSON.stringify(body),
             handleRequestDone, handleRequestFail);
+    }
+
+    function submitNewPassword() {
+        if (!checkPassword(oldPassword) || !checkPassword(newPassword) || !checkPassword(repeatPassword)) {
+            alert('Password format error, please check your input.');
+            return;
+        }
+        if (newPassword !== repeatPassword) {
+            alert('New passwords not match.');
+            return;
+        }
+
+        let body = {"oldPassword": oldPassword, "newPassword": newPassword};
+        setLoading(true);
+        postRequest(BaseUrl + 'user/' + user.uid + '/password', JSON.stringify(body),
+            changePasswordDone, changePasswordDone);
+    }
+
+    function checkPassword(password: string): boolean {
+        if (!password) return false;
+        if (!/^\S{8,64}$/.test(password)) return false;
+        if (!/\d+/.test(password) || !/[a-zA-Z]+/.test(password)) return false;
+
+        return true;
+    }
+
+    function changePasswordDone(res: globalThis.Response) {
+        res.text()
+            .then((result: string) => {
+                setLoading(false);
+                alert(result);
+            })
     }
 
     function handleRequestDone(res: globalThis.Response) {
@@ -48,7 +80,7 @@ export default function Settings() {
         <div id="setting">
             <h3>{user.email}</h3>
             <label>Nickname:</label> 
-            <input value={nickname} onChange={(e) => handleNicknameChange(e)}/>
+            <input value={nickname} onChange={(e) => handleInputChange(e, setNickname)}/>
             <div>
                 {!loading && <button onClick={() => submitNewNickname()}>Submit</button>}
                 {loading && <button disabled>Submit</button>}
@@ -61,17 +93,19 @@ export default function Settings() {
             </div>
             <hr/>
             <label>Old password:</label>
-            <input/>
+            <input type='password' value={oldPassword} onChange={(e) => handleInputChange(e, setOldPassword)}/>
             <label>New password:</label>
-            <input />            
+            <input type='password' value={newPassword} onChange={(e) => handleInputChange(e, setNewPassword)} />            
             <label>Repeat new password:</label>
-            <input />
+            <input type='password' value={repeatPassword} onChange={(e) => handleInputChange(e, setRepeatPassword)} />
             <div>
-                <button>Submit</button>
+                {!loading && <button onClick={() => submitNewPassword()}>Submit</button>}
+                {loading && <button disabled>Submit</button>}
                 <div className='tooltip'>Password rule?
                     <span className='tooltiptext'>
                         1. Must be longer than 8; <br/>
                         2. Has at least one character and one digit.
+                        3. Whitespace is not allowed.
                     </span>
                 </div>
             </div>
