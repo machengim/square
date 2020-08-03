@@ -11,5 +11,10 @@ public class PostRequest {
     private String content;
     private Instant ctime = Instant.now();
     private int isPrivate = 0;
+    private boolean anonymous;
     private String image;
+
+    public boolean getAnonymous() {
+        return anonymous;
+    }
 }

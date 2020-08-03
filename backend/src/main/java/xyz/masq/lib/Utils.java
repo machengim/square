@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import javax.imageio.ImageIO;
@@ -12,6 +13,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Random;
 import java.util.UUID;
@@ -80,18 +84,9 @@ public class Utils {
                 && !Pattern.matches(".*\\s.*", pw);
     }
 
-    // TODO: check path exist; check filename available; check image format.
-    public static String base64ToImage(String imageStr) throws IOException {
-        String body = imageStr.split(",")[1];
-        byte[] imageBytes = Base64.getDecoder().decode(body);
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-        BufferedImage image = ImageIO.read(bis);
-        bis.close();
-
-        String fileName = generateUuid() + ".png";
-        File output = new File("target" + File.separator + fileName);
-        ImageIO.write(image, "png", output);
-        return fileName;
+    public static String sha256(String text) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] result = digest.digest(text.getBytes(StandardCharsets.UTF_8));
+        return Hex.encodeHexString(result);
     }
-
 }

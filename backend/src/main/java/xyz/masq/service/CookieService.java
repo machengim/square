@@ -14,9 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
 
-/**
- * TODO: store user summary info in local storage.
- */
 @Service
 @Slf4j
 @PropertySource("classpath:site.properties")

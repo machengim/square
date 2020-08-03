@@ -36,18 +36,27 @@ public class PostController {
     @GetMapping(path = {"", "/"})
     public PostResponse getPublicPosts() {
         List<Post> posts = postRepository.findPublicPosts(limit);
+        for (Post post: posts) {
+            if (post.getHasAttachments() > 0) {
+                post.setAttachments(attachmentService.signPostAttachments(post.getPid()));
+            }
+        }
         return new PostResponse(posts, postRepository);
     }
 
-    // TODO: generate thumbnail, save image file, convert PostRequest to Post.
     @PostMapping(path = {"", "/"})
     @Transactional
     public String sendPost(@RequestBody PostRequest postRequest) {
         Post post = new Post(postRequest);
+        if (postRequest.getAnonymous()) {
+            post.setUname("Anonymous");
+        }
         post = postRepository.save(post);
-        int aid = attachmentService.processImage(postRequest, post.getPid());
-        post.setAttachments(aid);
-        postRepository.save(post);
+        if (postRequest.getImage() != null && postRequest.getImage().length() > 0) {
+            attachmentService.processImage(postRequest, post.getPid());
+            post.setHasAttachments(1);
+            postRepository.save(post);
+        }
 
         return "Success";
     }

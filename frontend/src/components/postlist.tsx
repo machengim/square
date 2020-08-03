@@ -114,6 +114,7 @@ export default function PostList(props: PageOptionProps) {
         res.json().then(
             (result: PostsResponse) => {
                 if (!result) return;
+                console.log(result);
 
                 setPosts(posts.concat(result.posts));
                 setHasMore(result.hasMore);
@@ -165,7 +166,7 @@ function PostEntry(props: PostProps) {
     const post = props.value;
     const [showComments, setShowComments] = useState(false);
     const [marked, setMarked] = useState(post.marked);
-    const [images, setImages] = useState(new Array<Image>());   //TODO: needs to init.
+    const [images, setImages] = useState(post.attachments);   //TODO: needs to init.
 
     function toggleShowComments() {
         setShowComments(!showComments);
@@ -185,7 +186,7 @@ function PostEntry(props: PostProps) {
         <>
             <div className="author">{post.uname} said:</div>
             <div className="content">{post.content}</div>
-            <Lightbox value={images} />
+            {images && <Lightbox value={images} />}
             <div className="foot">
                 <span>5 minutes ago</span>
                 <span className="toolbar">

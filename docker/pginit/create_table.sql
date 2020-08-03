@@ -14,10 +14,10 @@ CREATE TABLE post (
     pid serial primary key,
     uid integer not null,
     uname varchar(32) not null,
-    content varchar(320) not null,
+    content varchar(320),
     isPrivate integer default 0 not null,
     comments integer default 0 not null,
-    attachments integer default 0 not null,
+    hasAttachments integer default 0 not null,
     ctime timestamp without time zone default(timezone('utc', now())) not null
 );
 
@@ -41,8 +41,7 @@ CREATE TABLE attachment (
 	aid serial primary key,
 	pid integer not null,
 	url varchar(64) not null,
-	thumbnail varchar(64) not null,
-    ctime timestamp without time zone default(timezone('utc', now())) not null
+	thumbnail varchar(64) not null
 );
 
 CREATE TABLE login (

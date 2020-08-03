@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { ImageList } from '../lib/interfaces';
+import { BaseUrl } from '../lib/utils';
 import './lightbox.css';
 
 
@@ -10,10 +11,16 @@ import './lightbox.css';
  * TODO: clean css file.
  */
 export default function Lightbox(props: ImageList) {
-    const [images] = useState(props.value);
+    const [images, setImages] = useState(props.value);
     const [length] = useState(props.value.length);
     const [showModal, setShowModal] = useState(false);
     const [current, setCurrent] = useState(0);
+
+    /*
+    useEffect(() => {
+        setImages(props.value);
+        console.log(props.value);
+    }, [props]);*/
 
     useEffect(() => {
         // note this line should put before modal check to 
@@ -37,7 +44,7 @@ export default function Lightbox(props: ImageList) {
     return (
         <>
             <div className="attachments">
-                {images.map((i, id) => <img src={i.thumbnail} alt=''
+                {images.map((i, id) => <img key={id} src={BaseUrl + i.thumbnail} alt=''
                  onClick={() => {setCurrent(id); setShowModal(true)}}/>
                 )}
             </div>
@@ -45,7 +52,7 @@ export default function Lightbox(props: ImageList) {
             {showModal && (
                 <div id='lightbox' className='lightbox'>
                     <span className="close cursor" onClick={() => setShowModal(false)}>&times;</span>
-                    <img src={images[current].url} alt='' onClick={() => moveIndex(1)} />
+                    <img src={BaseUrl + images[current].url} alt='' onClick={() => moveIndex(1)} />
                     {length > 0 &&  (
                         <><a href='#' className='prev' onClick={() => moveIndex(-1)}>&#10094;</a>
                         <a href='#' className='next' onClick={() => moveIndex(1)}>&#10095;</a></>)

@@ -13,7 +13,7 @@ import { postRequest, BaseUrl } from '../lib/utils';
  */
 export default function Draft() {
     const userCtx = useContext(UserContext);
-    const [user] = useState(userCtx.user);
+    const [user, setUser] = useState(userCtx.user);
     const [writing, setWriting] = useState(false);
     const [content, setContent] = useState('');
     const [anonymous, setAnonymous] = useState(false);
@@ -22,6 +22,10 @@ export default function Draft() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [sending, setSending] = useState(false);
     const fileSelector = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        setUser(userCtx.user);
+    }, [userCtx]);
 
     useEffect(() => {
         let limit = 15;     // max length of the text shown on the 'Choose image' button.
@@ -98,6 +102,7 @@ export default function Draft() {
         const post: PostRequest = {
             uid: (user.uid)? user.uid: -1,
             uname: username,
+            anonymous: anonymous,
             content: content,
             ctime: new Date(),
             isPrivate: (isPrivate)? 1: 0,

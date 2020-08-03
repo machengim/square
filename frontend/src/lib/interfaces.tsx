@@ -27,14 +27,16 @@ export interface Post {
     isPrivate: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
-    attachment?: string; // only one image attachment allowed for now. In request, attchment contains the base64 string of image.
+    attachments?: Array<Image>; 
 }
 
+// only one image allowed in request temporarily. Some inconsistency with the Post interface.
 export interface PostRequest {
     uid: number;
     uname: string;
     content: string;
     ctime: Date;
+    anonymous: boolean;
     isPrivate: number;
     image: string | null;
 }
