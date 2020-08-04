@@ -37,7 +37,6 @@ export default function Panel() {
     }, [user]);
 
     function clickChangeButton() {
-        console.log(username + ' and ' + user.uname);
         if (changing && username !== user.uname) {
             // TODO: validate input and send new username to server.
             let body = {"uname": username};
@@ -137,7 +136,6 @@ export default function Panel() {
         }
 
         const emailStr = email.current.value;
-        console.log('email: ' + emailStr);
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
             alert('Invalid email input!')
             return '';
@@ -159,7 +157,6 @@ export default function Panel() {
         }
 
         if (!/^\S{8,64}$/.test(passwordStr)){
-            console.log(passwordStr.length);
             alert('Password must be longer than 8!');
             return '';
         }
@@ -212,7 +209,6 @@ export default function Panel() {
 
         function loginFailed(res: globalThis.Response) {
             setLogging(false);
-            console.log(res);
             alert('login failed');
         }
 
@@ -253,7 +249,6 @@ export default function Panel() {
         function submit() {
             const newUser = getRegisterInfo();
             if (!newUser.email || !newUser.password) return;
-            console.log(newUser.email + ': ' + newUser.password);
             setSubmitting(true);
             postRequest(BaseUrl + 'user/register', JSON.stringify(newUser),
                     registerDone, registerFailed);

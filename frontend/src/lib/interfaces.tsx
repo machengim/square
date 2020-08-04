@@ -13,8 +13,15 @@ export interface UserInfo {
 
 // Pass user info and its set methods to the children components.
 export interface UserInfoForContext {
-    user: UserInfo
+    user: UserInfo;
     setUser: Function;
+}
+
+export interface AppInfoForContext {
+    updateUser: boolean;
+    updatePosts: boolean;
+    setUpdateUser: Function | null;
+    setUpdatePosts: Function | null;
 }
 
 export interface Post {

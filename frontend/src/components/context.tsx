@@ -1,13 +1,23 @@
-import React, {useState, useEffect, createContext} from 'react';
-import {BaseUrl, fakeUser, fakeUserCtx, request, clearStorage, setupStorage} from '../lib/utils';
-import {UserInfo} from '../lib/interfaces';
+import React, {useState, useEffect, createContext, useContext} from 'react';
+import {BaseUrl, fakeUser, fakeUserCtx, request, clearStorage, setupStorage, checkInstruction} from '../lib/utils';
+import {UserInfo, AppInfoForContext} from '../lib/interfaces';
 import Cookies from 'js-cookie';
 
 /**
  * This file is the ACTUAL entry point of the whole app.
- * Only user id and user nickname should be kept as context.
- * TODO: read user info from cookie if it exists. This should be done immediately after constructor.
  */
+export const AppContext = createContext<AppInfoForContext>({updateUser: false, updatePosts: false, setUpdateUser: null, setUpdatePosts: null});
+
+export function AppProvider(props: any) {
+    const [updateUser, setUpdateUser] = useState(false);
+    const [updatePosts, setUpdatePosts] = useState(false);
+
+    return (
+        <AppContext.Provider value={{updateUser, updatePosts, setUpdateUser, setUpdatePosts}}>
+            {props.children}
+        </AppContext.Provider>
+    )
+}
 
 // Must have a default context value, so a fake user is made up in 'utils.tsx'.
 export const UserContext = createContext(fakeUserCtx());
@@ -16,8 +26,23 @@ export function UserProvider(props: any) {
     const [loading, setLoading] = useState(false);
     // to provide user panel consistency, the local storage will be used to init user
     // if it's valid, other wise user will be set as guest.
+    const appCtx = useContext(AppContext);
+    const [updateUserMsg, setUpdateUserMsg] = useState(appCtx.updateUser);
     const [user, setUser] = useState(initUser());
     useState(() => initRequestCheck());
+
+    useEffect(() => {
+        console.log(appCtx.updateUser);
+        setUpdateUserMsg(appCtx.updateUser);
+    }, [appCtx.updateUser]);
+
+    useEffect(() => {
+        if (updateUserMsg && user.uid > 0) {
+            request(BaseUrl + 'user/summary/' + user.uid, handleUserInfoResponse, handleError);
+        } else {
+            appCtx.setUpdateUser && appCtx.setUpdateUser(false);
+        }
+    }, [updateUserMsg])
 
     useEffect(() => {
         if (loading && user.uid > 0)   
@@ -79,11 +104,16 @@ export function UserProvider(props: any) {
     }
 
     function handleUserInfoResponse(res: globalThis.Response) {
+        if (checkInstruction(res.headers.get('instruction'))) {
+            setUser(fakeUser());
+        }
+        
         res.json()
         .then((summary: UserInfo) => {
-            setupStorage(summary)
+            setupStorage(summary);
             setUser(summary);
             setLoading(false);
+            appCtx.setUpdateUser && appCtx.setUpdateUser(false);
         }).catch(() => {
             console.log('Cannot parse json!\n' + res);
         })
@@ -99,3 +129,4 @@ export function UserProvider(props: any) {
         </UserContext.Provider>
     );
 }
+

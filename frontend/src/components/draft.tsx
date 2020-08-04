@@ -1,17 +1,15 @@
 import React, {useState, useEffect, ChangeEvent, useContext, useRef} from 'react';
-import {Image, PostRequest} from '../lib/interfaces';
-import './draft.css';
-import { resolve } from 'dns';
-import { rejects } from 'assert';
-import { read } from 'fs';
-import { UserContext } from './context';
+import { PostRequest} from '../lib/interfaces';
+import { AppContext, UserContext } from './context';
 import { postRequest, BaseUrl } from '../lib/utils';
+import './draft.css';
 
 /**
  * TODO: form submit validation;
  *       file size limit.
  */
 export default function Draft() {
+    const appCtx = useContext(AppContext);
     const userCtx = useContext(UserContext);
     const [user, setUser] = useState(userCtx.user);
     const [writing, setWriting] = useState(false);
@@ -118,6 +116,12 @@ export default function Draft() {
         setContent('');
         setSelectedFile(null);
         setSending(false);
+        if (appCtx.setUpdatePosts) {
+            appCtx.setUpdatePosts(true);
+        }
+        if (appCtx.setUpdateUser) {
+            appCtx.setUpdateUser(true);
+        }
         alert('Done');
     }
 

@@ -16,12 +16,6 @@ export default function Lightbox(props: ImageList) {
     const [showModal, setShowModal] = useState(false);
     const [current, setCurrent] = useState(0);
 
-    /*
-    useEffect(() => {
-        setImages(props.value);
-        console.log(props.value);
-    }, [props]);*/
-
     useEffect(() => {
         // note this line should put before modal check to 
         // prevent the scrollbar from missing after closing a modal.

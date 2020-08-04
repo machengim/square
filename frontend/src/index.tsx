@@ -8,11 +8,12 @@ import PageNotFound from './pages/404';
 import About from './pages/about';
 import Header from './components/header';
 import Footer from './components/footer';
-import {UserProvider} from './components/context';
+import {AppContext, UserProvider, AppProvider} from './components/context';
 import './index.css';
 
 
 ReactDOM.render(
+    <AppProvider>
     <UserProvider>
         <BrowserRouter>
             <Header />
@@ -27,6 +28,7 @@ ReactDOM.render(
             </Switch>
             <Footer />
         </BrowserRouter>
-    </UserProvider>,
+    </UserProvider>
+    </AppProvider>,
     document.getElementById('root')
 );

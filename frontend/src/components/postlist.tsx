@@ -1,8 +1,8 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
 import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image} from '../lib/interfaces';
-import {UserContext} from './context';
+import {AppContext, UserContext} from './context';
 import Lightbox from './lightbox';
-import {BaseUrl, request} from '../lib/utils';
+import {BaseUrl, request, checkInstruction, fakeUser} from '../lib/utils';
 import './postlist.css';
 
 /**
@@ -15,6 +15,7 @@ import './postlist.css';
  *  Finally, setLoading() triggers request().
  */
 export default function PostList(props: PageOptionProps) {
+    const appCtx = useContext(AppContext);
     const userCtx = useContext(UserContext);
     const firstRun = useRef(true);
     const [op, setOp] = useState(props.op);
@@ -27,12 +28,16 @@ export default function PostList(props: PageOptionProps) {
     const [destUrl, setDestUrl] = useState<string>();
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        if (appCtx.updatePosts && maxPid) {
+            setDestUrl(BaseUrl + 'posts?max=' + maxPid);
+        }
+    },[appCtx.updatePosts])
+
     // monitor the page change by the 'props' value.
     // Use 'useRef()' to skip the update following the first render.
     useEffect(() => {
-        console.log('props changed');
         if (firstRun.current) {
-            console.log('first run.');
             firstRun.current = false;
             return;
         }
@@ -42,8 +47,7 @@ export default function PostList(props: PageOptionProps) {
 
     // op change always means a new page, so construct default url here.
     useEffect(() => {
-        let url = getDefaultUrlByOption();
-        console.log('current op is ' + op + ' and url is ' + url);
+        let url = getDefaultUrlByOption(op);
         setDestUrl(url);
     }, [op]);
 
@@ -65,7 +69,8 @@ export default function PostList(props: PageOptionProps) {
         } 
     }, [loading]);
 
-    function getDefaultUrlByOption(): string {
+    
+    function getDefaultUrlByOption(op: number): string {
         let url = BaseUrl;
         switch (op) {
             case 1:
@@ -79,7 +84,7 @@ export default function PostList(props: PageOptionProps) {
         }
 
         return url;
-    }
+    } 
 
     function reset(): void {
         setPosts(new Array<Post>());
@@ -93,7 +98,7 @@ export default function PostList(props: PageOptionProps) {
         } 
 
         //if the current url === default url, the trigger will not work as well.
-        let newUrl = getDefaultUrlByOption();
+        let newUrl = getDefaultUrlByOption(op);
         if (newUrl === destUrl) {
             setLoading(true);
         } else { 
@@ -111,16 +116,25 @@ export default function PostList(props: PageOptionProps) {
     // Don't forget to handle the error of 'json()'.
     function handleResponse(res: globalThis.Response): void {
         if (!res) return;   // get null response.
+        if (checkInstruction(res.headers.get('instruction'))) {
+            userCtx.setUser(fakeUser());
+        }
         res.json().then(
             (result: PostsResponse) => {
                 if (!result) return;
-                console.log(result);
 
-                setPosts(posts.concat(result.posts));
+                if (appCtx.updatePosts && appCtx.setUpdatePosts) {
+                    let temp = result.posts.concat(posts.slice());
+                    setPosts(temp);
+                    appCtx.setUpdatePosts(false); 
+                } else {
+                    setPosts(posts.concat(result.posts));
+                }
+
                 setHasMore(result.hasMore);
                 if (result.maxPid > maxPid) setMaxPid(result.maxPid);
                 if (minPid > result.minPid || minPid <= 0) setMinPid(result.minPid);
-
+                
                 // No matter what response got, loading is finished. Same in catch block.
                 setLoading(false);
             }
@@ -136,7 +150,7 @@ export default function PostList(props: PageOptionProps) {
     }
 
     function loadMore(): void {
-        setDestUrl(BaseUrl + 'nextposts');
+        setDestUrl(BaseUrl + 'posts?min=' + minPid);
     }
 
     function deletePost(pid: number): void {  // TODO: ask user to confirm and send request to server.
@@ -164,16 +178,27 @@ export default function PostList(props: PageOptionProps) {
 //TODO: init lightbox images.
 function PostEntry(props: PostProps) {
     const post = props.value;
+    const appCtx = useContext(AppContext);
     const [showComments, setShowComments] = useState(false);
     const [marked, setMarked] = useState(post.marked);
-    const [images, setImages] = useState(post.attachments);   //TODO: needs to init.
+    const [images] = useState(post.attachments);   //TODO: needs to init.
+
+    function markOperation() {
+        let action = (marked)? "unmark": "mark";
+        request(BaseUrl + 'mark?pid=' + post.pid + '&action=' + action, MarkDone, MarkError);
+    }
+
+    function MarkDone(res: globalThis.Response) {
+        appCtx.setUpdateUser && appCtx.setUpdateUser(true);
+        setMarked(!marked);
+    }
+
+    function MarkError(res: globalThis.Response) {
+        console.log(res);
+    }
 
     function toggleShowComments() {
         setShowComments(!showComments);
-    }
-
-    function toggleMarked() {
-        setMarked(!marked);
     }
 
     function deleteCurrent() {
@@ -192,14 +217,13 @@ function PostEntry(props: PostProps) {
                 <span className="toolbar">
                     {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
                     &nbsp;<a onClick={() => toggleShowComments()}>Comments({post.comments})</a>
-                    &nbsp;<a onClick={() => toggleMarked()}>{marked? 'Marked': 'Mark'}</a>
+                    &nbsp;<a onClick={() => markOperation()}>{marked? 'Marked': 'Mark'}</a>
                 </span>
             </div>
             <CommentList value={post} show={showComments} onDelete={props.onDelete}/>
         </>
     );
 }
-
 
 function CommentList(props: PostProps) {
     const post = props.value;

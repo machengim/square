@@ -10,12 +10,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.annotation.Auth;
 import xyz.masq.entity.PostRequest;
+import xyz.masq.entity.User;
 import xyz.masq.repository.PostRepository;
 import xyz.masq.entity.Post;
 import xyz.masq.entity.PostResponse;
+import xyz.masq.repository.UserRepository;
 import xyz.masq.service.AttachmentService;
+import xyz.masq.service.MarkService;
+import xyz.masq.service.SessionService;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @PropertySource("classpath:site.properties")
@@ -31,16 +36,40 @@ public class PostController {
     private PostRepository postRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private AttachmentService attachmentService;
 
+    @Autowired
+    private SessionService sessionService;
+
+    @Autowired
+    private MarkService markService;
+
     @GetMapping(path = {"", "/"})
-    public PostResponse getPublicPosts() {
-        List<Post> posts = postRepository.findPublicPosts(limit);
+    public PostResponse getPublicPosts(@RequestParam(required = false) Integer min,
+                                       @RequestParam(required = false) Integer max) {
+        List<Post> posts = new ArrayList<>();
+        if (min == null && max == null) {
+            posts = postRepository.findPublicPosts(limit);
+        } else if (min != null) {
+            posts = postRepository.findOlderPost(min, limit);
+        } else {
+            posts = postRepository.findNewerPost(max, limit);
+        }
+        if (posts.size() == 0) return null;
+
+        int uid = sessionService.readIntByKey("uid");
         for (Post post: posts) {
             if (post.getHasAttachments() > 0) {
                 post.setAttachments(attachmentService.signPostAttachments(post.getPid()));
             }
+            if (uid > 0) {
+                post.setMarked(markService.checkMarked(uid, post.getPid()));
+            }
         }
+
         return new PostResponse(posts, postRepository);
     }
 
@@ -52,6 +81,11 @@ public class PostController {
             post.setUname("Anonymous");
         }
         post = postRepository.save(post);
+        if (post.getUid() > 0) {
+            User user = userRepository.findByUid(post.getUid());
+            user.setPosts(user.getPosts() + 1);
+            userRepository.save(user);
+        }
         if (postRequest.getImage() != null && postRequest.getImage().length() > 0) {
             attachmentService.processImage(postRequest, post.getPid());
             post.setHasAttachments(1);

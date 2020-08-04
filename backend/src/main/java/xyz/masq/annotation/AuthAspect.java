@@ -31,6 +31,8 @@ public class AuthAspect {
             throw new AuthError("Admin permission required.");
         } else if (value.equals("owner") && !checkOwner(joinPoint)) {
             throw new AuthError("Owner permission required.");
+        } else if (value.equals("logged") && !checkLogged()) {
+            throw new AuthError("Only available to logged user.");
         }
 
     }
@@ -44,6 +46,11 @@ public class AuthAspect {
 
     private boolean checkAdmin() {
         return sessionService.readIntByKey("type") == 99;
+    }
+
+    private boolean checkLogged() {
+        int uid = sessionService.readIntByKey("uid");
+        return uid > 0;
     }
 
     private boolean checkOwner(JoinPoint joinPoint) {

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import xyz.masq.repository.UserRepository;
 import xyz.masq.entity.User;
-import xyz.masq.lib.Utils;
 import xyz.masq.service.CookieService;
 import xyz.masq.service.LoginInfoService;
 import xyz.masq.service.SessionService;
@@ -64,6 +63,8 @@ public class AuthFilter extends OncePerRequestFilter {
                 }
             } else {
                 cookieService.removeCookie("u");
+                response.addHeader("Access-Control-Expose-Headers", "instruction");
+                response.addHeader("instruction", "clear");
             }
         } else if (uidCookie > 0 && uidSession > 0 && uidCookie != uidSession) {
             sessionService.removeSession();

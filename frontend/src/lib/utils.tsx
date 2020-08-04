@@ -5,11 +5,11 @@ export const BaseUrl = 'http://localhost:8080/';
 
 // Helper function to start a request. Don't forget the error handler.
 export function request(url: string, callback: Function, errorHandler: Function) {
-    console.log('request to ' + url);
+    console.log('get request to ' + url);
 
     fetch(url, {
-        credentials: 'include'
-    }).then(res => {
+        credentials: 'include',
+    }).then(res => {        
             if (res.ok) {
                 callback(res);
             } else {
@@ -32,6 +32,7 @@ export function postRequest(url: string, json: string,
             body: json,
             credentials: "include"
         }).then(res => {
+            checkInstruction(res.headers.get('instruction'));
             if (res.status === 200) {
                 callback(res);
             } else {
@@ -68,6 +69,13 @@ export function fakeUserCtx(): UserInfoForContext {
     function nan() {
         return;
     }
+}
+
+export function checkInstruction(instruction: string | null): boolean {
+    if (!instruction || instruction !== 'clear') return false;
+
+    clearStorage();
+    return true;
 }
 
 export function clearStorage() {

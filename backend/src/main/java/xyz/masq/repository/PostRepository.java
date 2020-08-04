@@ -16,6 +16,12 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
     @Query(value = "SELECT * FROM post WHERE pid < ? limit 1", nativeQuery = true)
     List<Post> checkMorePosts(int currentPid);
 
+    @Query(value = "SELECT * FROM post WHERE isPrivate = 0 AND pid > ? ORDER BY pid DESC limit ?", nativeQuery = true)
+    List<Post> findNewerPost(int pid, int limit);
+
+    @Query(value = "SELECT * FROM post WHERE isPrivate = 0 AND pid < ? ORDER BY pid DESC limit ?", nativeQuery = true)
+    List<Post> findOlderPost(int pid, int limit);
+
     Page<Post> findByUid(int uid, Pageable pageable);
 
 }
