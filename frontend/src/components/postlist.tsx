@@ -1,9 +1,10 @@
-import React, {useState, useEffect, useRef, useContext} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, Image} from '../lib/interfaces';
+import React, {useState, useEffect, useRef, useContext, ChangeEvent} from 'react';
+import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, CommentProps} from '../lib/interfaces';
 import {AppContext, UserContext} from './context';
 import Lightbox from './lightbox';
-import {BaseUrl, request, checkInstruction, fakeUser} from '../lib/utils';
+import {BaseUrl, request, deleteRequest, checkInstruction, fakeUser, postRequest} from '../lib/utils';
 import './postlist.css';
+import { userInfo } from 'os';
 
 /**
  * TODO: comments, update state from child components..
@@ -157,9 +158,19 @@ export default function PostList(props: PageOptionProps) {
         let confirmDelete = window.confirm('Confirm to delete it?');
 
         if (confirmDelete) {
-            let newPostList = posts.filter(post => post.pid !== pid);
-            setPosts(newPostList);
+            deleteRequest(BaseUrl + 'posts/' + pid, (d: any) => deleteDone(pid), deleteError);
         }
+    }
+
+    function deleteDone(pid: number) {
+        let newPostList = posts.filter(post => post.pid !== pid);
+        setPosts(newPostList);
+        appCtx.setUpdateUser && appCtx.setUpdateUser(true);
+
+    }
+
+    function deleteError(res: globalThis.Response) {
+        alert('Delete post error: ' + res);
     }
 
     // Note loading.svg should be put under the postlist to prevent re-render when requesting for more posts.
@@ -205,6 +216,10 @@ function PostEntry(props: PostProps) {
         props.onDelete(post.pid);
     }
 
+    function addComment() {
+        post.comments += 1;
+    }
+
     if (post === null || post === undefined) return null;
 
     return (
@@ -213,29 +228,37 @@ function PostEntry(props: PostProps) {
             <div className="content">{post.content}</div>
             {images && <Lightbox value={images} />}
             <div className="foot">
-                <span>5 minutes ago</span>
+                <span>{post.ctime}</span>
                 <span className="toolbar">
                     {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
                     &nbsp;<a onClick={() => toggleShowComments()}>Comments({post.comments})</a>
                     &nbsp;<a onClick={() => markOperation()}>{marked? 'Marked': 'Mark'}</a>
                 </span>
             </div>
-            <CommentList value={post} show={showComments} onDelete={props.onDelete}/>
+            <CommentList value={post} show={showComments} onComment={()=> addComment()}/>
         </>
     );
 }
 
-function CommentList(props: PostProps) {
+function CommentList(props: CommentProps) {
     const post = props.value;
     const show = props.show;
+    const userCtx = useContext(UserContext);
     const [comments, setComments] = useState(new Array<Comment>());
-    const [hasMore, setHasMore] = useState(false);
-    const [minCid, setMinCid] = useState(-1);
+    const [input, setInput] = useState('');
+    const [sending, setSending] = useState(false);
+    //const [hasMore, setHasMore] = useState(false);
+    //const [minCid, setMinCid] = useState(-1);
     
     useEffect(() => {
         if (!show || post.comments <= 0) return;
-        request(BaseUrl + 'comments', handleResponse, handleError);
+        request(BaseUrl + 'comments/' + post.pid, handleResponse, handleError);
     }, [show]);
+
+    useEffect(() => {
+        if (sending) sendComment();
+        else setInput('');
+    }, [sending]);
 
     if (!show || !post) return null;
 
@@ -245,36 +268,63 @@ function CommentList(props: PostProps) {
                 if (result === null) return;
 
                 setComments(result.comments.slice());
-                setHasMore(result.hasMore);
-                if (minCid > result.minCid || minCid <= 0) setMinCid(result.minCid);
+                //props.onComment();
+                //setHasMore(result.hasMore);
+                //if (minCid > result.minCid || minCid <= 0) setMinCid(result.minCid);
             }
-        )
+        ).catch((e) => {
+            console.log('Cannot parse comments response.');
+        })
     }
 
     function handleError(res: globalThis.Response): void {
         console.error(res);
     }
 
+    function onCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
+        setInput(event.target.value);
+    }
+
+    function sendComment() {
+        if (input.trim().length == 0) {
+            alert('No content in comment area to send.');
+            setSending(false);
+            return;
+        }
+
+        let comment: Comment = {
+            pid: (post.pid)? post.pid: -1,
+            uid: userCtx.user.uid,
+            uname: userCtx.user.uname,
+            content: input,
+            ctime: new Date(),
+        };
+
+        postRequest(BaseUrl + 'comments/' + post.pid, JSON.stringify(comment), commentDone, commentFail);
+    }
+
+    function commentDone(res: globalThis.Response) {
+        res.json()
+            .then((comment: Comment) => {
+                let temp = comments.slice().concat(comment);
+                setComments(temp);
+                setSending(false);
+                props.onComment();
+            });
+    }
+
+    function commentFail(res: globalThis.Response) {
+        setSending(false);
+        alert(res);
+    }
+
     return (
         <div className='comment'>
             {comments.map((c) => <p key={c.cid}>{c.content} --by {c.uname}</p>)}
-            <textarea name="comment"></textarea>
-            <button>Send</button>
+            <textarea name="comment" onChange={(e) => onCommentChange(e)} value={input} />
+            {!sending && <button onClick={() => setSending(true)}>Send</button>}
+            {sending && <button disabled>Send</button>}
         </div>
     )
 }
 
-
-//TODO: used to test Lightbox, needs to remove later.
-function test(): Image[] {
-    let i1: Image = {
-        pid: 4,
-        thumbnail: 'https://pbs.twimg.com/media/Ec8VfxDXYAM53Hj?format=jpg&name=900x900',
-        url: 'https://pbs.twimg.com/media/Ec8VfxDXYAM53Hj?format=jpg&name=large'};
-    let i2: Image = {
-        pid: 4,
-        thumbnail: 'https://pbs.twimg.com/media/Ec_uexnXkAAA_Cl?format=jpg&name=small',
-        url: 'https://pbs.twimg.com/media/Ec_uexnXkAAA_Cl?format=jpg&name=medium'};
-    
-    return [i1, i2];
-}

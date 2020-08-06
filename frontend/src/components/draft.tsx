@@ -43,7 +43,6 @@ export default function Draft() {
         }
     }
 
-
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
         if (event.target.files) {
             let file = event.target.files[0];

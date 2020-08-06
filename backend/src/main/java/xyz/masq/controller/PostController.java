@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import xyz.masq.annotation.Auth;
 import xyz.masq.entity.PostRequest;
 import xyz.masq.entity.User;
+import xyz.masq.error.AuthError;
+import xyz.masq.error.GenericError;
 import xyz.masq.repository.PostRepository;
 import xyz.masq.entity.Post;
 import xyz.masq.entity.PostResponse;
@@ -19,6 +21,7 @@ import xyz.masq.service.AttachmentService;
 import xyz.masq.service.MarkService;
 import xyz.masq.service.SessionService;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +65,15 @@ public class PostController {
 
         int uid = sessionService.readIntByKey("uid");
         for (Post post: posts) {
+            int pid = post.getPid();
             if (post.getHasAttachments() > 0) {
-                post.setAttachments(attachmentService.signPostAttachments(post.getPid()));
+                post.setAttachments(attachmentService.signPostAttachments(pid));
             }
             if (uid > 0) {
-                post.setMarked(markService.checkMarked(uid, post.getPid()));
+                post.setMarked(markService.checkMarked(uid, pid));
+                if (postRepository.findAuthorByPost(pid) == uid) {
+                    post.setOwner(true);
+                }
             }
         }
 
@@ -92,6 +99,27 @@ public class PostController {
             postRepository.save(post);
         }
 
+        return "Success";
+    }
+
+    @DeleteMapping(path = "/{pid}")
+    @Auth(value = "logged")
+    @Transactional
+    public String delelePost(@PathVariable Integer pid, HttpServletResponse response) {
+        Post post = postRepository.findByPid(pid);
+        if (post == null) {
+            throw new GenericError("Cannot find post.");
+        }
+        int uid = sessionService.readIntByKey("uid");
+        if (uid != post.getUid()) {
+            throw new AuthError("Only the author of the post is allowed to delete it.");
+        }
+
+        postRepository.delete(post);
+        // user posts count minus 1.
+        User user = userRepository.findByUid(uid);
+        user.setPosts(Math.max(user.getPosts() - 1, 0));
+        userRepository.save(user);
         return "Success";
     }
 

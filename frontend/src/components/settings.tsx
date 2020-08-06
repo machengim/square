@@ -112,8 +112,8 @@ export default function Settings() {
             <hr />
             <label>Account setting:</label><p/>
             <div>
-                <button>Export posts</button>
-                <button className='right'>Delete account</button>
+                <button disabled>Export posts</button>
+                <button className='right' disabled>Delete account</button>
             </div>
         </div>
     );

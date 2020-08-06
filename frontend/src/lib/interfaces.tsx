@@ -76,12 +76,12 @@ export interface Comment {
     uid?: number; // hidden in response for user's privacy.
     uname: string;
     content: string;
-    ctime: string;
+    ctime: Date;
 }
 
 export interface CommentsResponse {
-    hasMore: boolean;
-    minCid: number;
+    //hasMore: boolean;
+    //minCid: number;
     comments: Array<Comment>;
 }
 
@@ -90,6 +90,13 @@ export interface PostProps {
     onDelete: Function; // function to delete current post.
     show?: boolean;     // whether the comments are shown.
 }
+
+export interface CommentProps {
+    value: Post;
+    onComment: Function; // function to delete current post.
+    show: boolean;     // whether the comments are shown.
+}
+
 
 // used to wrap the option that represents which page to display.
 export interface PageOptionProps {

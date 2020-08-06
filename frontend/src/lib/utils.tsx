@@ -9,6 +9,23 @@ export function request(url: string, callback: Function, errorHandler: Function)
 
     fetch(url, {
         credentials: 'include',
+    }).then(res => {            
+            if (res.ok) {
+                callback(res);
+            } else {
+                errorHandler(res);
+            }
+        }).catch((res) => {
+            errorHandler(res);
+        });
+}
+
+export function deleteRequest(url: string, callback: Function, errorHandler: Function) {
+    console.log('delete request to ' + url);
+
+    fetch(url, {
+        credentials: 'include',
+        method: 'DELETE'
     }).then(res => {        
             if (res.ok) {
                 callback(res);
