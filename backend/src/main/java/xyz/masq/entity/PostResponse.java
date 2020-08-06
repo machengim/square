@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class PostResponse {
-    private boolean hasMore = false;
+    private Boolean hasMore;
     private int maxPid;
     private int minPid;
     private List<Post> posts;
@@ -18,7 +18,6 @@ public class PostResponse {
         if (this.posts.size() == 0) return;
 
         setMaxMin();
-        checkMorePosts(postRepository);
     }
 
     private void setMaxMin() {
@@ -33,10 +32,8 @@ public class PostResponse {
         this.minPid = min;
     }
 
-    private void checkMorePosts(PostRepository postRepository) {
+    public void checkMorePosts(PostRepository postRepository) {
         List<Post> morePosts = postRepository.checkMorePosts(this.minPid);
-        if (morePosts.size() > 0) {
-            this.hasMore = true;
-        }
+        this.hasMore = morePosts.size() > 0;
     }
 }

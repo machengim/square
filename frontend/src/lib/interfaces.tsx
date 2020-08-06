@@ -31,7 +31,7 @@ export interface Post {
     content: string;
     ctime: Date;
     comments: number;
-    isPrivate: number;    // 0 means public, 1 means private, maybe more options later.
+    status: number;    // 0 means public, 1 means private, maybe more options later.
     marked?: boolean;   // whether it's marked by current user. Not required in request.
     owner?: boolean;    // whether it's owned by current user. Not required in request.
     attachments?: Array<Image>; 
@@ -44,7 +44,7 @@ export interface PostRequest {
     content: string;
     ctime: Date;
     anonymous: boolean;
-    isPrivate: number;
+    status: number;
     image: string | null;
 }
 

@@ -19,9 +19,8 @@ public class Post {
     private int comments = 0;
     // this field saves the aid of attachment currently.
     private int hasAttachments = 0;
-    // 0 means public, 1 means private, maybe more options later.
-    @Column(name = "isPrivate")
-    private int isPrivate = 0;
+    // 0 means private, 1 means public, -1 means deleted.
+    private int status = 1;
     @Transient
     private boolean marked = false;
     @Transient
@@ -36,6 +35,6 @@ public class Post {
         this.uname = request.getUname();
         this.content = request.getContent();
         this.ctime = request.getCtime();
-        this.isPrivate = request.getIsPrivate();
+        this.status = request.getStatus();
     }
 }

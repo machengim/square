@@ -15,7 +15,7 @@ CREATE TABLE post (
     uid integer not null,
     uname varchar(32) not null,
     content varchar(320),
-    isPrivate integer default 0 not null,
+    status integer default 1 not null,
     comments integer default 0 not null,
     hasAttachments integer default 0 not null,
     ctime timestamp without time zone default(timezone('utc', now())) not null

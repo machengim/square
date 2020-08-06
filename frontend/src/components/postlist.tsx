@@ -4,7 +4,6 @@ import {AppContext, UserContext} from './context';
 import Lightbox from './lightbox';
 import {BaseUrl, request, deleteRequest, checkInstruction, fakeUser, postRequest} from '../lib/utils';
 import './postlist.css';
-import { userInfo } from 'os';
 
 /**
  * TODO: comments, update state from child components..
@@ -30,7 +29,7 @@ export default function PostList(props: PageOptionProps) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (appCtx.updatePosts && maxPid) {
+        if (appCtx.updatePosts) {
             setDestUrl(BaseUrl + 'posts?max=' + maxPid);
         }
     },[appCtx.updatePosts])
@@ -65,7 +64,6 @@ export default function PostList(props: PageOptionProps) {
         }
         // Typescript will complain if `destUrl` is not checked.
         if (loading && destUrl) {
-            setHasMore(false);  // Hide hasMore button when requesting.
             request(destUrl, handleResponse, handleError); 
         } 
     }, [loading]);
@@ -125,22 +123,30 @@ export default function PostList(props: PageOptionProps) {
                 if (!result) return;
 
                 if (appCtx.updatePosts && appCtx.setUpdatePosts) {
-                    let temp = result.posts.concat(posts.slice());
-                    setPosts(temp);
+                    if (result.posts.length > 0) {
+                        let temp = result.posts.concat(posts.slice()); 
+                        setPosts(temp);
+                    } else {
+                    // if the notification to update posts is received, but the response result is empty,
+                    // it's because the user send a private post. In this case, the maxPid still needs to
+                    // update to avoid the React fails in checking data change in future request.
+                        setMaxPid(maxPid + 1);
+                    }
                     appCtx.setUpdatePosts(false); 
                 } else {
                     setPosts(posts.concat(result.posts));
                 }
 
-                setHasMore(result.hasMore);
+                if (result.hasMore !== null) setHasMore(result.hasMore);
                 if (result.maxPid > maxPid) setMaxPid(result.maxPid);
-                if (minPid > result.minPid || minPid <= 0) setMinPid(result.minPid);
+                if (result.minPid > 0 && (minPid > result.minPid || minPid <= 0)) setMinPid(result.minPid);
                 
                 // No matter what response got, loading is finished. Same in catch block.
                 setLoading(false);
             }
         ).catch(() => {
             setLoading(false);
+            setDestUrl('');
             console.error('json parse error!\n' + res.body);
         })
     }
@@ -180,7 +186,7 @@ export default function PostList(props: PageOptionProps) {
             {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} key={p.pid}/><hr/></div>)}   
             {loading && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
             {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
-            {hasMore && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
+            {hasMore && maxPid > 0 && !loading && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
         </div>
     );
 
@@ -191,6 +197,7 @@ function PostEntry(props: PostProps) {
     const post = props.value;
     const appCtx = useContext(AppContext);
     const [showComments, setShowComments] = useState(false);
+    const [comments, setComments] = useState(post.comments);
     const [marked, setMarked] = useState(post.marked);
     const [images] = useState(post.attachments);   //TODO: needs to init.
 
@@ -205,7 +212,7 @@ function PostEntry(props: PostProps) {
     }
 
     function MarkError(res: globalThis.Response) {
-        console.log(res);
+        res.text().then(e => alert(e));
     }
 
     function toggleShowComments() {
@@ -217,7 +224,7 @@ function PostEntry(props: PostProps) {
     }
 
     function addComment() {
-        post.comments += 1;
+        setComments(comments + 1);
     }
 
     if (post === null || post === undefined) return null;
@@ -231,7 +238,7 @@ function PostEntry(props: PostProps) {
                 <span>{post.ctime}</span>
                 <span className="toolbar">
                     {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
-                    &nbsp;<a onClick={() => toggleShowComments()}>Comments({post.comments})</a>
+                    &nbsp;<a onClick={() => toggleShowComments()}>Comments({comments})</a>
                     &nbsp;<a onClick={() => markOperation()}>{marked? 'Marked': 'Mark'}</a>
                 </span>
             </div>

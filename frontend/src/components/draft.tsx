@@ -95,14 +95,14 @@ export default function Draft() {
             return;
         }
 
-        let username = (isPrivate)? 'Anonymous': user.uname;
+        let username = (anonymous)? 'Anonymous': user.uname;
         const post: PostRequest = {
             uid: (user.uid)? user.uid: -1,
             uname: username,
             anonymous: anonymous,
             content: content,
             ctime: new Date(),
-            isPrivate: (isPrivate)? 1: 0,
+            status: (isPrivate)? 0: 1,
             image: (imageStr)? imageStr: null,
         };
 
@@ -121,7 +121,6 @@ export default function Draft() {
         if (appCtx.setUpdateUser) {
             appCtx.setUpdateUser(true);
         }
-        alert('Done');
     }
 
     function postFail(res: globalThis.Response) {

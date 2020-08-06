@@ -32,7 +32,6 @@ export function UserProvider(props: any) {
     useState(() => initRequestCheck());
 
     useEffect(() => {
-        console.log(appCtx.updateUser);
         setUpdateUserMsg(appCtx.updateUser);
     }, [appCtx.updateUser]);
 

@@ -61,7 +61,6 @@ public class PostController {
         } else {
             posts = postRepository.findNewerPost(max, limit);
         }
-        if (posts.size() == 0) return null;
 
         int uid = sessionService.readIntByKey("uid");
         for (Post post: posts) {
@@ -77,7 +76,10 @@ public class PostController {
             }
         }
 
-        return new PostResponse(posts, postRepository);
+        // if the path variable contains no 'max', check whether it has older post.
+        PostResponse postResponse = new PostResponse(posts, postRepository);
+        if (max == null) postResponse.checkMorePosts(postRepository);
+        return postResponse;
     }
 
     @PostMapping(path = {"", "/"})
@@ -115,7 +117,9 @@ public class PostController {
             throw new AuthError("Only the author of the post is allowed to delete it.");
         }
 
-        postRepository.delete(post);
+        // The post status is set to -1 when it's deleted, so can hide it instead of delete it from all user's mark list.
+        post.setStatus(-1);
+        postRepository.save(post);
         // user posts count minus 1.
         User user = userRepository.findByUid(uid);
         user.setPosts(Math.max(user.getPosts() - 1, 0));

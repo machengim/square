@@ -10,16 +10,16 @@ import java.util.List;
 
 public interface PostRepository extends PagingAndSortingRepository<Post, Integer> {
 
-    @Query(value = "SELECT * FROM post WHERE isPrivate = 0 ORDER BY pid DESC LIMIT ?", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE status > 0 ORDER BY pid DESC LIMIT ?", nativeQuery = true)
     List<Post> findPublicPosts(int limit);
 
-    @Query(value = "SELECT * FROM post WHERE pid < ? limit 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE status > 0 AND pid < ? limit 1", nativeQuery = true)
     List<Post> checkMorePosts(int currentPid);
 
-    @Query(value = "SELECT * FROM post WHERE isPrivate = 0 AND pid > ? ORDER BY pid DESC limit ?", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE status > 0 AND pid > ? ORDER BY pid DESC limit ?", nativeQuery = true)
     List<Post> findNewerPost(int pid, int limit);
 
-    @Query(value = "SELECT * FROM post WHERE isPrivate = 0 AND pid < ? ORDER BY pid DESC limit ?", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE status > 0 AND pid < ? ORDER BY pid DESC limit ?", nativeQuery = true)
     List<Post> findOlderPost(int pid, int limit);
 
     @Query(value = "SELECT uid FROM post WHERE pid=?", nativeQuery = true)
