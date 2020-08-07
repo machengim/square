@@ -104,7 +104,7 @@ export default function Panel() {
                 <ul>
                     <li>Posts: {(user.posts > 0)? <Link to='/posts'>{user.posts}</Link> : 0}</li>
                     <li>Marks: {(user.marks > 0)? <Link to='/marks'>{user.marks}</Link> : 0}</li>
-                    <li>Messages: {(user.messages > 0)? <a>{user.messages}</a> : 0}</li>
+                    <li>Messages: {(user.messages > 0)? user.messages : 0}</li>
                 </ul>
                 <hr />
                 <div className='center'>

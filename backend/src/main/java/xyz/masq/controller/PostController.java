@@ -133,7 +133,35 @@ public class PostController {
         // The page number works like array index, the range is [0, total), so minus 1 here for convenience of client.
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("pid").descending());
         Page<Post> posts = postRepository.findByUid(uid, pageable);
-        return new PagedPostsResponse(posts, page);
+        PagedPostsResponse pagedPostsResponse = new PagedPostsResponse(posts, page);
+
+        for (Post post: pagedPostsResponse.getPosts()) {
+            int pid = post.getPid();
+            post.setMarked(markService.checkMarked(uid, pid));
+            if (postRepository.findAuthorByPost(pid) == uid) post.setOwner(true);
+        }
+
+        return pagedPostsResponse;
+    }
+
+    @GetMapping(path = "search/{keyword}")
+    @Auth(value = "logged")
+    public PagedPostsResponse searchPost(@PathVariable String keyword,
+                                         @RequestParam(required = false) Integer page) {
+        if (page == null || page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("pid").descending());
+        Page<Post> posts = postRepository.findByContentIgnoreCaseLikeAndStatusGreaterThan(
+                "%" + keyword + "%", 0, pageable);
+        PagedPostsResponse pagedPostsResponse = new PagedPostsResponse(posts, page);
+
+        int uid = sessionService.readIntByKey("uid");
+        for (Post post: pagedPostsResponse.getPosts()) {
+            int pid = post.getPid();
+            post.setMarked(markService.checkMarked(uid, pid));
+            if (postRepository.findAuthorByPost(pid) == uid) post.setOwner(true);
+        }
+
+        return pagedPostsResponse;
     }
 
 }

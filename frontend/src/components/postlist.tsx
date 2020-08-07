@@ -3,9 +3,8 @@ import {Post, Comment, PostsResponse, PagedPostsResponse, CommentsResponse, Post
     PageOptionProps, CommentProps, PageInfo, PageInfoProps} from '../lib/interfaces';
 import {AppContext, UserContext} from './context';
 import Lightbox from './lightbox';
-import {BaseUrl, request, deleteRequest, checkInstruction, fakeUser, postRequest} from '../lib/utils';
+import {BaseUrl, request, deleteRequest, checkInstruction, fakeUser, postRequest, getTimeElapse} from '../lib/utils';
 import './postlist.css';
-import { toASCII } from 'punycode';
 
 /**
  * TODO: comments, update state from child components..
@@ -103,11 +102,16 @@ export default function PostList(props: PageOptionProps) {
         let uid = userCtx.user.uid;
         switch (op) {
             case 1:
-                // fake URL to test error handling.
+                // get posts from the current user.
                 url = BaseUrl + 'posts/user/' + uid;
                 break;
             case 2:
+                // get marks from the current user.
                 url = BaseUrl + 'marks/user/' + uid;
+                break;
+            case 3:
+                // search for a keyword.
+                url = BaseUrl + 'posts/search/' + getSearchKeyword();
                 break;
             default:
                 url = BaseUrl + 'posts';
@@ -115,6 +119,11 @@ export default function PostList(props: PageOptionProps) {
 
         return url;
     } 
+
+    function getSearchKeyword() {
+        let keyword = window.location.pathname.split('/').pop();
+        return keyword;
+    }
 
     function reset(): void {
         setPosts(new Array<Post>());
@@ -139,7 +148,7 @@ export default function PostList(props: PageOptionProps) {
     function validateUser() {
         let uid = userCtx.user.uid;
         // Unlogged users are not allowed to see '/posts' or '/marks' or others later.
-        if (uid <= 0 && (op == 1 || op == 2)) return false;
+        if (uid <= 0 && (op === 1 || op === 2)) return false;
         return true;
     }
 
@@ -150,8 +159,6 @@ export default function PostList(props: PageOptionProps) {
             userCtx.setUser(fakeUser());
         }
 
-        console.log(props.op);
-        setLoading(false);
         if (props.op === 0) parsePostResponse(res);
         else parsePagedPostResponse(res);
     }
@@ -164,10 +171,12 @@ export default function PostList(props: PageOptionProps) {
                 setCurrentPage(result.currentPage);
                 setTotalPage(result.totalPage);
                 setPosts(result.posts);
+                setLoading(false);
             }
-        ).catch( e =>
-            console.log('Cannot parse paged post from: ' + res)
-        );
+        ).catch( e => {
+            console.log('Cannot parse paged post from: ' + res);
+            setLoading(false);
+        });
     }
 
     function parsePostResponse(res: globalThis.Response) {
@@ -193,12 +202,13 @@ export default function PostList(props: PageOptionProps) {
                 if (result.hasMore !== null) setHasMore(result.hasMore);
                 if (result.maxPid > maxPid) setMaxPid(result.maxPid);
                 if (result.minPid > 0 && (minPid > result.minPid || minPid <= 0)) setMinPid(result.minPid);
-                
+                setLoading(false);
                 // No matter what response got, loading is finished. Same in catch block.
             }
         ).catch(() => {
             setDestUrl('');
             console.error('json parse error!\n' + res.body);
+            setLoading(false);
         });
     }
 
@@ -295,7 +305,19 @@ function Pagination(props: PageInfoProps) {
     function changePage(page: number) {
         if (page < 0 || page > pageInfo.total) return;
 
-        pageInfo.setDestUrl(BaseUrl + 'posts/user/' + pageInfo.uid + '?page=' + page);
+        let url = '';
+        switch (pageInfo.op) {
+            case 1:
+                url = BaseUrl + 'posts/user/' + pageInfo.uid + '?page=' + page;
+                break;
+            case 2:
+                url = BaseUrl + 'marks/user/' + pageInfo.uid + '?page=' + page;
+                break;
+            default:
+                break;
+        }
+
+        pageInfo.setDestUrl(url);
     }
 
     return (
@@ -316,7 +338,7 @@ function PostEntry(props: PostProps) {
 
     function markOperation() {
         let action = (marked)? "unmark": "mark";
-        request(BaseUrl + 'mark?pid=' + post.pid + '&action=' + action, MarkDone, MarkError);
+        request(BaseUrl + 'marks?pid=' + post.pid + '&action=' + action, MarkDone, MarkError);
     }
 
     function MarkDone(res: globalThis.Response) {
@@ -348,7 +370,7 @@ function PostEntry(props: PostProps) {
             <div className="content">{post.content}</div>
             {images && <Lightbox value={images} />}
             <div className="foot">
-                <span>{post.ctime}</span>
+                <span>{getTimeElapse(post.ctime)}</span>
                 <span className="toolbar">
                     {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
                     &nbsp;<a onClick={() => toggleShowComments()}>Comments({comments})</a>
@@ -406,7 +428,7 @@ function CommentList(props: CommentProps) {
     }
 
     function sendComment() {
-        if (input.trim().length == 0) {
+        if (input.trim().length === 0) {
             alert('No content in comment area to send.');
             setSending(false);
             return;

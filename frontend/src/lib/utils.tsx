@@ -104,3 +104,17 @@ export function setupStorage(summary: UserInfo) {
     localStorage.setItem('summary', JSON.stringify(summary));
     localStorage.setItem('lastUpdate', JSON.stringify(new Date()));
 }
+
+// ctime must be any type here. Using `Date` or `number` will cause react crash.
+export function getTimeElapse(ctime: any) {
+    let current = new Date();
+    let seconds = current.getTime()/1000 - ctime;
+    let text = '';
+    if (seconds < 60) text = 'just now';
+    else if (seconds < 60 * 60) text = Math.floor(seconds / 60) + ' mins ago';
+    else if (seconds < 24 * 60 * 60) text = Math.floor(seconds / 60 / 60) + ' hours ago';
+    else if (seconds < 7 * 24 * 60 * 60) text = Math.floor(seconds / 24 / 60 / 60) + 'days ago';
+    else text = new Date(ctime).toLocaleString();
+
+    return text;
+}

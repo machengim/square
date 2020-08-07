@@ -1,17 +1,16 @@
 package xyz.masq.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import xyz.masq.entity.Mark;
 
-import java.util.List;
 
 @Repository
-public interface MarkRepository extends CrudRepository<Mark, Integer> {
+public interface MarkRepository extends PagingAndSortingRepository<Mark, Integer> {
 
     Mark findByUidAndPid(int uid, int pid);
 
-    Mark findByMid(int mid);
-
-    //int deleteByMid(int mid);
+    Page<Mark> findAllByUid(int uid, Pageable pageable);
 }

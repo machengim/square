@@ -11,7 +11,7 @@ import './lightbox.css';
  * TODO: clean css file.
  */
 export default function Lightbox(props: ImageList) {
-    const [images, setImages] = useState(props.value);
+    const [images] = useState(props.value);
     const [length] = useState(props.value.length);
     const [showModal, setShowModal] = useState(false);
     const [current, setCurrent] = useState(0);

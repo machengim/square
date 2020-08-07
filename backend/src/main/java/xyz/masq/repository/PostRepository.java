@@ -2,7 +2,6 @@ package xyz.masq.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import xyz.masq.entity.Post;
@@ -27,6 +26,8 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
     Integer findAuthorByPost(int pid);
 
     Page<Post> findByUid(int uid, Pageable pageable);
+
+    Page<Post> findByContentIgnoreCaseLikeAndStatusGreaterThan(String keyword, int status, Pageable pageable);
 
     Post findByPid(int pid);
 

@@ -21,6 +21,7 @@ ReactDOM.render(
                 <Route exact path='/' component={() => <Home op={0} />}/>
                 <Route exact path='/posts' component={() => <Home op={1} />}/>
                 <Route exact path='/marks' component={() => <Home op={2} />}/>
+                <Route exact path='/search/:keyword' component={() => <Home op={3} />}/>
                 <Route exact path='/trending' component={Trending} />
                 <Route exact path='/setting' component={Setting} />
                 <Route exact path='/about' component={About} />
