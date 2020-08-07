@@ -27,7 +27,7 @@ public class MarkController {
     @ResponseBody
     @Auth(value = "logged")
     public String createMark(@RequestParam Integer pid, @RequestParam String action) {
-        if (pid == null || pid <= 0) throw new GenericError("Invalid post id to mark.");
+        if (pid <= 0) throw new GenericError("Invalid post id to mark.");
         int uid = sessionService.readIntByKey("uid");
 
         if (action.equals("mark")) {

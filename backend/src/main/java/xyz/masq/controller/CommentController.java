@@ -24,9 +24,6 @@ public class CommentController {
 
     @GetMapping(path = "/{pid}")
     public CommentResponse getComments(@PathVariable Integer pid) {
-        if (pid == null) {
-            throw new GenericError("No post id found to retrieve comments.");
-        }
 
         List<Comment> comments = commentRepository.findAllByPid(pid);
         CommentResponse commentResponse = new CommentResponse();
@@ -37,9 +34,7 @@ public class CommentController {
     @PostMapping(path = "/{pid}")
     @Transactional
     public Comment postComment(@PathVariable Integer pid, @RequestBody Comment comment) {
-        if (pid == null) {
-            throw new GenericError("No post id found to send a comment.");
-        } else if (comment.getContent().trim().length() == 0) {
+        if (comment.getContent().trim().length() == 0) {
             throw new GenericError("No content in the comment.");
         }
 

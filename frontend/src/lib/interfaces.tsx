@@ -56,6 +56,12 @@ export interface PostsResponse {
     posts: Array<Post>;
 }
 
+export interface PagedPostsResponse {
+    currentPage: number;
+    totalPage: number;
+    posts: Array<Post>;
+}
+
 // Keep it for future use.
 export interface Image {
     aid?: number;   // not required in request.
@@ -108,4 +114,16 @@ export interface AlertBoxProps {
     text: string;
     onConfirm: Function;
     onClose: Function;
+}
+
+export interface PageInfo {
+    uid: number;
+    current: number;
+    total: number;
+    op: number;
+    setDestUrl: Function;
+}
+
+export interface PageInfoProps{
+    value: PageInfo;
 }

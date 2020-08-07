@@ -23,9 +23,6 @@ public class AttachmentController {
                            @RequestParam String expire, @RequestParam String sign)
             throws IOException{
 
-        if (expire == null || sign == null) {
-            throw new GenericError("Invalid request for attachment: " + file);
-        }
         if (!attachmentService.checkSignedUrl(file, expire, sign)) {
             throw new GenericError("Malformed signed URL for attachment: " + file);
         }

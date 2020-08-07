@@ -8,7 +8,7 @@ import PageNotFound from './pages/404';
 import About from './pages/about';
 import Header from './components/header';
 import Footer from './components/footer';
-import {AppContext, UserProvider, AppProvider} from './components/context';
+import {UserProvider, AppProvider} from './components/context';
 import './index.css';
 
 

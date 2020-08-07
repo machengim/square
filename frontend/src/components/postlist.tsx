@@ -1,9 +1,11 @@
 import React, {useState, useEffect, useRef, useContext, ChangeEvent} from 'react';
-import {Post, Comment, PostsResponse, CommentsResponse, PostProps, PageOptionProps, CommentProps} from '../lib/interfaces';
+import {Post, Comment, PostsResponse, PagedPostsResponse, CommentsResponse, PostProps, 
+    PageOptionProps, CommentProps, PageInfo, PageInfoProps} from '../lib/interfaces';
 import {AppContext, UserContext} from './context';
 import Lightbox from './lightbox';
 import {BaseUrl, request, deleteRequest, checkInstruction, fakeUser, postRequest} from '../lib/utils';
 import './postlist.css';
+import { toASCII } from 'punycode';
 
 /**
  * TODO: comments, update state from child components..
@@ -25,14 +27,17 @@ export default function PostList(props: PageOptionProps) {
     const [posts, setPosts] = useState(new Array<Post>());
     const [minPid, setMinPid] = useState(-1);
     const [maxPid, setMaxPid] = useState(-1);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
     const [destUrl, setDestUrl] = useState<string>();
     const [loading, setLoading] = useState(false);
+    const [pageInfo, setPageInfo] = useState<PageInfo>(defaultPageInfo());
 
     useEffect(() => {
         if (appCtx.updatePosts) {
             setDestUrl(BaseUrl + 'posts?max=' + maxPid);
         }
-    },[appCtx.updatePosts])
+    },[appCtx.updatePosts]);
 
     // monitor the page change by the 'props' value.
     // Use 'useRef()' to skip the update following the first render.
@@ -68,18 +73,44 @@ export default function PostList(props: PageOptionProps) {
         } 
     }, [loading]);
 
+    useEffect(() => {
+        let pageInfo: PageInfo = {
+            uid: userCtx.user.uid,
+            current: currentPage,
+            total: totalPage,
+            op: op,
+            setDestUrl: setDestUrl,
+        };
+
+        setPageInfo(pageInfo);
+    }, [op, currentPage, totalPage, userCtx])
+
+    function defaultPageInfo(): PageInfo {
+        let pageInfo: PageInfo = {
+            uid: -1,
+            current: 0,
+            total: 0,
+            op: 0,
+            setDestUrl: setDestUrl,
+        }
+
+        return pageInfo;
+    }
+
     
     function getDefaultUrlByOption(op: number): string {
-        let url = BaseUrl;
+        let url = '';
+        let uid = userCtx.user.uid;
         switch (op) {
             case 1:
                 // fake URL to test error handling.
-                url = 'https://run.mocky.io/v3/5a17e854-64a7-4398-a416-88ec6b6f8d72';
+                url = BaseUrl + 'posts/user/' + uid;
                 break;
             case 2:
+                url = BaseUrl + 'marks/user/' + uid;
                 break;
             default:
-                url += 'posts';
+                url = BaseUrl + 'posts';
         }
 
         return url;
@@ -118,6 +149,28 @@ export default function PostList(props: PageOptionProps) {
         if (checkInstruction(res.headers.get('instruction'))) {
             userCtx.setUser(fakeUser());
         }
+
+        console.log(props.op);
+        setLoading(false);
+        if (props.op === 0) parsePostResponse(res);
+        else parsePagedPostResponse(res);
+    }
+
+    function parsePagedPostResponse(res: globalThis.Response) {
+        res.json().then(
+            (result: PagedPostsResponse) => {
+                if (!result) return;
+
+                setCurrentPage(result.currentPage);
+                setTotalPage(result.totalPage);
+                setPosts(result.posts);
+            }
+        ).catch( e =>
+            console.log('Cannot parse paged post from: ' + res)
+        );
+    }
+
+    function parsePostResponse(res: globalThis.Response) {
         res.json().then(
             (result: PostsResponse) => {
                 if (!result) return;
@@ -142,13 +195,11 @@ export default function PostList(props: PageOptionProps) {
                 if (result.minPid > 0 && (minPid > result.minPid || minPid <= 0)) setMinPid(result.minPid);
                 
                 // No matter what response got, loading is finished. Same in catch block.
-                setLoading(false);
             }
         ).catch(() => {
-            setLoading(false);
             setDestUrl('');
             console.error('json parse error!\n' + res.body);
-        })
+        });
     }
 
     function handleError(res: globalThis.Response): void {
@@ -184,12 +235,74 @@ export default function PostList(props: PageOptionProps) {
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
             {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} key={p.pid}/><hr/></div>)}   
-            {loading && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
+            {loading && op === 0 && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
             {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
             {hasMore && maxPid > 0 && !loading && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
+            {op > 0 && !loading && <Pagination value={pageInfo} />}
         </div>
     );
 
+}
+
+function Pagination(props: PageInfoProps) {
+    const [pageInfo, setPageInfo] = useState(props.value);
+    const [pages, setPages] = useState<number[]>([]);
+
+    useEffect(() => {
+        setPageInfo(props.value);
+    }, [props]);
+
+    useEffect(() => {
+        if (pageInfo.total <= 0) {
+            setPages([]);
+        } else {
+            setPages(getPageNumbers(pageInfo.current, pageInfo.total));
+        }
+
+    }, [pageInfo]);
+
+    function getPageNumbers(current: number, total: number): number[] {
+        let pages: number[] = [];
+        let min = current;
+        let max = current;
+
+        for (let i = 0; i < 2; i++) {
+            if (min - 1 > 0) min--;
+            else if (max + 1 <= total) max++;
+            if (max + 1 <= total) max++;
+            else if(min - 1 > 0) min--;
+        }
+
+        for (let i = min; i <= max; i++){
+            pages.push(i);
+        }
+
+        return pages;
+    }
+
+    function getSinglePageLink(p: number) {
+        if (p !== pageInfo.current) {
+            return (
+                <a key={p} onClick={() => changePage(p)}>&nbsp;{p}&nbsp;</a>
+            );
+        } else {
+            return (
+                <span key={p}>&nbsp;{p}&nbsp;</span>
+            )
+        }
+    }
+
+    function changePage(page: number) {
+        if (page < 0 || page > pageInfo.total) return;
+
+        pageInfo.setDestUrl(BaseUrl + 'posts/user/' + pageInfo.uid + '?page=' + page);
+    }
+
+    return (
+        <div id='page_no'>
+            {pages.map(p => getSinglePageLink(p))}
+        </div>
+    )
 }
 
 //TODO: init lightbox images.
