@@ -1,4 +1,5 @@
 .vscode/*
+**/prod/
 **/pgdata
 **/redisdata
 **/.idea/

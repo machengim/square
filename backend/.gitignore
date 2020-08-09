@@ -33,4 +33,4 @@ build/
 .vscode/
 
 ### Custom ###
-application.properties
+**/application-prod.properties
