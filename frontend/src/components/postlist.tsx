@@ -113,6 +113,9 @@ export default function PostList(props: PageOptionProps) {
                 // search for a keyword.
                 url = BaseUrl + 'posts/search/' + getSearchKeyword();
                 break;
+            case 4:
+                url = BaseUrl + 'trending';
+                break;
             default:
                 url = BaseUrl + 'posts';
         }

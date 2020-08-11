@@ -10,3 +10,14 @@ INSERT INTO post(uid, uname, content) VALUES(4, 'David', 'Great place');
 
 INSERT INTO comment(uid, pid, uname, content) VALUES(2, 1, 'Bob', 'Hey you');
 INSERT INTO comment(uid, pid, uname, content) VALUES(3, 1, 'Charlie', 'Hi');
+INSERT INTO comment(uid, pid, uname, content) VALUES(2, 2, 'Bob', 'Hey you');
+INSERT INTO comment(uid, pid, uname, content) VALUES(3, 2, 'Charlie', 'Hi');
+INSERT INTO comment(uid, pid, uname, content) VALUES(2, 2, 'Bob', 'Hey you');
+INSERT INTO comment(uid, pid, uname, content) VALUES(3, 3, 'Charlie', 'Hi');
+INSERT INTO comment(uid, pid, uname, content) VALUES(2, 1, 'Bob', 'Hey you');
+INSERT INTO comment(uid, pid, uname, content) VALUES(3, 4, 'Charlie', 'Hi');
+
+INSERT INTO mark(uid, pid) VALUES(1, 4);
+INSERT INTO mark(uid, pid) VALUES(2, 4);
+INSERT INTO mark(uid, pid) VALUES(3, 4);
+INSERT INTO mark(uid, pid) VALUES(4, 4);

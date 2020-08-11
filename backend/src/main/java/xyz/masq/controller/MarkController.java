@@ -27,7 +27,6 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/marks")
-@PropertySource("classpath:site.properties")
 public class MarkController {
 
     @Value("${site.page.limit}")

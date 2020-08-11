@@ -13,7 +13,7 @@ public class PostResponse {
     private List<Post> posts;
 
     // TODO: check posts owner and whether it's marked by current user.
-    public PostResponse(List<Post> posts, PostRepository postRepository) {
+    public PostResponse(List<Post> posts) {
         this.posts = posts;
         if (this.posts.size() == 0) return;
 

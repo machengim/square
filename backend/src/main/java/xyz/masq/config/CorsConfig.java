@@ -9,7 +9,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc
-@PropertySource("classpath:site.properties")
 public class CorsConfig implements WebMvcConfigurer {
 
     @Value("${site.trust}")

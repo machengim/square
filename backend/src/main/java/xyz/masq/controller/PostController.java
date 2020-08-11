@@ -24,7 +24,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@PropertySource("classpath:site.properties")
 @RestController
 @Slf4j
 @RequestMapping(path = "/posts")
@@ -75,7 +74,7 @@ public class PostController {
         }
 
         // if the path variable contains no 'max', check whether it has older post.
-        PostResponse postResponse = new PostResponse(posts, postRepository);
+        PostResponse postResponse = new PostResponse(posts);
         if (max == null) postResponse.checkMorePosts(postRepository);
         return postResponse;
     }
