@@ -2,6 +2,7 @@ import {UserInfoForContext, UserInfo} from './interfaces';
 
 
 export const BaseUrl = 'http://localhost:8080/';
+//export const BaseUrl = 'https://masq.xyz/api/';
 
 // Helper function to start a request. Don't forget the error handler.
 export function request(url: string, callback: Function, errorHandler: Function) {

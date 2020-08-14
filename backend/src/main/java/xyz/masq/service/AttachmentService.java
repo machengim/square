@@ -44,9 +44,12 @@ public class AttachmentService {
     @Value("${site.attachments.link.life}")
     private int linkLife;
 
+    @Value("${spring.redis.password}")
+    private String redisPass;
+
     public List<Attachment> signPostAttachments(int pid) {
         Jedis jedis = new Jedis();
-        jedis.auth("qwer1234");
+        jedis.auth(redisPass);
         String key =  jedis.get("current_key");
         jedis.close();
         if (key == null) {
