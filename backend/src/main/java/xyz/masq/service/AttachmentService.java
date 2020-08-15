@@ -177,7 +177,7 @@ public class AttachmentService {
         if (expireInstant.compareTo(Instant.now()) < 0) return false;
 
         Jedis jedis = new Jedis();
-        jedis.auth("qwer1234");
+        jedis.auth(redisPass);
         String currentKey = jedis.get("current_key");
         String previousKey = jedis.get("previous_key");
         jedis.close();
