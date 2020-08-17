@@ -35,7 +35,7 @@ public class AttachmentService {
     @Autowired
     private AttachmentRepository attachmentRepository;
 
-    @Value("${site.attachments.path}")
+    @Value("${site.attachments.path.parent}")
     private String rootPath;
 
     @Value("${site.attachments.thumbnail.size}")
@@ -46,6 +46,8 @@ public class AttachmentService {
 
     @Value("${spring.redis.password}")
     private String redisPass;
+
+    final private String attachmentsFolder = "attachments";
 
     public List<Attachment> signPostAttachments(int pid) {
         Jedis jedis = new Jedis();
@@ -87,11 +89,12 @@ public class AttachmentService {
 
     private String prepareDirectory() {
         LocalDate date = LocalDate.now(ZoneOffset.UTC);
-        String path = rootPath + File.separator + date.getYear() + File.separator + date.getMonthValue();
+        String path = rootPath + File.separator + attachmentsFolder + File.separator + date.getYear()
+                + File.separator + date.getMonthValue();
         File f = new File(path);
         if (!f.exists() || !f.isDirectory()) {
             if (!f.mkdirs()){   // use 'mkdirs()' to create all necessary directories.
-                throw new GenericError("Cannot create directory at " + date);
+                throw new GenericError("Cannot create path at " + path);
             }
         }
 
@@ -132,11 +135,12 @@ public class AttachmentService {
         Attachment attachment = new Attachment();
         attachment.setPid(pid);
         // Note the final "/" mark is necessary to work with REST api. remove it for test.
-        attachment.setUrl(filename + "." + suffix);
+        String filenameRight = attachmentsFolder + filename.split(attachmentsFolder)[1];
+        attachment.setUrl(filenameRight + "." + suffix);
         if (hasThumb) {
-            attachment.setThumbnail(filename + "-s." + suffix);
+            attachment.setThumbnail(filenameRight + "-s." + suffix);
         } else {
-            attachment.setThumbnail(filename + "." + suffix);
+            attachment.setThumbnail(filenameRight + "." + suffix);
         }
 
         attachmentRepository.save(attachment);

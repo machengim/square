@@ -2,6 +2,7 @@ package xyz.masq.controller;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import xyz.masq.error.GenericError;
@@ -16,6 +17,11 @@ public class AttachmentController {
     @Autowired
     private AttachmentService attachmentService;
 
+    @Value("${site.attachments.path.parent}")
+    private String rootPath;
+
+    final private String ATTACHMENTS = "attachments";
+
     @GetMapping(path = "/{year}/{month}/{file:.+}",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE})
     @ResponseBody
@@ -28,7 +34,7 @@ public class AttachmentController {
         }
 
         String sep = File.separator;
-        String path = "attachments" + sep + year + sep + month + sep + file;
+        String path = rootPath + sep + ATTACHMENTS + sep + year + sep + month + sep + file;
         InputStream in = new FileInputStream(path);
 
         return IOUtils.toByteArray(in);
