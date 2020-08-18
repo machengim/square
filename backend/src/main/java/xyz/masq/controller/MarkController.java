@@ -17,6 +17,7 @@ import xyz.masq.entity.PostResponse;
 import xyz.masq.error.GenericError;
 import xyz.masq.repository.MarkRepository;
 import xyz.masq.repository.PostRepository;
+import xyz.masq.service.AttachmentService;
 import xyz.masq.service.MarkService;
 import xyz.masq.service.SessionService;
 
@@ -43,6 +44,9 @@ public class MarkController {
 
     @Autowired
     private SessionService sessionService;
+
+    @Autowired
+    private AttachmentService attachmentService;
 
     // receive request like '/mark?pid=20&action=mark'.
     @GetMapping(path = {"", "/"})
@@ -73,11 +77,26 @@ public class MarkController {
         for (Mark mark: marks.toList()) {
             int pid = mark.getPid();
             Post post = postRepository.findByPid(pid);
-            post.setMarked(markService.checkMarked(uid, pid));
-            if (postRepository.findAuthorByPost(pid) == uid) post.setOwner(true);
+            getExtraInfo(post, uid);
             posts.add(post);
         }
 
         return new PagedPostsResponse(marks, posts, page);
+    }
+
+    private void getExtraInfo(Post post, int uid) {
+        int pid = post.getPid();
+        if (post.getHasAttachments() > 0) {
+            post.setAttachments(attachmentService.signPostAttachments(pid));
+        }
+        if (post.getStatus() <= 0) {
+            post.setContent("This post is private or deleted");
+        }
+        if (uid > 0) {
+            post.setMarked(markService.checkMarked(uid, pid));
+            if (postRepository.findAuthorByPost(pid) == uid) {
+                post.setOwner(true);
+            }
+        }
     }
 }

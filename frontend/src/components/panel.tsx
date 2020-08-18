@@ -177,7 +177,7 @@ export default function Panel() {
         let repeatStr = repeatPassword.current.value;
 
         if(password !== repeatStr) {
-            alert('Password and repeat password not match!')
+            alert('Password and repeat password not match!');
             return false;
         }
 
@@ -257,6 +257,7 @@ export default function Panel() {
         function registerDone() {
             setSubmitting(false);
             alert('Register successfully!');
+            setDialogOption(1);
         }
 
         function registerFailed() {

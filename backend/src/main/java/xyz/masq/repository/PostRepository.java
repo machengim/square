@@ -27,6 +27,8 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
 
     Page<Post> findByUid(int uid, Pageable pageable);
 
+    Page<Post> findByUidAndStatusGreaterThanEqual(int uid, Pageable pageable, int status);
+
     Page<Post> findByContentIgnoreCaseLikeAndStatusGreaterThan(String keyword, int status, Pageable pageable);
 
     Post findByPid(int pid);

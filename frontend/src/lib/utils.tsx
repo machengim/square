@@ -1,12 +1,12 @@
 import {UserInfoForContext, UserInfo} from './interfaces';
 
 
-export const BaseUrl = 'http://localhost:8080/';
-//export const BaseUrl = 'https://masq.xyz/api/';
+//export const BaseUrl = 'http://localhost:8080/';
+export const BaseUrl = 'https://masq.xyz/api/';
 
 // Helper function to start a request. Don't forget the error handler.
 export function request(url: string, callback: Function, errorHandler: Function) {
-    console.log('get request to ' + url);
+    //console.log('get request to ' + url);
 
     fetch(url, {
         credentials: 'include',
@@ -22,7 +22,7 @@ export function request(url: string, callback: Function, errorHandler: Function)
 }
 
 export function deleteRequest(url: string, callback: Function, errorHandler: Function) {
-    console.log('delete request to ' + url);
+    //console.log('delete request to ' + url);
 
     fetch(url, {
         credentials: 'include',
@@ -41,7 +41,7 @@ export function deleteRequest(url: string, callback: Function, errorHandler: Fun
 export function postRequest(url: string, json: string,
      callback: Function, errorHandler: Function) {
 
-        console.log('post request to ' + url);
+        //console.log('post request to ' + url);
         fetch(url, {
             method: 'POST',
             headers: {

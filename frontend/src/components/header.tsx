@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import {clearStorage, request, BaseUrl} from '../lib/utils';
 import './header.css';
 import { UserContext } from './context';
+import { off } from 'process';
 
 export default function Header() {
     const userCtx = useContext(UserContext);
@@ -61,8 +62,8 @@ export default function Header() {
     return (
         <header>
             <nav>
-                <div id="nav_logo">Masq</div>
-                <div id="nav_items">
+                <div id='nav_logo'>Masq</div>
+                <div id='nav_items'>
                     <ul>
                         <li><Link to='/'>Home</Link></li>
                         <li><Link to='/trending'>Trending</Link></li>
@@ -71,10 +72,10 @@ export default function Header() {
                         <li><Link id='search' to={path} /></li>
                     </ul>
                 </div>
-                <div id="nav_search">
-                    <input placeholder="Search" value={keyword} onChange={(e) => changeInput(e)} onKeyPress={(e) => monitorKeyPress(e)} />
+                <div id='nav_search'>
+                    <input id='search' autoComplete='off' placeholder='Search' value={keyword} onChange={(e) => changeInput(e)} onKeyPress={(e) => monitorKeyPress(e)} />
                 </div>
-            </nav> 
+            </nav>
         </header>
     );
 
