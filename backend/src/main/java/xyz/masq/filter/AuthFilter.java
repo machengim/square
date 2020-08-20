@@ -51,7 +51,10 @@ public class AuthFilter extends OncePerRequestFilter {
         int uidCookie = cookieService.readUid();
         int uidSession = sessionService.readIntByKey("uid");
 
-        if (uidCookie < 0 && uidSession > 0) {  // has session but no cookie, this is weird.
+        if (uidCookie < 0 && uidSession < 0) {
+            // first time visit,
+            cookieService.writeCookie("u", -1);
+        }else if (uidCookie < 0 && uidSession > 0) {  // has session but no cookie, this is weird.
             //cookieService.writeCookie("u", uidSession);
             sessionService.removeSession();
         } else if (uidCookie > 0 && uidSession < 0) {
@@ -62,7 +65,7 @@ public class AuthFilter extends OncePerRequestFilter {
                     cookieService.writeCookie("u", user.getUid());
                 }
             } else {
-                cookieService.removeCookie("u");
+                cookieService.writeCookie("u", -1);
                 response.addHeader("Access-Control-Expose-Headers", "instruction");
                 response.addHeader("instruction", "clear");
             }

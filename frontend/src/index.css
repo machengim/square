@@ -1,6 +1,8 @@
 body{
     margin: 0;
     padding: 0;
+    height: 100%;
+    min-height: 100%;
 }
 
 body .modal-open {
@@ -58,11 +60,56 @@ div .loading-img {
 }
 
 footer{
+    clear: both;
+    position: relative;
+    height: 20px;
+    margin-top: -20px;
     margin: 0 auto;
     width: 80%;
     padding-right: 100px;
-    height: 20px;
     font-size: 14px;
     text-align: center;
     color: grey;
+}
+
+#foot-note {
+    padding: 20px auto;
+    position: absolute;
+    bottom: 0;
+    height: 80px;
+    width: 100%;
+    z-index: 1;
+    background-color: rgb(229, 252, 188);
+    font-size: 16px;
+    text-align: center;
+    color: grey;
+    opacity: 1;
+}
+
+.close {
+    color: rgb(110, 109, 109);
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 550;
+    text-align: center;
+    margin-top: 15px;
+    color: rgb(4, 150, 23);
+}
+
+.subtitle {
+    font-size: 18px;
+    font-weight: 550;
+    margin: 10px auto;
+    color: rgb(16, 110, 36);
+}
+
+.code {
+    background-color: rgb(240, 233, 233);
 }
