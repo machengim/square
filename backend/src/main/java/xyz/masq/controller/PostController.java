@@ -72,13 +72,18 @@ public class PostController {
     @PostMapping(path = {"", "/"})
     @Transactional
     public String sendPost(@RequestBody PostRequest postRequest) {
+        int uid = sessionService.readIntByKey("uid");
+        User user = userRepository.findByUid(uid);
+        if (postRequest.getImage() != null && user.getType() < 3) {
+            throw new AuthError("Sorry, you have no permission to post images.");
+        }
+
         Post post = new Post(postRequest);
         if (postRequest.getAnonymous()) {
             post.setUname("Anonymous");
         }
         post = postRepository.save(post);
         if (post.getUid() > 0) {
-            User user = userRepository.findByUid(post.getUid());
             user.setPosts(user.getPosts() + 1);
             userRepository.save(user);
         }

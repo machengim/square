@@ -113,7 +113,7 @@ export default function Settings() {
             <label>Account setting:</label><p/>
             <div>
                 <button disabled>Export posts</button>
-                <button className='right' disabled>Delete account</button>
+                <button className='right' disabled>Validate Email</button>
             </div>
         </div>
     );

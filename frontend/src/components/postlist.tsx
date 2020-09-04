@@ -232,6 +232,14 @@ export default function PostList(props: PageOptionProps) {
         }
     }
 
+    function reportPost(pid: number): void {
+        let confirmReport = window.confirm('Confirm to report this post?');
+
+        if (confirmReport) {
+            postRequest(BaseUrl + 'report/' + pid, '', (d: any) => deleteDone(pid), reportError);
+        }
+    }
+
     function deleteDone(pid: number) {
         let newPostList = posts.filter(post => post.pid !== pid);
         setPosts(newPostList);
@@ -243,11 +251,15 @@ export default function PostList(props: PageOptionProps) {
         alert('Delete post error: ' + res);
     }
 
+    function reportError(res: globalThis.Response) {
+        res.text().then((result: string) => alert(result));
+    }
+
     // Note loading.svg should be put under the postlist to prevent re-render when requesting for more posts.
     return (
         <div id="post_list">
             {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
-            {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} key={p.pid}/><hr/></div>)}   
+            {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} onReport={reportPost} key={p.pid}/><hr/></div>)}   
             {loading && op === 0 && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
             {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
             {hasMore && maxPid > 0 && !loading && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
@@ -361,6 +373,10 @@ function PostEntry(props: PostProps) {
         props.onDelete(post.pid);
     }
 
+    function reportCurrent() {
+        props.onReport(post.pid);
+    }
+
     function addComment() {
         setComments(comments + 1);
     }
@@ -375,6 +391,7 @@ function PostEntry(props: PostProps) {
             <div className="foot">
                 <span>{getTimeElapse(post.ctime)}</span>
                 <span className="toolbar">
+                    <a onClick={() => reportCurrent()}>Report</a>&nbsp;
                     {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
                     &nbsp;<a onClick={() => toggleShowComments()}>Comments({comments})</a>
                     &nbsp;<a onClick={() => markOperation()}>{marked? 'Marked': 'Mark'}</a>

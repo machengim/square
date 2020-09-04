@@ -290,9 +290,9 @@ export default function Panel() {
             <div className='box'>
                 <a className='close' onClick={() => setDialogOption(0)}>&times;</a>
                 <h2>Sign up</h2>
-                <input type='email' ref={email} name='email' placeholder='Email' autoComplete='off' required />
-                <input type='password' ref={password} name='password' placeholder='Password' required />
-                <input type='password' ref={repeatPassword} name='repeat_passwd' placeholder='Repeat password' required />
+                <input title='Fake email is allowed if you do not need advanced features.' type='email' ref={email} name='email' placeholder='Email' autoComplete='off' required />
+                <input title='No less than 8 and has at least one digit and one character.' type='password' ref={password} name='password' placeholder='Password' required />
+                <input title='Same with password.' type='password' ref={repeatPassword} name='repeat_passwd' placeholder='Repeat password' required />
                 <input type='text' ref={uname} name='nickname' autoComplete='off' placeholder='Nickname (optional)' />
                 <div className='btns'>
                     {submitting && <button disabled className='disabled'>Submit</button>}

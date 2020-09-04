@@ -10,6 +10,7 @@ public class UserSummary {
     private int posts = 0;
     private int marks = 0;
     private int messages = 0;
+    private int type = -1;
 
     public UserSummary(User user) {
         this.uid = user.getUid();
@@ -17,6 +18,7 @@ public class UserSummary {
         this.uname = user.getUname();
         this.posts = user.getPosts();
         this.marks = user.getMarks();
+        this.type = user.getType();
         this.messages = user.getMessages();
     }
 }

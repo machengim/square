@@ -69,6 +69,7 @@ export function fakeUser(): UserInfo {
         posts: 0,
         marks: 0,
         messages: 0,
+        type: -1,
     }
 
     return user;
@@ -107,6 +108,7 @@ export function setupStorage(summary: UserInfo) {
 }
 
 // ctime must be any type here. Using `Date` or `number` will cause react crash.
+// Note the unit used in Date(ctime) should be millisecond.
 export function getTimeElapse(ctime: any) {
     let current = new Date();
     let seconds = current.getTime()/1000 - ctime;
@@ -114,8 +116,8 @@ export function getTimeElapse(ctime: any) {
     if (seconds < 60) text = 'just now';
     else if (seconds < 60 * 60) text = Math.floor(seconds / 60) + ' mins ago';
     else if (seconds < 24 * 60 * 60) text = Math.floor(seconds / 60 / 60) + ' hours ago';
-    else if (seconds < 7 * 24 * 60 * 60) text = Math.floor(seconds / 24 / 60 / 60) + 'days ago';
-    else text = new Date(ctime).toLocaleString();
+    else if (seconds < 365 * 24 * 60 * 60) text = Math.floor(seconds / 24 / 60 / 60) + ' days ago';
+    else text = new Date(ctime * 1000).toLocaleString();
 
     return text;
 }

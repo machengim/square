@@ -6,6 +6,7 @@ export interface UserInfo {
     uname: string;
     posts: number;
     marks: number;
+    type: number;
     messages: number;
     email?: string;
     password?: string;
@@ -94,6 +95,7 @@ export interface CommentsResponse {
 export interface PostProps {
     value: Post;
     onDelete: Function; // function to delete current post.
+    onReport: Function;
     show?: boolean;     // whether the comments are shown.
 }
 

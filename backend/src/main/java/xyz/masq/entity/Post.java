@@ -19,7 +19,8 @@ public class Post {
     private int comments = 0;
     // this field saves the aid of attachment currently.
     private int hasAttachments = 0;
-    // 0 means private, 1 means public, -1 means deleted.
+    // 0 means private, 1 means public, -1 means deleted,
+    // -2 means under report, 99 means trusted.
     private int status = 1;
     @Transient
     private boolean marked = false;

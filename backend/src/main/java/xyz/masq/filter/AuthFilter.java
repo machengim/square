@@ -2,6 +2,7 @@ package xyz.masq.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,6 +15,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
 
 /**
  * This filter is used to check whether user has a cookie declaring the identity,
@@ -44,6 +46,9 @@ public class AuthFilter extends OncePerRequestFilter {
     @Autowired
     private LoginInfoService loginInfoService;
 
+    @Value("${site.user.trust.days}")
+    private int trustDays;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
@@ -61,6 +66,7 @@ public class AuthFilter extends OncePerRequestFilter {
             if (loginInfoService.checkLoginHistory(uidCookie)) {
                 User user = userRepository.findByUid(uidCookie);
                 if (user != null && user.getType() > 0) {
+                    checkUserTrust(user);
                     sessionService.setUserInfo(user);
                     cookieService.writeCookie("u", user.getUid());
                 }
@@ -75,6 +81,17 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    private void checkUserTrust(User user){
+        if (user.getType() == 2 && checkRegisterLength(user)) {
+            user.setType(3);
+        }
+    }
+
+    private boolean checkRegisterLength(User user) {
+        Instant threshold = Instant.now().minusSeconds(trustDays * 60 * 60 * 24);
+        return user.getCtime().compareTo(threshold) < 0;
     }
 
 }
