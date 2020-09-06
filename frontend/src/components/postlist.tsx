@@ -257,12 +257,12 @@ export default function PostList(props: PageOptionProps) {
 
     // Note loading.svg should be put under the postlist to prevent re-render when requesting for more posts.
     return (
-        <div id="post_list">
-            {op === 0 && newPost > 0 && <button id="btn_loadnew">Load {newPost} new posts</button>}
+        <div id='post_list'>
+            {op === 0 && newPost > 0 && <button id='btn_loadnew'>Load {newPost} new posts</button>}
             {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} onReport={reportPost} key={p.pid}/><hr/></div>)}   
             {loading && op === 0 && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
             {!loading && posts.length === 0 && <div className='center'><h3>No posts found.</h3></div>}
-            {hasMore && maxPid > 0 && !loading && <button id="btn_loadmore" onClick={() => loadMore()}>Load More</button>}
+            {hasMore && maxPid > 0 && !loading && <button id='btn_loadmore' onClick={() => loadMore()}>Load More</button>}
             {op > 0 && !loading && <Pagination value={pageInfo} />}
         </div>
     );
@@ -346,13 +346,14 @@ function Pagination(props: PageInfoProps) {
 function PostEntry(props: PostProps) {
     const post = props.value;
     const appCtx = useContext(AppContext);
+    const [showToolbar, setShowToolbar] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState(post.comments);
     const [marked, setMarked] = useState(post.marked);
     const [images] = useState(post.attachments);   //TODO: needs to init.
 
     function markOperation() {
-        let action = (marked)? "unmark": "mark";
+        let action = (marked)? 'unmark': 'mark';
         request(BaseUrl + 'marks?pid=' + post.pid + '&action=' + action, MarkDone, MarkError);
     }
 
@@ -384,21 +385,21 @@ function PostEntry(props: PostProps) {
     if (post === null || post === undefined) return null;
 
     return (
-        <>
-            <div className="author">{post.uname} said:</div>
-            <div className="content">{post.content}</div>
+        <div className='post_entry' onMouseEnter={() => setShowToolbar(true)} onMouseLeave={() => setShowToolbar(false)}>
+            <div className='author'>{post.uname} said:</div>
+            <div className='content'>{post.content}</div>
             {images && <Lightbox value={images} />}
-            <div className="foot">
+            <div className='foot'>
                 <span>{getTimeElapse(post.ctime)}</span>
-                <span className="toolbar">
-                    <a onClick={() => reportCurrent()}>Report</a>&nbsp;
-                    {post.owner? <a onClick={() => deleteCurrent()}>Delete</a>: null}
-                    &nbsp;<a onClick={() => toggleShowComments()}>Comments({comments})</a>
+                <span className='toolbar'>
+                    {!post.owner && <a onClick={() => reportCurrent()}>Report</a>}&nbsp;
+                    {post.owner && <a onClick={() => deleteCurrent()}>Delete</a>}
                     &nbsp;<a onClick={() => markOperation()}>{marked? 'Marked': 'Mark'}</a>
+                    &nbsp;<a onClick={() => toggleShowComments()}>Comments({comments})</a>
                 </span>
             </div>
             <CommentList value={post} show={showComments} onComment={()=> addComment()}/>
-        </>
+        </div>
     );
 }
 
@@ -483,7 +484,7 @@ function CommentList(props: CommentProps) {
     return (
         <div className='comment'>
             {comments.map((c) => <p key={c.cid}>{c.content} --by {c.uname}</p>)}
-            <textarea name="comment" onChange={(e) => onCommentChange(e)} value={input} />
+            <textarea name='comment' onChange={(e) => onCommentChange(e)} value={input} />
             {!sending && <button onClick={() => setSending(true)}>Send</button>}
             {sending && <button disabled>Send</button>}
         </div>

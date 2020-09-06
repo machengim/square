@@ -3,23 +3,38 @@ package xyz.masq.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
-/**
- * The Jedis bean has critical issue as it cannot close the connection automatically.
- */
+import java.time.Duration;
+
 @Configuration
-@PropertySource("classpath:site.properties")
 public class JedisConfig {
+
+    final JedisPoolConfig poolConfig = buildPoolConfig();
 
     @Value("${spring.redis.password}")
     private String password;
 
     @Bean
-    public Jedis getJedis() {
-        Jedis jedis = new Jedis();
-        jedis.auth(password);
-        return jedis;
+    public JedisPool getJedisPool() {
+        return new JedisPool(poolConfig, "localhost", 6379, 2000, password);
+    }
+
+    private JedisPoolConfig buildPoolConfig() {
+        final JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(64);
+        poolConfig.setMaxIdle(64);
+        poolConfig.setMinIdle(16);
+
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(true);
+        poolConfig.setTestWhileIdle(true);
+        poolConfig.setMinEvictableIdleTimeMillis(Duration.ofSeconds(60).toMillis());
+        poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
+        poolConfig.setNumTestsPerEvictionRun(3);
+        poolConfig.setBlockWhenExhausted(true);
+
+        return poolConfig;
     }
 }

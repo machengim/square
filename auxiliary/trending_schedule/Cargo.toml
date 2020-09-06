@@ -1,0 +1,15 @@
+[package]
+name = "trending_schedule"
+version = "0.1.0"
+authors = ["machengim"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sqlx = {version = "0.4.0-beta.1", features = ["postgres", "offline", "chrono"]}
+async-std = {version = "1.6", features = ["attributes"]}
+serde = "1.0"
+chrono = "0.4"
+redis = "0.17"
+dotenv = "0.15"
