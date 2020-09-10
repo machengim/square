@@ -33,9 +33,9 @@ public class TrendingController {
     private MarkService markService;
 
     @GetMapping(path = {"", "/"})
-    public PostResponse getTreanding(@RequestParam (required = false) Integer hours) {
-        if (hours == null) hours = 24;
-        List<Post> posts = trendingService.findTrendingPost(hours);
+    public PostResponse getTreanding(@RequestParam (required = false) Integer days) {
+        if (days == null) days = 1;
+        List<Post> posts = trendingService.findTrendingPost(days);
 
         int uid = sessionService.readIntByKey("uid");
         for (Post post: posts) {

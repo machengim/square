@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import xyz.masq.entity.Post;
 import xyz.masq.repository.CommentRepository;
 import xyz.masq.repository.MarkRepository;
@@ -11,6 +13,7 @@ import xyz.masq.repository.PostRepository;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @PropertySource("classpath:site.properties")
@@ -25,9 +28,57 @@ public class TrendingService {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private JedisPool jedisPool;
+
     @Value("${site.trending.limit}")
     private int limit;
 
+    public List<Post> findTrendingPost(Integer days) {
+        Jedis jedis = jedisPool.getResource();
+        String key = "trending_";
+        switch (days) {
+            case 7:
+                key += "week"; break;
+            case 30:
+                key += "month"; break;
+            default:
+                key += "day"; break;
+        }
+
+        if (!jedis.exists(key)) return new ArrayList<Post>();
+
+        List<Integer> pids = jedis.lrange(key, 0, 20).stream()
+                .map(this::convertStrToInt).collect(Collectors.toList());
+
+        return getPostsFromList(pids);
+    }
+
+    private List<Post> getPostsFromList(List<Integer> pids) {
+        List<Post> posts = new ArrayList<>();
+
+        for (Integer pid: pids) {
+            if (pid <= 0) continue;
+            Post post = postRepository.findByPid(pid);
+            if (post.getStatus() > 0) posts.add(post);
+            if (posts.size() >= limit) break;
+        }
+
+        return posts;
+    }
+
+    private Integer convertStrToInt(String s) {
+        int i = -1;
+        try {
+            i = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        return i;
+    }
+
+    /*
     // TODO: save trending posts in Redis.
     public List<Post> findTrendingPost(Integer hours) {
         HashMap<Integer, Integer> trends = new HashMap<>();
@@ -80,4 +131,5 @@ public class TrendingService {
 
         return result;
     }
+     */
 }

@@ -101,3 +101,18 @@
     margin-top: 80px;
     text-align: center;
 }
+
+.trending_header {
+    text-align: center;
+}
+
+.trending_header .trending_title{
+    font-size: 20px;
+    font-weight: 550;
+    text-align: center;
+}
+
+.trending_header .options {
+    position: relative;
+    right: -200px;
+}

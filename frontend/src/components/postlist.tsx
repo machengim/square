@@ -31,6 +31,7 @@ export default function PostList(props: PageOptionProps) {
     const [destUrl, setDestUrl] = useState<string>();
     const [loading, setLoading] = useState(false);
     const [pageInfo, setPageInfo] = useState<PageInfo>(defaultPageInfo());
+    const [trendingDays, setTrendingDays] = useState(1);
 
     useEffect(() => {
         if (appCtx.updatePosts) {
@@ -52,8 +53,13 @@ export default function PostList(props: PageOptionProps) {
     // op change always means a new page, so construct default url here.
     useEffect(() => {
         let url = getDefaultUrlByOption(op);
+        if (op === 4) {
+            console.log('trending days: ', trendingDays);
+            url += '?days=' + trendingDays;
+            console.log(url);
+        }
         setDestUrl(url);
-    }, [op]);
+    }, [op, trendingDays]);
 
     useEffect(() => {
         if (destUrl) setLoading(true);
@@ -258,6 +264,7 @@ export default function PostList(props: PageOptionProps) {
     // Note loading.svg should be put under the postlist to prevent re-render when requesting for more posts.
     return (
         <div id='post_list'>
+            {op === 4 && <TrendingTitle value={trendingDays} setDays={setTrendingDays}/> }
             {op === 0 && newPost > 0 && <button id='btn_loadnew'>Load {newPost} new posts</button>}
             {posts.map((p) => <div className='post' key={p.pid}><PostEntry value={p} onDelete={deletePost} onReport={reportPost} key={p.pid}/><hr/></div>)}   
             {loading && op === 0 && <div className='loading-img'><img src='/images/loading.svg' alt='loading' width='100px'/></div>}
@@ -491,3 +498,27 @@ function CommentList(props: CommentProps) {
     )
 }
 
+function TrendingTitle(props: any) {
+    const [days, setDays] = useState(props.value);
+    const [first, setFirst] = useState(true);
+
+    useEffect(() => {
+        if (first) setFirst(false);
+        else props.setDays(days);
+    }, [days])
+
+    return (
+        <div className='trending_header'>
+            <p className='trending_title'>Trending Posts</p>
+            <div className='options'>
+            <label>Date range: </label>
+            <select onChange={(e) => setDays(parseInt(e.target.value))} value={days.toString()}>
+                <option value='1'>One day</option>
+                <option value='7'>One week</option>
+                <option value='30'>one month</option>
+            </select>
+            </div>
+            <hr />
+        </div>
+    )
+}
