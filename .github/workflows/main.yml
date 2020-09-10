@@ -1,4 +1,4 @@
-name: Rust CI
+name: Rust Auto Build
 
 on: 
   push:
@@ -6,7 +6,7 @@ on:
     - auxiliary/trending_schedule/**
 
 env:
-  DIR: auxiliar/trending_schedule 
+  DIR: auxiliary/trending_schedule 
   APP_NAME: trending_service
 
 jobs:
