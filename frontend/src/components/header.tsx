@@ -8,6 +8,7 @@ export default function Header() {
     const userCtx = useContext(UserContext);
     const [keyword, setKeyword] = useState('');
     const [path, setPath] = useState('');
+    const [readonly, setReadonly] = useState(true);
 
     useEffect(() => {
         if (keyword) setPath('/search/' + keyword);

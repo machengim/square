@@ -28,11 +28,11 @@
 
 .lightbox img {
   position: absolute;
-  margin: auto;
   top: 0;
   bottom: 0;
-  width: auto;
-  height: auto;
+  left: 0;
+  right: 0;
+  margin: auto;
   max-width: 90vw;
   max-height: 90vh;
 }

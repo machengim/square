@@ -113,3 +113,7 @@ footer{
 .code {
     background-color: rgb(240, 233, 233);
 }
+
+.hidden {
+    display: none;
+}

@@ -14,6 +14,9 @@ import './index.css';
 ReactDOM.render(
     <AppProvider>
     <UserProvider>
+        <div className='hidden'>
+            <input type="text" /><input type="password" />
+        </div>
         <BrowserRouter>
             <Header />
             <Switch>

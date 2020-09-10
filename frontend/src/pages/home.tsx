@@ -3,6 +3,7 @@ import {PageOptionProps} from '../lib/interfaces';
 import Draft from '../components/draft';
 import PostList from '../components/postlist';
 import Panel from '../components/panel';
+import { isNull } from 'util';
 
 
 /**
@@ -24,13 +25,13 @@ export default function Home(props: PageOptionProps) {
 
     return (
         <main>
-        <div id="wrapper">
-            <article>
-                {op === 0 && <Draft />}
-                <PostList op={op}/>
-            </article>
-            <Panel/>
-        </div>
-    </main>
+            <div id="wrapper">
+                <article>
+                    {op === 0 && <Draft />}
+                    <PostList op={op}/>
+                </article>
+                <Panel/>
+            </div>
+        </main>
     );
 }

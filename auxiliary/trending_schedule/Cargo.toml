@@ -1,5 +1,5 @@
 [package]
-name = "trending_schedule"
+name = "trending_service"
 version = "0.1.0"
 authors = ["machengim"]
 edition = "2018"

@@ -1,0 +1,45 @@
+name: Rust CI
+
+on: 
+  push:
+    paths:
+    - auxiliary/trending_schedule/**
+
+env:
+  DIR: auxiliar/trending_schedule 
+  APP_NAME: trending_service
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{env.DIR}}
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Rust Setup
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build Release
+        run: cargo build --release --all-features
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{env.APP_NAME}} 
+          path: ${{env.DIR}}/target/release/${{env.APP_NAME}}
