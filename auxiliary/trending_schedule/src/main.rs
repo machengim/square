@@ -11,7 +11,7 @@ struct Record {
 
 #[async_std::main]
 async fn main(){
-    let stage = "dev";
+    let stage = "prod";
 
     dotenv::from_filename(format!("{}{}", ".env_", &stage)).ok();
 
