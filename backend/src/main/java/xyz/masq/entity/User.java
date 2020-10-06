@@ -22,6 +22,7 @@ public class User {
     @ValidPassword
     private String password;
     // type == 0 means inactive, 1 means registered, 2 means validated-email, 3 means trusted, 99 means admin, -1 means blocked;
+    // Currently registered users are allowed to send pictures.
     private int type = 0;
     private int posts = 0;
     private int marks = 0;

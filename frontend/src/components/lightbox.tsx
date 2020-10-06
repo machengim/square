@@ -5,10 +5,7 @@ import './lightbox.css';
 
 
 /**
- * TODO: image access authentication:
- * approach 1: signed URL in limited period, has security problem;
- * apporach 2: blob response, suffers in performance.
- * TODO: clean css file.
+ ** Currently only one image is used in lightbox.
  */
 export default function Lightbox(props: ImageList) {
     const [images] = useState(props.value);
@@ -47,10 +44,6 @@ export default function Lightbox(props: ImageList) {
                 <div id='lightbox' className='lightbox'>
                     <span className="close cursor" onClick={() => setShowModal(false)}>&times;</span>
                     <img src={BaseUrl + images[current].url} alt='' onClick={() => moveIndex(1)} />
-                    {length > 0 &&  (
-                        <><a href='#' className='prev' onClick={() => moveIndex(-1)}>&#10094;</a>
-                        <a href='#' className='next' onClick={() => moveIndex(1)}>&#10095;</a></>)
-                    }
                 </div>
             )}
         </>

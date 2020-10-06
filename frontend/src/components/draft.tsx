@@ -89,7 +89,7 @@ export default function Draft() {
     async function uploadPost() {
         let imageStr = '';
         if (selectedFile) {
-            if (user.type <= 2) {
+            if (user.type <= 0) {
                 alert('Sorry, you cannot upload images, please remove it');
                 return;
             } else {
@@ -141,8 +141,8 @@ export default function Draft() {
                 onChange={(e) => handleTextChange(e, setContent)} />
             <button className={writing? '': 'hidden'} onClick={() => setWriting(false)}>Collapse</button>
             <div id='draft_toolbar' className={writing? '': 'hidden'}>
-                {user.type > 2 && <input type='file' id='file' name='file' ref={fileSelector} accept='.jpg,.jpeg,.png,.bmp,.gif' onChange={(e) => handleFileChange(e)} />}
-                {user.type > 2 && <button id='select_file' onClick={() => triggerSelectFile()}>{btnText}</button>}
+                {user.type > 0 && <input type='file' id='file' name='file' ref={fileSelector} accept='.jpg,.jpeg,.png,.bmp,.gif' onChange={(e) => handleFileChange(e)} />}
+                {user.type > 0 && <button id='select_file' onClick={() => triggerSelectFile()}>{btnText}</button>}
                 <input type='checkbox' name='is_anonymous' checked={anonymous} onChange={() => setAnonymous(!anonymous)}/>
                 <label>Anonymous</label>
                 <input type='checkbox' name='is_private' checked={isPrivate} onChange={() => setPrivate(!isPrivate)} />

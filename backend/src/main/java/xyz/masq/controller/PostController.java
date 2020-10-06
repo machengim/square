@@ -74,7 +74,7 @@ public class PostController {
     public String sendPost(@RequestBody PostRequest postRequest) {
         int uid = sessionService.readIntByKey("uid");
         User user = userRepository.findByUid(uid);
-        if (postRequest.getImage() != null && user.getType() < 3) {
+        if (postRequest.getImage() != null && user.getType() <= 0) {
             throw new AuthError("Sorry, you have no permission to post images.");
         }
 
