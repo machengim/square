@@ -126,7 +126,8 @@ public class PostController {
         if (page == null || page < 1) page = 1;
         // The page number works like array index, the range is [0, total), so minus 1 here for convenience of client.
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("pid").descending());
-        Page<Post> posts = postRepository.findByUidAndStatusGreaterThanEqual(uid, pageable, 0);
+        //Page<Post> posts = postRepository.findByUidAndStatusGreaterThanEqual(uid, pageable, 0);
+        Page<Post> posts = postRepository.findByUid(uid, pageable);
         PagedPostsResponse pagedPostsResponse = new PagedPostsResponse(posts, page);
 
         for (Post post: pagedPostsResponse.getPosts()) {
@@ -156,11 +157,11 @@ public class PostController {
 
     private void getExtraInfo(Post post, int uid) {
         int pid = post.getPid();
-        if (post.getHasAttachments() > 0) {
+        if (post.getStatus() > 0 && post.getHasAttachments() > 0) {
             post.setAttachments(attachmentService.signPostAttachments(pid));
         }
         if (post.getStatus() < 0) {
-            post.setContent("The post has been deleted.");
+            post.setContent("The post status is abnormal.");
         }
         if (uid > 0) {
             post.setMarked(markService.checkMarked(uid, pid));

@@ -86,11 +86,11 @@ public class MarkController {
 
     private void getExtraInfo(Post post, int uid) {
         int pid = post.getPid();
-        if (post.getHasAttachments() > 0) {
+        if (post.getHasAttachments() > 0 && post.getStatus() > 0) {
             post.setAttachments(attachmentService.signPostAttachments(pid));
         }
         if (post.getStatus() <= 0) {
-            post.setContent("This post is private or deleted");
+            post.setContent("This post status is abnormal.");
         }
         if (uid > 0) {
             post.setMarked(markService.checkMarked(uid, pid));
