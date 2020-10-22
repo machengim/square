@@ -126,8 +126,9 @@ public class PostController {
         if (page == null || page < 1) page = 1;
         // The page number works like array index, the range is [0, total), so minus 1 here for convenience of client.
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("pid").descending());
-        //Page<Post> posts = postRepository.findByUidAndStatusGreaterThanEqual(uid, pageable, 0);
-        Page<Post> posts = postRepository.findByUid(uid, pageable);
+        // Abnormal posts should not be displayed on the user's page, unlike the abnormal marks.
+        Page<Post> posts = postRepository.findByUidAndStatusGreaterThanEqual(uid, pageable, 0);
+        //Page<Post> posts = postRepository.findByUid(uid, pageable);
         PagedPostsResponse pagedPostsResponse = new PagedPostsResponse(posts, page);
 
         for (Post post: pagedPostsResponse.getPosts()) {

@@ -68,6 +68,7 @@ export default function Header() {
                         <li><Link to='/'>Home</Link></li>
                         <li><Link to='/trending'>Trending</Link></li>
                         <li><Link to='/setting'>Setting</Link></li>
+                        <li><Link to='/about/why-masq'>About</Link></li>
                         <li><a onClick={() => logOut()}>Quit</a></li>
                         <li><Link id='search' to={path} /></li>
                     </ul>
