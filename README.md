@@ -1,7 +1,7 @@
-# Anon Square
+# Masq
 
-An anonymous social network application.
+Masq.xyz is an anonymous social network application that focuses on privacy and security. 
 
-Front end is developed in Angular, back end in Go, and database is Postgresql.
+Developed using React and Spring.
 
-Under construction.
+More features are under development.
