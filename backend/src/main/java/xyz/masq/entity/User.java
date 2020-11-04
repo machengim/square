@@ -28,5 +28,4 @@ public class User {
     private int marks = 0;
     private int messages = 0;
     private Instant ctime = Instant.now();
-
 }

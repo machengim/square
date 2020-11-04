@@ -8,9 +8,9 @@ export default function Footer() {
     const current = new Date().getFullYear();
     const text = (current > start)? start + '-' + current: start;
     const site = 'Masq.xyz';
-    const [showNote, setShowNote] = useState(Cookie.get('first') === undefined);
+    const [showNote, setShowNote] = useState(Cookie.get('first') === undefined && Cookie.get('u') === undefined);
 
-    Cookie.set('first', 'f');
+    Cookie.set('first', 'f', { expires: 7 });
 
     return (
         <>        
