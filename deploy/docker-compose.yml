@@ -1,0 +1,51 @@
+#gcp prod version
+version: '3'
+services:
+  
+  web:
+    image: nginx:latest
+    container_name: web
+    network_mode: "host"
+    restart: "always"
+    volumes:
+    - ./config/nginx/:/etc/nginx/conf.d/
+    - /home/ma/site/frontend:/var/www/html
+    - /home/ma/site/tls:/var/tls
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: "always"
+    ports:
+    - "5432:5432"
+    environment:
+    - POSTGRES_USER=cheng
+    - POSTGRES_PASSWORD=8g3eMcwp
+    - POSTGRES_DB=masq
+    volumes:
+    - ./data/postgres:/var/lib/postgresql/data
+    - ./config/postgres:/docker-entrypoint-initdb.d/
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: "always"
+    ports:
+    - "6379:6379"
+    volumes:
+    - ./config/redis:/usr/local/etc/redis
+    - ./data/redis:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  backend:
+    image: openjdk:8
+    container_name: backend
+    restart: "always"
+    depends_on:
+    - postgres
+    - redis
+    network_mode: "host"
+    volumes:
+    - ./backend:/home/app
+    - ./data/attachments:/home/app/attachments
+    command: java -jar /home/app/app.jar
