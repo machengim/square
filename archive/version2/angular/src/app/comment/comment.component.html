@@ -1,5 +1,0 @@
-<div class="comment" *ngIf="show">
-    <p *ngFor="let cmt of comments">{{cmt.Content}} &nbsp; --by&nbsp;{{cmt.Nickname}}</p>
-    <textarea name="comment" maxlength="100" [(ngModel)]="comment.content"></textarea>
-    <button (click)="submitComment()">Send</button>
-</div>
